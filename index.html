@@ -464,7 +464,7 @@ document.addEventListener("click", e => {
 
 <script>
 async function cargarAlIniciar() {
-  const res = await fetch("http://localhost:3000");
+  const res = await fetch("https://almacen-servidor.onrender.com/guardar");
   const data = await res.json();
 
   if (!data.almacen) return;
@@ -484,5 +484,6 @@ window.addEventListener("load", cargarAlIniciar);
 
 </body>
 </html>
+
 
 
