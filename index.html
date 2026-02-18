@@ -368,11 +368,9 @@ function agregarFila(){
 </div>
 
 <script>
-const URL = "https://almacen-servidor.onrender.com";
-
 let temporizador = null;
-let avisoMostrado = false;
 
+// 🔹 Obtener datos del almacen desde pantalla
 function obtenerAlmacen() {
   return [...document.querySelectorAll(".fila")].map((fila, i) => ({
     id: i,
@@ -380,95 +378,19 @@ function obtenerAlmacen() {
   }));
 }
 
-function actualizarBotonEstado(estado) {
-    const btn = document.getElementById("btnEstadoGuardado");
-    const icono = document.getElementById("iconoEstado");
-    const texto = document.getElementById("textoEstado");
-
-    if (!btn || !icono || !texto) return; // Seguridad por si no encuentra los IDs
-
-    btn.className = ""; // Limpia colores anteriores
-
-    if (estado === "guardado") {
-        btn.classList.add("estado-guardado");
-        icono.textContent = "✅";
-        texto.textContent = "Guardado";
-    } else if (estado === "pendiente") {
-        btn.classList.add("estado-pendiente");
-        icono.textContent = "⏳";
-        texto.textContent = "Cambios pendientes...";
-    } else if (estado === "guardando") {
-        btn.classList.add("estado-guardando");
-        icono.textContent = "🔄";
-        texto.textContent = "Guardando...";
-    }
+// 🔹 Guardar en localStorage
+function guardarLocal() {
+  const datos = { almacen: obtenerAlmacen() };
+  localStorage.setItem("almacenAceites", JSON.stringify(datos));
+  actualizarBotonEstado("guardado");
 }
 
-async function guardarAutomatico() {
-    actualizarBotonEstado("guardado");
-  await fetch(URL + "/guardar", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ almacen: obtenerAlmacen() })
-  });
+// 🔹 Cargar desde localStorage
+function cargarLocal() {
+  const guardado = localStorage.getItem("almacenAceites");
+  if (!guardado) return;
 
-  if (!avisoMostrado) {
-    mostrarAviso();
-    avisoMostrado = true;
-  }
-}
-
-function mostrarAviso(){
-  let aviso = document.getElementById("aviso");
-  if(!aviso){
-    aviso = document.createElement("div");
-    aviso.id = "aviso";
-    aviso.textContent = "✅ Cambios guardados";
-    aviso.style.cssText = `
-      position:fixed;
-      bottom:90px;
-      left:50%;
-      transform:translateX(-50%);
-      background:#111;
-      color:#ff8c1a;
-      padding:10px 18px;
-      border-radius:12px;
-      border:1px solid #ff8c1a;
-      font-size:14px;
-    `;
-    document.body.appendChild(aviso);
-    setTimeout(()=> aviso.remove(), 3000);
-  }
-}
-
-document.addEventListener("click", e => {
-  if (e.target.classList.contains("sumar") || e.target.classList.contains("restar")) {
-
-    const fila = e.target.closest(".fila");
-    const num = fila.querySelector("[data-count]");
-    let v = Number(num.textContent);
-    v += e.target.classList.contains("sumar") ? 1 : -1;
-    num.textContent = Math.max(0, v);
-
-    actualizarBotonEstado("pendiente");
-     avisoMostrado = false;
-
-    clearTimeout(temporizador);
-    temporizador = setTimeout(() => {
-      guardarAutomatico();
-    }, 1500); // ⬅️ espera 1.5 segundos sin tocar nada
-  }
-});
-
-</script>
-
-<script>
-async function cargarAlIniciar() {
-  const res = await fetch("https://almacen-servidor.onrender.com/guardar");
-  const data = await res.json();
-
-  if (!data.almacen) return;
-
+  const data = JSON.parse(guardado);
   const numeros = document.querySelectorAll("[data-count]");
 
   data.almacen.forEach((item, i) => {
@@ -478,13 +400,49 @@ async function cargarAlIniciar() {
   });
 }
 
-// cuando abre la página
-window.addEventListener("load", cargarAlIniciar);
+// 🔹 Estado visual
+function actualizarBotonEstado(estado) {
+  const btn = document.getElementById("btnEstadoGuardado");
+  const icono = document.getElementById("iconoEstado");
+  const texto = document.getElementById("textoEstado");
+
+  btn.className = "";
+
+  if (estado === "guardado") {
+    btn.classList.add("estado-guardado");
+    icono.textContent = "✅";
+    texto.textContent = "Guardado";
+  } else {
+    btn.classList.add("estado-pendiente");
+    icono.textContent = "⏳";
+    texto.textContent = "Cambios pendientes...";
+  }
+}
+
+// 🔹 Eventos sumar/restar
+document.addEventListener("click", e => {
+  if (e.target.classList.contains("sumar") || e.target.classList.contains("restar")) {
+
+    const fila = e.target.closest(".fila");
+    const num = fila.querySelector("[data-count]");
+    let v = Number(num.textContent);
+
+    v += e.target.classList.contains("sumar") ? 1 : -1;
+    num.textContent = Math.max(0, v);
+
+    actualizarBotonEstado("pendiente");
+
+    clearTimeout(temporizador);
+    temporizador = setTimeout(() => {
+      guardarLocal();
+    }, 1000);
+  }
+});
+
+// 🔹 Cargar al abrir página
+window.addEventListener("load", cargarLocal);
 </script>
 
 </body>
 </html>
-
-
-
 
