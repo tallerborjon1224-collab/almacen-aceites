@@ -11,53 +11,6 @@
 
 <style>
 
-.seccion{ display:none; }
-.seccion.activa{ display:block; }
-
-.menu{
-    position:fixed;
-    bottom:0;
-    left:0;
-    width:100%;
-    background:#111;
-    display:flex;
-    justify-content:space-around;
-    padding:12px 0;
-    border-top:2px solid var(--naranja);
-}
-
-.menu button{
-    background:none;
-    color:white;
-    font-size:16px;
-}
-
-.menu .activo{ color:var(--naranja); }
-
-.registro{
-    max-width:900px;
-    margin:30px auto;
-}
-
-.registro table{
-    width:100%;
-    border-collapse:collapse;
-}
-
-.registro th,.registro td{
-    border:1px solid var(--naranja);
-    padding:8px;
-    text-align:center;
-}
-
-.registro input{
-    width:100%;
-    background:#000;
-    color:#fff;
-    border:none;
-    text-align:center;
-}
-
 :root{
     --naranja:#ff8c1a;
     --negro:#000;
@@ -66,14 +19,15 @@
     --blanco:#fff;
 }
 
+/* ================= BASE ================= */
+
 body{
     margin:0;
     background:var(--negro);
     color:var(--blanco);
     font-family:Arial, sans-serif;
     padding:20px;
-    padding-bottom:100px;
-
+    padding-bottom:120px;
 }
 
 h1{
@@ -81,14 +35,19 @@ h1{
     color:var(--naranja);
 }
 
+.seccion{ display:none; }
+.seccion.activa{ display:block; }
+
+/* ================= ALMACEN ================= */
+
 .almacen{
-    display: flex;
-    justify-content: center;   /* centra horizontal */
-    align-items: flex-start;
-    gap: 40px;                 /* espacio entre cards */
-    max-width: 1200px;
-    margin: 30px auto;
-    flex-wrap: wrap;           /* baja en pantallas chicas */
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    gap:40px;
+    max-width:1200px;
+    margin:30px auto;
+    flex-wrap:wrap;
 }
 
 .card{
@@ -139,89 +98,127 @@ h1{
     font-weight:bold;
 }
 
+/* ================= BOTONES ================= */
+
 button{
     border:none;
-    border-radius:6px;
+    border-radius:8px;
     cursor:pointer;
     font-size:15px;
+    transition:0.15s ease;
+}
+
+button:active{
+    transform:scale(0.95);
 }
 
 .restar{ background:#444; color:white; }
 .sumar{ background:var(--naranja); color:black; }
 
+/* ================= REGISTRO ================= */
+
+.registro{
+    max-width:900px;
+    margin:30px auto;
+}
+
+.registro table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.registro th,.registro td{
+    border:1px solid var(--naranja);
+    padding:8px;
+    text-align:center;
+}
+
+.registro input{
+    width:100%;
+    background:#000;
+    color:#fff;
+    border:none;
+    text-align:center;
+}
+
+/* ================= MENU INFERIOR ================= */
+
 .menu{
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: #111;
-    border-top: 2px solid var(--naranja);
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    padding: 10px 0;
-    z-index: 9999;
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    background:#111;
+    border-top:2px solid var(--naranja);
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    padding:10px 0;
+    z-index:9999;
 }
 
 .menu button{
-    background: var(--gris2);
-    color: white;
-    border: 1px solid var(--naranja);
-    padding: 10px 18px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 14px;
+    background:var(--gris2);
+    color:white;
+    border:1px solid var(--naranja);
+    padding:10px 18px;
+    border-radius:12px;
+    font-size:14px;
 }
 
 .menu button.activo{
-    background: var(--naranja);
-    color: black;
+    background:var(--naranja);
+    color:black;
 }
 
-#btnEstadoGuardado {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 10px 15px;
-    border-radius: 10px;
-    font-weight: bold;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    z-index: 10000;
+/* ================= ESTADO GUARDADO ================= */
+
+#btnEstadoGuardado{
+    position:fixed;
+    top:20px;
+    right:20px;
+    padding:10px 15px;
+    border-radius:10px;
+    font-weight:bold;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    z-index:10000;
 }
-.estado-guardado { background: #28a745; color: white; }
-.estado-pendiente { background: #ff8c1a; color: black; }
-.estado-guardando { background: #007bff; color: white; }
 
-    /* ================= RESPONSIVE CELULAR ================= */
-@media (max-width: 768px) {
+.estado-guardado{ background:#28a745; color:white; }
+.estado-pendiente{ background:#ff8c1a; color:black; }
+.estado-guardando{ background:#007bff; color:white; }
 
-    body {
-        padding: 10px;
-        padding-bottom: 120px;
+/* ================= RESPONSIVE CELULAR ================= */
+
+@media (max-width:768px){
+
+    body{
+        padding:10px;
+        padding-bottom:130px;
     }
 
-    .card {
-        width: 100%;
+    .card{
+        width:100%;
     }
 
-    .almacen {
-        gap: 20px;
+    .almacen{
+        gap:20px;
     }
 
-    h1 {
-        font-size: 22px;
+    h1{
+        font-size:22px;
     }
 
-    .fila {
-        grid-template-columns: 1fr 40px 35px 35px;
+    .fila{
+        grid-template-columns:1fr 40px 35px 35px;
     }
 
-    .menu button {
-        font-size: 13px;
-        padding: 8px 12px;
+    .menu button{
+        font-size:13px;
+        padding:8px 12px;
     }
 
 }
@@ -482,6 +479,7 @@ window.addEventListener("load", cargarLocal);
 
 </body>
 </html>
+
 
 
 
