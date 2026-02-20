@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Almacén de Aceites</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff8c1a">
@@ -194,6 +195,36 @@ button{
 .estado-pendiente { background: #ff8c1a; color: black; }
 .estado-guardando { background: #007bff; color: white; }
 
+    /* ================= RESPONSIVE CELULAR ================= */
+@media (max-width: 768px) {
+
+    body {
+        padding: 10px;
+        padding-bottom: 120px;
+    }
+
+    .card {
+        width: 100%;
+    }
+
+    .almacen {
+        gap: 20px;
+    }
+
+    h1 {
+        font-size: 22px;
+    }
+
+    .fila {
+        grid-template-columns: 1fr 40px 35px 35px;
+    }
+
+    .menu button {
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+
+}
 
 </style>
 </head>
@@ -451,6 +482,7 @@ window.addEventListener("load", cargarLocal);
 
 </body>
 </html>
+
 
 
 
