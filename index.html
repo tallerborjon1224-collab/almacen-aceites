@@ -367,26 +367,52 @@ button:active{
 </div>
 </section> 
 
-    <!-- ================= VENTAS ================= -->
+<!-- ================= VENTAS ================= -->
 <section id="ventas" class="seccion">
 <h1>Venta de Aceite</h1>
 
 <div class="card">
 
-<label>Producto:</label>
-<select id="productoVenta"></select>
+<table width="100%" style="text-align:center;">
+<tr>
+<th>Producto</th>
+<th>Cantidad</th>
+<th>Precio Unit.</th>
+<th>Total</th>
+</tr>
 
-<br><br>
+<tr>
+<td>
+<select id="productoVenta" style="width:100%;"></select>
+</td>
 
-<label>Cantidad:</label>
-<input type="number" id="cantidadVenta" min="1" value="1">
+<td>
+<input type="number" id="cantidadVenta" min="1" value="1" style="width:70px; text-align:center;">
+</td>
 
-<br><br>
+<td>
+$<span id="precioUnitario">0</span>
+</td>
 
-<button onclick="vender()" class="sumar">💰 Realizar Venta</button>
+<td>
+$<span id="totalVenta">0</span>
+</td>
+</tr>
+</table>
 
-<h3>Total: $<span id="totalVenta">0</span></h3>
-<h2>Ganancia Hoy: $<span id="gananciaHoy">0</span></h2>
+<br>
+
+<div style="display:flex; gap:10px; justify-content:center;">
+<button onclick="calcularTotal()" class="sumar">Calcular</button>
+<button onclick="vender()" class="sumar">Confirmar Venta</button>
+<button onclick="cancelarVenta()" class="restar">Cancelar</button>
+</div>
+
+<br>
+
+<h2 style="text-align:center;">
+Ganancia Hoy: $<span id="gananciaHoy">0</span>
+</h2>
 
 </div>
 </section>
@@ -547,6 +573,11 @@ function vender(){
   const numero = fila.querySelector("[data-count]");
   let stock = Number(numero.textContent);
 
+  if(cantidad <= 0){
+    alert("Cantidad inválida");
+    return;
+  }
+
   if(cantidad > stock){
     alert("No hay suficiente stock");
     return;
@@ -556,7 +587,6 @@ function vender(){
   numero.textContent = stock;
 
   const total = precio * cantidad;
-  document.getElementById("totalVenta").textContent = total;
 
   const venta = {
     producto: select.selectedOptions[0].textContent,
@@ -571,6 +601,8 @@ function vender(){
   guardarLocal();
   actualizarHistorial();
   actualizarGananciaHoy();
+
+  cancelarVenta(); // limpia automáticamente
 }
 
 // ================= HISTORIAL =================
@@ -610,11 +642,29 @@ window.addEventListener("load", ()=>{
   actualizarHistorial();
   actualizarGananciaHoy();
 });
+// ================= CALCULAR TOTAL =================
+function calcularTotal(){
+  const select = document.getElementById("productoVenta");
+  const cantidad = Number(document.getElementById("cantidadVenta").value);
+  const precio = Number(select.selectedOptions[0].dataset.precio);
 
+  document.getElementById("precioUnitario").textContent = precio;
+  document.getElementById("totalVenta").textContent = precio * cantidad;
+}
+
+// ================= CANCELAR VENTA =================
+function cancelarVenta(){
+  document.getElementById("cantidadVenta").value = 1;
+  document.getElementById("precioUnitario").textContent = 0;
+  document.getElementById("totalVenta").textContent = 0;
+}
+
+        
 </script>
     
 </body>
 </html>
+
 
 
 
