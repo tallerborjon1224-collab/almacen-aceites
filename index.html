@@ -284,6 +284,72 @@ button:active{
     }
 }
 
+    /* ================= NUEVO REGISTRO ================= */
+
+.registro-nuevo{
+    max-width:900px;
+    margin:auto;
+    background:var(--gris);
+    border:2px solid var(--naranja);
+    border-radius:20px;
+    padding:25px;
+}
+
+.form-carro{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+.campo{
+    display:flex;
+    flex-direction:column;
+}
+
+.campo label{
+    margin-bottom:5px;
+    font-weight:bold;
+    color:var(--naranja);
+}
+
+.campo input{
+    padding:10px;
+    border-radius:8px;
+    border:none;
+    background:#000;
+    color:white;
+    font-size:15px;
+}
+
+.btn-guardar{
+    margin-top:20px;
+    width:100%;
+    padding:12px;
+    font-size:16px;
+}
+
+#listaCarros{
+    margin-top:20px;
+}
+
+.tarjeta-carro{
+    background:var(--gris2);
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:15px;
+    border-left:5px solid var(--naranja);
+}
+
+.tarjeta-carro button{
+    margin-top:10px;
+}
+
+/* CELULAR */
+@media(max-width:600px){
+    .form-carro{
+        grid-template-columns:1fr;
+    }
+}
 </style>
 </head>
 
@@ -300,33 +366,45 @@ button:active{
 <section id="registro" class="seccion">
 <h1>Registro de Carros</h1>
 
-<div class="registro">
-<table>
-<thead>
-<tr>
-<th>Placas</th>
-<th>Marca</th>
-<th>Modelo</th>
-<th>Servicio</th>
-<th>Fecha</th>
-</tr>
-</thead>
-<tbody id="tablaCarros">
-<tr>
-<td><input></td>
-<td><input></td>
-<td><input></td>
-<td><input></td>
-<td><input type="date"></td>
-</tr>
-</tbody>
-</table>
+<div class="registro-nuevo">
 
-<br>
-<button onclick="agregarFila()" class="sumar">➕ Agregar carro</button>
+<div class="form-carro">
+    <div class="campo">
+        <label>Placas</label>
+        <input type="text" id="placas">
+    </div>
+
+    <div class="campo">
+        <label>Marca</label>
+        <input type="text" id="marca">
+    </div>
+
+    <div class="campo">
+        <label>Modelo</label>
+        <input type="text" id="modelo">
+    </div>
+
+    <div class="campo">
+        <label>Servicio Realizado</label>
+        <input type="text" id="servicio">
+    </div>
+
+    <div class="campo">
+        <label>Fecha</label>
+        <input type="date" id="fecha">
+    </div>
+</div>
+
+<button onclick="guardarCarro()" class="sumar btn-guardar">
+    Guardar Registro
+</button>
+
+<hr>
+
+<div id="listaCarros"></div>
+
 </div>
 </section>
-
 <section id="almacen" class="seccion activa">
 
 <h1>Almacén de Aceites</h1>
@@ -743,12 +821,75 @@ function cancelarVenta(){
   actualizarHistorial();
   actualizarGananciaHoy();
 }
+// ================= REGISTRO DE CARROS =================
 
+let listaCarros = JSON.parse(localStorage.getItem("listaCarros")) || [];
+
+function guardarCarro(){
+
+    const placas = document.getElementById("placas").value.trim();
+    const marca = document.getElementById("marca").value.trim();
+    const modelo = document.getElementById("modelo").value.trim();
+    const servicio = document.getElementById("servicio").value.trim();
+    const fecha = document.getElementById("fecha").value;
+
+    if(!placas || !marca || !modelo || !servicio || !fecha){
+        alert("Completa todos los campos");
+        return;
+    }
+
+    const carro = { placas, marca, modelo, servicio, fecha };
+
+    listaCarros.push(carro);
+    localStorage.setItem("listaCarros", JSON.stringify(listaCarros));
+
+    limpiarFormulario();
+    mostrarCarros();
+}
+
+function mostrarCarros(){
+
+    const contenedor = document.getElementById("listaCarros");
+    contenedor.innerHTML = "";
+
+    listaCarros.forEach((carro,index)=>{
+        contenedor.innerHTML += `
+            <div class="tarjeta-carro">
+                <strong>${carro.placas}</strong><br>
+                Marca: ${carro.marca}<br>
+                Modelo: ${carro.modelo}<br>
+                Servicio: ${carro.servicio}<br>
+                Fecha: ${carro.fecha}<br>
+                <button onclick="eliminarCarro(${index})" class="restar">
+                    Eliminar
+                </button>
+            </div>
+        `;
+    });
+}
+
+function eliminarCarro(index){
+    listaCarros.splice(index,1);
+    localStorage.setItem("listaCarros", JSON.stringify(listaCarros));
+    mostrarCarros();
+}
+
+function limpiarFormulario(){
+    document.getElementById("placas").value="";
+    document.getElementById("marca").value="";
+    document.getElementById("modelo").value="";
+    document.getElementById("servicio").value="";
+    document.getElementById("fecha").value="";
+}
+
+// cargar al abrir
+window.addEventListener("load", mostrarCarros);
         
 </script>
     
 </body>
 </html>
+
 
 
 
