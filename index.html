@@ -692,16 +692,20 @@ function actualizarHistorial(){
   });
 }
 
-// ================= GANANCIA HOY =================
 function actualizarGananciaHoy(){
-  const hoy = new Date().toLocaleDateString();
 
-  const total = historialVentas
-    .filter(v=>v.fecha.includes(hoy))
-    .reduce((acc,v)=>acc+v.total,0);
+  const hoy = new Date().toDateString();
+  let totalHoy = 0;
 
-  const span = document.getElementById("gananciaHoy");
-  if(span) span.textContent = total;
+  historialVentas.forEach(venta => {
+      const fechaVenta = new Date(venta.fecha).toDateString();
+
+      if(fechaVenta === hoy){
+          totalHoy += Number(venta.total);
+      }
+  });
+
+  document.getElementById("gananciaHoy").textContent = totalHoy;
 }
 
 // ================= INICIAR =================
@@ -726,12 +730,26 @@ function cancelarVenta(){
   document.getElementById("precioUnitario").textContent = 0;
   document.getElementById("totalVenta").textContent = 0;
 }
+        function borrarVentasHoy(){
+
+  const hoy = new Date().toDateString();
+
+  historialVentas = historialVentas.filter(venta =>
+      new Date(venta.fecha).toDateString() !== hoy
+  );
+
+  localStorage.setItem("historialVentas", JSON.stringify(historialVentas));
+
+  actualizarHistorial();
+  actualizarGananciaHoy();
+}
 
         
 </script>
     
 </body>
 </html>
+
 
 
 
