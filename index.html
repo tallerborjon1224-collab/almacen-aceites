@@ -280,9 +280,9 @@ button:active{
 <div class="marca">
 <h3>VALVOLINE</h3>
 <div class="subtitulo">GALONES</div>
-<div class="fila"><span>Sintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Semisintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Multigrado</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
+<div class="fila" data-precio="850">><span>Sintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
+<div class="fila" data-precio="850"><span>Semisintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
+<div class="fila" data-precio="850"><span>Multigrado</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
 
 <div class="subtitulo">CUARTOS</div>
 <div class="fila"><span>Sintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
@@ -367,6 +367,35 @@ button:active{
 </div>
 </section> 
 
+    <!-- ================= VENTAS ================= -->
+<section id="ventas" class="seccion">
+<h1>Venta de Aceite</h1>
+
+<div class="card">
+
+<label>Producto:</label>
+<select id="productoVenta"></select>
+
+<br><br>
+
+<label>Cantidad:</label>
+<input type="number" id="cantidadVenta" min="1" value="1">
+
+<br><br>
+
+<button onclick="vender()" class="sumar">💰 Realizar Venta</button>
+
+<h3>Total: $<span id="totalVenta">0</span></h3>
+<h2>Ganancia Hoy: $<span id="gananciaHoy">0</span></h2>
+
+</div>
+</section>
+    <!-- ================= HISTORIAL ================= -->
+<section id="historial" class="seccion">
+<h1>Historial de Ventas</h1>
+<div id="listaHistorial"></div>
+</section>
+
 
 <script>
 function mostrar(id){
@@ -397,10 +426,11 @@ function agregarFila(){
 </script>
 
 <div class="menu">
-<button id="btnAlmacen" class="activo" onclick="mostrar('almacen')">🛢 Almacén</button>
+<button id="btnAlmacen" class="activo" onclick="mostrar('almacen')">🛢 Inventario</button>
+<button id="btnVentas" onclick="mostrar('ventas')">💰 Ventas</button>
+<button id="btnHistorial" onclick="mostrar('historial')">📜 Historial</button>
 <button id="btnRegistro" onclick="mostrar('registro')">🚗 Registro</button>
 </div>
-
 <script>
 let temporizador = null;
 
@@ -477,8 +507,115 @@ document.addEventListener("click", e => {
 window.addEventListener("load", cargarLocal);
 </script>
 
+    <script>
+
+// ================= VARIABLES =================
+let historialVentas = JSON.parse(localStorage.getItem("historialVentas")) || [];
+
+// ================= CARGAR PRODUCTOS =================
+function cargarProductosVenta(){
+  const select = document.getElementById("productoVenta");
+  if(!select) return;
+
+  select.innerHTML = "";
+
+  document.querySelectorAll(".fila").forEach((fila,i)=>{
+    const nombre = fila.querySelector("span").textContent;
+    const marca = fila.closest(".marca").querySelector("h3").textContent;
+    const tipo = fila.closest(".card").querySelector("h2").textContent;
+    const precio = fila.dataset.precio || 0;
+
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = `${tipo} - ${marca} - ${nombre} - $${precio}`;
+    option.dataset.precio = precio;
+
+    select.appendChild(option);
+  });
+}
+
+// ================= VENDER =================
+function vender(){
+
+  const select = document.getElementById("productoVenta");
+  const cantidad = Number(document.getElementById("cantidadVenta").value);
+  const precio = Number(select.selectedOptions[0].dataset.precio);
+  const index = select.value;
+
+  const filas = document.querySelectorAll(".fila");
+  const fila = filas[index];
+  const numero = fila.querySelector("[data-count]");
+  let stock = Number(numero.textContent);
+
+  if(cantidad > stock){
+    alert("No hay suficiente stock");
+    return;
+  }
+
+  stock -= cantidad;
+  numero.textContent = stock;
+
+  const total = precio * cantidad;
+  document.getElementById("totalVenta").textContent = total;
+
+  const venta = {
+    producto: select.selectedOptions[0].textContent,
+    cantidad,
+    total,
+    fecha: new Date().toLocaleString()
+  };
+
+  historialVentas.push(venta);
+  localStorage.setItem("historialVentas", JSON.stringify(historialVentas));
+
+  guardarLocal();
+  actualizarHistorial();
+  actualizarGananciaHoy();
+}
+
+// ================= HISTORIAL =================
+function actualizarHistorial(){
+  const contenedor = document.getElementById("listaHistorial");
+  if(!contenedor) return;
+
+  contenedor.innerHTML = "";
+
+  historialVentas.forEach(v=>{
+    contenedor.innerHTML += `
+      <div class="marca">
+        <strong>${v.producto}</strong><br>
+        Cantidad: ${v.cantidad}<br>
+        Total: $${v.total}<br>
+        Fecha: ${v.fecha}
+      </div>
+    `;
+  });
+}
+
+// ================= GANANCIA HOY =================
+function actualizarGananciaHoy(){
+  const hoy = new Date().toLocaleDateString();
+
+  const total = historialVentas
+    .filter(v=>v.fecha.includes(hoy))
+    .reduce((acc,v)=>acc+v.total,0);
+
+  const span = document.getElementById("gananciaHoy");
+  if(span) span.textContent = total;
+}
+
+// ================= INICIAR =================
+window.addEventListener("load", ()=>{
+  cargarProductosVenta();
+  actualizarHistorial();
+  actualizarGananciaHoy();
+});
+
+</script>
+    
 </body>
 </html>
+
 
 
 
