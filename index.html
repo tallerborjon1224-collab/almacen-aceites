@@ -173,23 +173,6 @@ button:active{
 
 /* ================= ESTADO GUARDADO ================= */
 
-#btnEstadoGuardado{
-    position:fixed;
-    top:20px;
-    right:20px;
-    padding:10px 15px;
-    border-radius:10px;
-    font-weight:bold;
-    font-size:13px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    z-index:10000;
-}
-
-.estado-guardado{ background:#28a745; color:white; }
-.estado-pendiente{ background:#ff8c1a; color:black; }
-.estado-guardando{ background:#007bff; color:white; }
 
 /* ================= RESPONSIVE CELULAR ================= */
 
@@ -357,10 +340,7 @@ button:active{
 
   
     
-    <div id="btnEstadoGuardado" class="estado-guardado">
-    <span id="iconoEstado">✅</span>
-    <span id="textoEstado">Guardado</span>
-</div>
+   
 
 
 <section id="registro" class="seccion">
@@ -551,6 +531,9 @@ $<span id="totalVenta">0</span>
 </div>
 
 <hr>
+    <h2 style="text-align:center; color:orange;">Historial de Ventas</h2>
+
+<div id="listaHistorial"></div>
 
 <h2 class="ganancia">
 Ganancia Hoy: $<span id="gananciaHoy">0</span>
@@ -600,7 +583,6 @@ function agregarFila(){
 <div class="menu">
 <button id="btnAlmacen" class="activo" onclick="mostrar('almacen')">🛢 Inventario</button>
 <button id="btnVentas" onclick="mostrar('ventas')">💰 Ventas</button>
-<button id="btnHistorial" onclick="mostrar('historial')">📜 Historial</button>
 <button id="btnRegistro" onclick="mostrar('registro')">🚗 Registro</button>
 </div>
 <script>
@@ -636,24 +618,7 @@ function cargarLocal() {
   });
 }
 
-// 🔹 Estado visual
-function actualizarBotonEstado(estado) {
-  const btn = document.getElementById("btnEstadoGuardado");
-  const icono = document.getElementById("iconoEstado");
-  const texto = document.getElementById("textoEstado");
 
-  btn.className = "";
-
-  if (estado === "guardado") {
-    btn.classList.add("estado-guardado");
-    icono.textContent = "✅";
-    texto.textContent = "Guardado";
-  } else {
-    btn.classList.add("estado-pendiente");
-    icono.textContent = "⏳";
-    texto.textContent = "Cambios pendientes...";
-  }
-}
 
 // 🔹 Eventos sumar/restar
 document.addEventListener("click", e => {
@@ -738,7 +703,7 @@ function vender(){
     producto: select.selectedOptions[0].textContent,
     cantidad,
     total,
-    fecha: new Date().toLocaleString()
+    fecha: new Date().toISOString()
   };
 
   historialVentas.push(venta);
@@ -889,6 +854,7 @@ window.addEventListener("load", mostrarCarros);
     
 </body>
 </html>
+
 
 
 
