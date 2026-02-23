@@ -379,8 +379,19 @@ cursor:pointer;
 <body>
 
   
-    
-   
+  <div class="menu">
+    <button id="btnAlmacen" class="activo" onclick="mostrar('almacen')">
+        🛢 Inventario
+    </button>
+
+    <button id="btnVentas" onclick="mostrar('ventas')">
+        💰 Ventas
+    </button>
+
+    <button id="btnRegistro" onclick="mostrar('registro')">
+        🚗 Registro
+    </button>
+</div>
 
 
 <section id="registro" class="seccion">
@@ -528,7 +539,29 @@ Reiniciar Todo
 </div>
 </section>
 <script>
+// ================= MENU =================
+function mostrar(id){
+    document.querySelectorAll('.seccion').forEach(s=>{
+        s.classList.remove('activa');
+    });
 
+    const seccion = document.getElementById(id);
+    if(seccion){
+        seccion.classList.add('activa');
+    }
+
+    document.querySelectorAll('.menu button').forEach(b=>{
+        b.classList.remove('activo');
+    });
+
+    const btn = document.getElementById(
+        'btn' + id.charAt(0).toUpperCase() + id.slice(1)
+    );
+
+    if(btn){
+        btn.classList.add('activo');
+    }
+}
 // ================= INVENTARIO TABLA PROFESIONAL =================
 
 // Base de datos local
@@ -648,6 +681,7 @@ window.addEventListener("load", ()=>{
     
 </body>
 </html>
+
 
 
 
