@@ -527,292 +527,128 @@ Reiniciar Todo
 
 </div>
 </section>
-
 <script>
 
-// ================== MENU ==================
-function mostrar(id){
-    document.querySelectorAll('.seccion').forEach(s=>{
-        s.classList.remove('activa');
-    });
-    document.getElementById(id).classList.add('activa');
+// ================= INVENTARIO TABLA PROFESIONAL =================
 
-    document.querySelectorAll('.menu button').forEach(b=>{
-        b.classList.remove('activo');
-    });
-    document.getElementById(
-        'btn' + id.charAt(0).toUpperCase() + id.slice(1)
-    ).classList.add('activo');
+// Base de datos local
+let inventario = JSON.parse(localStorage.getItem("inventarioTabla")) || [];
+
+// Referencia tabla
+const tabla = document.getElementById("tablaInventario");
+
+// ================= GUARDAR =================
+function guardarInventario(){
+    localStorage.setItem("inventarioTabla", JSON.stringify(inventario));
 }
 
-function agregarFila(){
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-        <td><input></td>
-        <td><input></td>
-        <td><input></td>
-        <td><input></td>
-        <td><input type="date"></td>
-    `;
-    document.getElementById("tablaCarros").appendChild(tr);
-}
+// ================= RENDER =================
+function renderTabla(){
 
-// ================= INVENTARIO NUEVO =================
-let inventario = JSON.parse(localStorage.getItem("inventarioTaller")) || [];
+    if(!tabla) return;
 
-function inicializarInventario(){
-    if(inventario.length > 0) return;
+    tabla.innerHTML = "";
 
-    document.querySelectorAll(".fila").forEach((fila,i)=>{
-        const nombre = fila.querySelector("span").textContent;
-        const cantidad = Number(fila.querySelector("[data-count]").textContent);
-        const precio = Number(fila.dataset.precio) || 0;
+    inventario.forEach((item,index)=>{
 
-        inventario.push({
-            id: i,
-            nombre: nombre,
-            stock: cantidad,
-            precio: precio
-        });
+        const colorStock = item.stock <= 3 ? "red" : "white";
+
+        tabla.innerHTML += `
+        <tr>
+            <td>${item.producto}</td>
+            <td>${item.categoria}</td>
+            <td>${item.marca}</td>
+            <td>$${item.precio}</td>
+            <td style="color:${colorStock}; font-weight:bold;">
+                ${item.stock}
+            </td>
+            <td>
+                <button onclick="sumarStock(${index})">+</button>
+            </td>
+            <td>
+                <button onclick="restarStock(${index})">-</button>
+            </td>
+            <td>
+                <button onclick="eliminarArticulo(${index})">
+                    Eliminar
+                </button>
+            </td>
+        </tr>
+        `;
     });
 
     guardarInventario();
 }
 
-function guardarInventario(){
-    localStorage.setItem("inventarioTaller", JSON.stringify(inventario));
-}
+// ================= AGREGAR =================
+function agregarArticulo(){
 
-function renderInventario(){
-    document.querySelectorAll(".fila").forEach((fila,i)=>{
-        const numero = fila.querySelector("[data-count]");
-        if(inventario[i]){
-            numero.textContent = inventario[i].stock;
+    const producto = prompt("Nombre del producto:");
+    if(!producto) return;
 
-            // 🔥 alerta visual stock bajo
-            if(inventario[i].stock <= 3){
-                numero.style.color = "red";
-            } else {
-                numero.style.color = "white";
-            }
-        }
-    });
-}
+    const categoria = prompt("Categoría:");
+    if(!categoria) return;
 
-// Eventos sumar / restar
-document.addEventListener("click", e => {
+    const marca = prompt("Marca:");
+    if(!marca) return;
 
-    if (e.target.classList.contains("sumar") || e.target.classList.contains("restar")) {
-
-        const fila = e.target.closest(".fila");
-        const index = [...document.querySelectorAll(".fila")].indexOf(fila);
-
-        if(index === -1) return;
-
-        if(e.target.classList.contains("sumar")){
-            inventario[index].stock++;
-        } else {
-            if(inventario[index].stock > 0){
-                inventario[index].stock--;
-            }
-        }
-
-        guardarInventario();
-        renderInventario();
-    }
-});
-
-// ================= VENTAS =================
-let historialVentas = JSON.parse(localStorage.getItem("historialVentas")) || [];
-
-function cargarProductosVenta(){
-  const select = document.getElementById("productoVenta");
-  if(!select) return;
-
-  select.innerHTML = "";
-
-  inventario.forEach((item,i)=>{
-    const option = document.createElement("option");
-    option.value = i;
-    option.textContent = `${item.nombre} - $${item.precio}`;
-    option.dataset.precio = item.precio;
-    select.appendChild(option);
-  });
-}
-
-function vender(){
-
-  const select = document.getElementById("productoVenta");
-  const cantidad = Number(document.getElementById("cantidadVenta").value);
-  const precio = Number(select.selectedOptions[0].dataset.precio);
-  const index = Number(select.value);
-
-  let stock = inventario[index].stock;
-
-  if(cantidad <= 0){
-    alert("Cantidad inválida");
-    return;
-  }
-
-  if(cantidad > stock){
-    alert("No hay suficiente stock");
-    return;
-  }
-
-  inventario[index].stock -= cantidad;
-  guardarInventario();
-  renderInventario();
-
-  const total = precio * cantidad;
-
-  const venta = {
-    producto: inventario[index].nombre,
-    cantidad,
-    total,
-    fecha: new Date().toISOString()
-  };
-
-  historialVentas.push(venta);
-  localStorage.setItem("historialVentas", JSON.stringify(historialVentas));
-
-  actualizarHistorial();
-  actualizarGananciaHoy();
-  cancelarVenta();
-}
-
-function actualizarHistorial(){
-  const contenedor = document.getElementById("listaHistorial");
-  if(!contenedor) return;
-
-  contenedor.innerHTML = "";
-
-  historialVentas.forEach(v=>{
-    contenedor.innerHTML += `
-      <div class="marca">
-        <strong>${v.producto}</strong><br>
-        Cantidad: ${v.cantidad}<br>
-        Total: $${v.total}<br>
-        Fecha: ${new Date(v.fecha).toLocaleString()}
-      </div>
-    `;
-  });
-}
-
-function actualizarGananciaHoy(){
-  const hoy = new Date().toDateString();
-  let totalHoy = 0;
-
-  historialVentas.forEach(venta => {
-      const fechaVenta = new Date(venta.fecha).toDateString();
-      if(fechaVenta === hoy){
-          totalHoy += Number(venta.total);
-      }
-  });
-
-  document.getElementById("gananciaHoy").textContent = totalHoy;
-}
-
-function calcularTotal(){
-  const select = document.getElementById("productoVenta");
-  const cantidad = Number(document.getElementById("cantidadVenta").value);
-  const precio = Number(select.selectedOptions[0].dataset.precio);
-
-  document.getElementById("precioUnitario").textContent = precio;
-  document.getElementById("totalVenta").textContent = precio * cantidad;
-}
-
-function cancelarVenta(){
-  document.getElementById("cantidadVenta").value = 1;
-  document.getElementById("precioUnitario").textContent = 0;
-  document.getElementById("totalVenta").textContent = 0;
-}
-
-function borrarVentasHoy(){
-  const hoy = new Date().toDateString();
-
-  historialVentas = historialVentas.filter(venta =>
-      new Date(venta.fecha).toDateString() !== hoy
-  );
-
-  localStorage.setItem("historialVentas", JSON.stringify(historialVentas));
-  actualizarHistorial();
-  actualizarGananciaHoy();
-}
-
-// ================= REGISTRO =================
-let listaCarros = JSON.parse(localStorage.getItem("listaCarros")) || [];
-
-function guardarCarro(){
-
-    const placas = document.getElementById("placas").value.trim();
-    const marca = document.getElementById("marca").value.trim();
-    const modelo = document.getElementById("modelo").value.trim();
-    const servicio = document.getElementById("servicio").value.trim();
-    const fecha = document.getElementById("fecha").value;
-
-    if(!placas || !marca || !modelo || !servicio || !fecha){
-        alert("Completa todos los campos");
+    const precio = Number(prompt("Precio:"));
+    if(isNaN(precio) || precio < 0){
+        alert("Precio inválido");
         return;
     }
 
-    const carro = { placas, marca, modelo, servicio, fecha };
+    const stock = Number(prompt("Stock inicial:"));
+    if(isNaN(stock) || stock < 0){
+        alert("Stock inválido");
+        return;
+    }
 
-    listaCarros.push(carro);
-    localStorage.setItem("listaCarros", JSON.stringify(listaCarros));
-
-    limpiarFormulario();
-    mostrarCarros();
-}
-
-function mostrarCarros(){
-
-    const contenedor = document.getElementById("listaCarros");
-    contenedor.innerHTML = "";
-
-    listaCarros.forEach((carro,index)=>{
-        contenedor.innerHTML += `
-            <div class="tarjeta-carro">
-                <strong>${carro.placas}</strong><br>
-                Marca: ${carro.marca}<br>
-                Modelo: ${carro.modelo}<br>
-                Servicio: ${carro.servicio}<br>
-                Fecha: ${carro.fecha}<br>
-                <button onclick="eliminarCarro(${index})" class="restar">
-                    Eliminar
-                </button>
-            </div>
-        `;
+    inventario.push({
+        producto: producto.trim(),
+        categoria: categoria.trim(),
+        marca: marca.trim(),
+        precio: precio,
+        stock: stock
     });
+
+    renderTabla();
 }
 
-function eliminarCarro(index){
-    listaCarros.splice(index,1);
-    localStorage.setItem("listaCarros", JSON.stringify(listaCarros));
-    mostrarCarros();
+// ================= SUMAR =================
+function sumarStock(index){
+    inventario[index].stock++;
+    renderTabla();
 }
 
-function limpiarFormulario(){
-    document.getElementById("placas").value="";
-    document.getElementById("marca").value="";
-    document.getElementById("modelo").value="";
-    document.getElementById("servicio").value="";
-    document.getElementById("fecha").value="";
+// ================= RESTAR =================
+function restarStock(index){
+    if(inventario[index].stock > 0){
+        inventario[index].stock--;
+        renderTabla();
+    }
 }
 
-// ================= INICIAR TODO =================
+// ================= ELIMINAR =================
+function eliminarArticulo(index){
+
+    const confirmar = confirm("¿Eliminar este artículo?");
+    if(!confirmar) return;
+
+    inventario.splice(index,1);
+    renderTabla();
+}
+
+// ================= INICIAR =================
 window.addEventListener("load", ()=>{
-    inicializarInventario();
-    renderInventario();
-    cargarProductosVenta();
-    actualizarHistorial();
-    actualizarGananciaHoy();
-    mostrarCarros();
+    renderTabla();
 });
 
 </script>
     
 </body>
 </html>
+
 
 
 
