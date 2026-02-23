@@ -333,6 +333,46 @@ button:active{
         grid-template-columns:1fr;
     }
 }
+    .inventario-container{
+max-width:1100px;
+margin:auto;
+}
+
+.tabla-inventario{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+.tabla-inventario th{
+background:#1a1a1a;
+color:orange;
+padding:12px;
+border-bottom:2px solid orange;
+}
+
+.tabla-inventario td{
+padding:10px;
+text-align:center;
+border-bottom:1px solid #333;
+}
+
+.tabla-inventario input{
+width:80px;
+text-align:center;
+background:#000;
+color:white;
+border:1px solid #444;
+}
+
+.btn-agregar{
+background:green;
+color:white;
+padding:10px 15px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
 </style>
 </head>
 
@@ -386,103 +426,39 @@ button:active{
 </div>
 </section>
 <section id="almacen" class="seccion activa">
+<h1>Inventario del Taller</h1>
 
-<h1>Almacén de Aceites</h1>
+<div class="inventario-container">
 
-<div class="almacen">
+<button onclick="mostrarFormulario()" class="btn-agregar">
+➕ Agregar Nuevo Artículo
+</button>
 
-<!-- ================= 5W-30 ================= -->
-<div class="card">
-<h2>Aceite 5W-30</h2>
-
-<!-- VALVOLINE -->
-<div class="marca">
-<h3>VALVOLINE</h3>
-<div class="subtitulo">GALONES</div>
-<div class="fila" data-precio="850">><span>Sintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila" data-precio="850"><span>Semisintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila" data-precio="850"><span>Multigrado</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-
-<div class="subtitulo">CUARTOS</div>
-<div class="fila"><span>Sintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Semisintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Multigrado</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
+<div id="formularioNuevo" style="display:none; margin-top:20px;">
+<input type="text" id="nuevoNombre" placeholder="Nombre del producto">
+<input type="text" id="nuevoCategoria" placeholder="Categoría (Ej: Aceite de Frenos)">
+<input type="text" id="nuevoMarca" placeholder="Marca">
+<input type="number" id="nuevoPrecio" placeholder="Precio">
+<input type="number" id="nuevoStock" placeholder="Stock inicial">
+<button onclick="agregarArticulo()">Guardar</button>
 </div>
 
-<!-- MOBIL -->
-<div class="marca">
-<h3>MOBIL SUPER</h3>
-<div class="subtitulo">GALONES</div>
-<div class="fila"><span>Sintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Semisintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Multigrado</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
+<table class="tabla-inventario">
+<thead>
+<tr>
+<th>Producto</th>
+<th>Categoría</th>
+<th>Marca</th>
+<th>Precio</th>
+<th>Stock</th>
+<th>+</th>
+<th>-</th>
+<th>Eliminar</th>
+</tr>
+</thead>
+<tbody id="tablaInventario"></tbody>
+</table>
 
-<div class="subtitulo">CUARTOS</div>
-<div class="fila"><span>Sintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Semisintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Multigrado</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-</div>
-
-<!-- SUPREME -->
-<div class="marca">
-<h3>SUPREME</h3>
-<div class="subtitulo">GALONES</div>
-<div class="fila"><span>Sintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Semisintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Multigrado</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-
-<div class="subtitulo">CUARTOS</div>
-<div class="fila"><span>Sintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Semisintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Multigrado</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-</div>
-
-<!-- ACDELCO -->
-<div class="marca">
-<h3>ACDELCO</h3>
-<div class="subtitulo">GALONES</div>
-<div class="fila"><span>Sintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Semisintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Multigrado</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-
-<div class="subtitulo">CUARTOS</div>
-<div class="fila"><span>Sintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Semisintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Multigrado</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-</div>
-</div>
-
-
-<!-- ================= 10W-30 ================= -->
-<div class="card">
-<h2>Aceite 10W-30</h2>
-
-<div class="marca">
-<h3>VALVOLINE</h3>
-<div class="subtitulo">GALONES</div>
-<div class="fila"><span>Sintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Semisintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Multigrado</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-
-<div class="subtitulo">CUARTOS</div>
-<div class="fila"><span>Sintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Semisintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Multigrado</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-</div>
-
-<div class="marca">
-<h3>SHELL</h3>
-<div class="subtitulo">GALONES</div>
-<div class="fila"><span>Sintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Semisintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Multigrado</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-
-<div class="subtitulo">CUARTOS</div>
-<div class="fila"><span>Sintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Semisintético</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-<div class="fila"><span>Multigrado</span><div class="numero" data-count>0</div><button class="restar">➖</button><button class="sumar">➕</button></div>
-</div>
-</div>
 </div>
 </section> 
 
@@ -553,6 +529,8 @@ Reiniciar Todo
 </section>
 
 <script>
+
+// ================== MENU ==================
 function mostrar(id){
     document.querySelectorAll('.seccion').forEach(s=>{
         s.classList.remove('activa');
@@ -578,111 +556,98 @@ function agregarFila(){
     `;
     document.getElementById("tablaCarros").appendChild(tr);
 }
-</script>
 
-<div class="menu">
-<button id="btnAlmacen" class="activo" onclick="mostrar('almacen')">🛢 Inventario</button>
-<button id="btnVentas" onclick="mostrar('ventas')">💰 Ventas</button>
-<button id="btnRegistro" onclick="mostrar('registro')">🚗 Registro</button>
-</div>
-<script>
-let temporizador = null;
+// ================= INVENTARIO NUEVO =================
+let inventario = JSON.parse(localStorage.getItem("inventarioTaller")) || [];
 
-// 🔹 Obtener datos del almacen desde pantalla
-function obtenerAlmacen() {
-  return [...document.querySelectorAll(".fila")].map((fila, i) => ({
-    id: i,
-    cantidad: Number(fila.querySelector("[data-count]").textContent)
-  }));
+function inicializarInventario(){
+    if(inventario.length > 0) return;
+
+    document.querySelectorAll(".fila").forEach((fila,i)=>{
+        const nombre = fila.querySelector("span").textContent;
+        const cantidad = Number(fila.querySelector("[data-count]").textContent);
+        const precio = Number(fila.dataset.precio) || 0;
+
+        inventario.push({
+            id: i,
+            nombre: nombre,
+            stock: cantidad,
+            precio: precio
+        });
+    });
+
+    guardarInventario();
 }
 
-// 🔹 Guardar en localStorage
-function guardarLocal() {
-  const datos = { almacen: obtenerAlmacen() };
-  localStorage.setItem("almacenAceites", JSON.stringify(datos));
-  actualizarBotonEstado("guardado");
+function guardarInventario(){
+    localStorage.setItem("inventarioTaller", JSON.stringify(inventario));
 }
 
-// 🔹 Cargar desde localStorage
-function cargarLocal() {
-  const guardado = localStorage.getItem("almacenAceites");
-  if (!guardado) return;
+function renderInventario(){
+    document.querySelectorAll(".fila").forEach((fila,i)=>{
+        const numero = fila.querySelector("[data-count]");
+        if(inventario[i]){
+            numero.textContent = inventario[i].stock;
 
-  const data = JSON.parse(guardado);
-  const numeros = document.querySelectorAll("[data-count]");
-
-  data.almacen.forEach((item, i) => {
-    if (numeros[i]) {
-      numeros[i].textContent = item.cantidad;
-    }
-  });
+            // 🔥 alerta visual stock bajo
+            if(inventario[i].stock <= 3){
+                numero.style.color = "red";
+            } else {
+                numero.style.color = "white";
+            }
+        }
+    });
 }
 
-
-
-// 🔹 Eventos sumar/restar
+// Eventos sumar / restar
 document.addEventListener("click", e => {
-  if (e.target.classList.contains("sumar") || e.target.classList.contains("restar")) {
 
-    const fila = e.target.closest(".fila");
-    const num = fila.querySelector("[data-count]");
-    let v = Number(num.textContent);
+    if (e.target.classList.contains("sumar") || e.target.classList.contains("restar")) {
 
-    v += e.target.classList.contains("sumar") ? 1 : -1;
-    num.textContent = Math.max(0, v);
+        const fila = e.target.closest(".fila");
+        const index = [...document.querySelectorAll(".fila")].indexOf(fila);
 
-    actualizarBotonEstado("pendiente");
+        if(index === -1) return;
 
-    clearTimeout(temporizador);
-    temporizador = setTimeout(() => {
-      guardarLocal();
-    }, 1000);
-  }
+        if(e.target.classList.contains("sumar")){
+            inventario[index].stock++;
+        } else {
+            if(inventario[index].stock > 0){
+                inventario[index].stock--;
+            }
+        }
+
+        guardarInventario();
+        renderInventario();
+    }
 });
 
-// 🔹 Cargar al abrir página
-window.addEventListener("load", cargarLocal);
-</script>
-
-    <script>
-
-// ================= VARIABLES =================
+// ================= VENTAS =================
 let historialVentas = JSON.parse(localStorage.getItem("historialVentas")) || [];
 
-// ================= CARGAR PRODUCTOS =================
 function cargarProductosVenta(){
   const select = document.getElementById("productoVenta");
   if(!select) return;
 
   select.innerHTML = "";
 
-  document.querySelectorAll(".fila").forEach((fila,i)=>{
-    const nombre = fila.querySelector("span").textContent;
-    const marca = fila.closest(".marca").querySelector("h3").textContent;
-    const tipo = fila.closest(".card").querySelector("h2").textContent;
-    const precio = fila.dataset.precio || 0;
-
+  inventario.forEach((item,i)=>{
     const option = document.createElement("option");
     option.value = i;
-    option.textContent = `${tipo} - ${marca} - ${nombre} - $${precio}`;
-    option.dataset.precio = precio;
-
+    option.textContent = `${item.nombre} - $${item.precio}`;
+    option.dataset.precio = item.precio;
     select.appendChild(option);
   });
 }
 
-// ================= VENDER =================
 function vender(){
 
   const select = document.getElementById("productoVenta");
   const cantidad = Number(document.getElementById("cantidadVenta").value);
   const precio = Number(select.selectedOptions[0].dataset.precio);
-  const index = select.value;
+  const index = Number(select.value);
 
-  const filas = document.querySelectorAll(".fila");
-  const fila = filas[index];
-  const numero = fila.querySelector("[data-count]");
-  let stock = Number(numero.textContent);
+  let stock = inventario[index].stock;
 
   if(cantidad <= 0){
     alert("Cantidad inválida");
@@ -694,13 +659,14 @@ function vender(){
     return;
   }
 
-  stock -= cantidad;
-  numero.textContent = stock;
+  inventario[index].stock -= cantidad;
+  guardarInventario();
+  renderInventario();
 
   const total = precio * cantidad;
 
   const venta = {
-    producto: select.selectedOptions[0].textContent,
+    producto: inventario[index].nombre,
     cantidad,
     total,
     fecha: new Date().toISOString()
@@ -709,14 +675,11 @@ function vender(){
   historialVentas.push(venta);
   localStorage.setItem("historialVentas", JSON.stringify(historialVentas));
 
-  guardarLocal();
   actualizarHistorial();
   actualizarGananciaHoy();
-
-  cancelarVenta(); // limpia automáticamente
+  cancelarVenta();
 }
 
-// ================= HISTORIAL =================
 function actualizarHistorial(){
   const contenedor = document.getElementById("listaHistorial");
   if(!contenedor) return;
@@ -729,20 +692,18 @@ function actualizarHistorial(){
         <strong>${v.producto}</strong><br>
         Cantidad: ${v.cantidad}<br>
         Total: $${v.total}<br>
-        Fecha: ${v.fecha}
+        Fecha: ${new Date(v.fecha).toLocaleString()}
       </div>
     `;
   });
 }
 
 function actualizarGananciaHoy(){
-
   const hoy = new Date().toDateString();
   let totalHoy = 0;
 
   historialVentas.forEach(venta => {
       const fechaVenta = new Date(venta.fecha).toDateString();
-
       if(fechaVenta === hoy){
           totalHoy += Number(venta.total);
       }
@@ -751,13 +712,6 @@ function actualizarGananciaHoy(){
   document.getElementById("gananciaHoy").textContent = totalHoy;
 }
 
-// ================= INICIAR =================
-window.addEventListener("load", ()=>{
-  cargarProductosVenta();
-  actualizarHistorial();
-  actualizarGananciaHoy();
-});
-// ================= CALCULAR TOTAL =================
 function calcularTotal(){
   const select = document.getElementById("productoVenta");
   const cantidad = Number(document.getElementById("cantidadVenta").value);
@@ -767,14 +721,13 @@ function calcularTotal(){
   document.getElementById("totalVenta").textContent = precio * cantidad;
 }
 
-// ================= CANCELAR VENTA =================
 function cancelarVenta(){
   document.getElementById("cantidadVenta").value = 1;
   document.getElementById("precioUnitario").textContent = 0;
   document.getElementById("totalVenta").textContent = 0;
 }
-        function borrarVentasHoy(){
 
+function borrarVentasHoy(){
   const hoy = new Date().toDateString();
 
   historialVentas = historialVentas.filter(venta =>
@@ -782,12 +735,11 @@ function cancelarVenta(){
   );
 
   localStorage.setItem("historialVentas", JSON.stringify(historialVentas));
-
   actualizarHistorial();
   actualizarGananciaHoy();
 }
-// ================= REGISTRO DE CARROS =================
 
+// ================= REGISTRO =================
 let listaCarros = JSON.parse(localStorage.getItem("listaCarros")) || [];
 
 function guardarCarro(){
@@ -847,13 +799,21 @@ function limpiarFormulario(){
     document.getElementById("fecha").value="";
 }
 
-// cargar al abrir
-window.addEventListener("load", mostrarCarros);
-        
+// ================= INICIAR TODO =================
+window.addEventListener("load", ()=>{
+    inicializarInventario();
+    renderInventario();
+    cargarProductosVenta();
+    actualizarHistorial();
+    actualizarGananciaHoy();
+    mostrarCarros();
+});
+
 </script>
     
 </body>
 </html>
+
 
 
 
