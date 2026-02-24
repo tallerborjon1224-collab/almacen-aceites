@@ -11,12 +11,16 @@
 
 <style>
 
+/* ================= VARIABLES ================= */
+
 :root{
     --naranja:#ff8c1a;
     --negro:#000;
     --gris:#1a1a1a;
     --gris2:#262626;
     --blanco:#fff;
+    --verde:#4CAF50;
+    --rojo:#c62828;
 }
 
 /* ================= BASE ================= */
@@ -33,112 +37,25 @@ body{
 h1{
     text-align:center;
     color:var(--naranja);
+    margin-bottom:25px;
 }
 
 .seccion{ display:none; }
 .seccion.activa{ display:block; }
 
-/* ================= ALMACEN ================= */
-
-.almacen{
-    display:flex;
-    justify-content:center;
-    align-items:flex-start;
-    gap:40px;
-    max-width:1200px;
-    margin:30px auto;
-    flex-wrap:wrap;
-}
-
-.card{
-    width:420px;
-    background:var(--gris);
-    border-radius:20px;
-    border:2px solid var(--naranja);
-    padding:20px;
-}
-
-.card h2{
-    text-align:center;
-    color:var(--naranja);
-}
-
-.marca{
-    background:var(--gris2);
-    border-radius:16px;
-    padding:16px;
-    margin-bottom:20px;
-}
-
-.marca h3{
-    text-align:center;
-    color:#ffd199;
-}
-
-.subtitulo{
-    text-align:center;
-    font-weight:bold;
-    color:var(--naranja);
-    margin:12px 0 8px;
-    border-bottom:1px solid var(--naranja);
-    padding-bottom:4px;
-}
-
-.fila{
-    display:grid;
-    grid-template-columns: 1.6fr 45px 30px 30px;
-    gap:6px;
-    align-items:center;
-    margin-bottom:6px;
-}
-
-.numero{
-    text-align:center;
-    font-size:17px;
-    font-weight:bold;
-}
-
-/* ================= BOTONES ================= */
+/* ================= BOTONES GENERALES ================= */
 
 button{
     border:none;
-    border-radius:8px;
+    border-radius:10px;
     cursor:pointer;
     font-size:15px;
+    padding:8px 14px;
     transition:0.15s ease;
 }
 
 button:active{
     transform:scale(0.95);
-}
-
-.restar{ background:#444; color:white; }
-.sumar{ background:var(--naranja); color:black; }
-
-/* ================= REGISTRO ================= */
-
-.registro{
-    max-width:900px;
-    margin:30px auto;
-}
-
-.registro table{
-    width:100%;
-    border-collapse:collapse;
-}
-
-.registro th,.registro td{
-    border:1px solid var(--naranja);
-    padding:8px;
-    text-align:center;
-}
-
-.registro input{
-    width:100%;
-    background:#000;
-    color:#fff;
-    border:none;
-    text-align:center;
 }
 
 /* ================= MENU INFERIOR ================= */
@@ -161,7 +78,6 @@ button:active{
     background:var(--gris2);
     color:white;
     border:1px solid var(--naranja);
-    padding:10px 18px;
     border-radius:12px;
     font-size:14px;
 }
@@ -171,41 +87,141 @@ button:active{
     color:black;
 }
 
-/* ================= ESTADO GUARDADO ================= */
+/* ================= INVENTARIO LISTA ================= */
 
-
-/* ================= RESPONSIVE CELULAR ================= */
-
-@media (max-width:768px){
-
-    body{
-        padding:10px;
-        padding-bottom:130px;
-    }
-
-    .card{
-        width:100%;
-    }
-
-    .almacen{
-        gap:20px;
-    }
-
-    h1{
-        font-size:22px;
-    }
-
-    .fila{
-        grid-template-columns:1fr 40px 35px 35px;
-    }
-
-    .menu button{
-        font-size:13px;
-        padding:8px 12px;
-    }
-
+.inventario-app{
+    max-width:900px;
+    margin:auto;
 }
-    /* ===== NUEVO DISEÑO VENTAS ===== */
+
+.card-item{
+    background:var(--gris);
+    border:2px solid var(--naranja);
+    border-radius:18px;
+    padding:20px;
+    margin:18px 0;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.card-item:hover{
+    transform:scale(1.02);
+    box-shadow:0 0 12px rgba(255,140,26,0.4);
+}
+
+.card-item h3{
+    font-size:20px;
+    margin-bottom:8px;
+    color:white;
+}
+
+.card-item p{
+    margin:4px 0;
+    color:#ccc;
+}
+
+.stock-bajo{
+    color:red;
+    font-weight:bold;
+}
+
+/* ================= DETALLE PRODUCTO ================= */
+
+.detalle-box{
+    background:var(--gris);
+    border:2px solid var(--naranja);
+    border-radius:18px;
+    padding:25px;
+    margin-top:20px;
+}
+
+.detalle-box h2{
+    font-size:28px;
+    margin-bottom:15px;
+    color:white;
+}
+
+.detalle-box p{
+    font-size:17px;
+    margin:8px 0;
+    color:#ccc;
+}
+
+.detalle-box strong{
+    color:var(--naranja);
+}
+
+.precio-destacado{
+    font-size:22px;
+    color:var(--verde);
+    font-weight:bold;
+    margin-top:10px;
+}
+
+.stock-destacado{
+    font-size:26px;
+    color:var(--naranja);
+    font-weight:bold;
+    margin:18px 0;
+}
+
+/* ================= MOVIMIENTO STOCK ================= */
+
+.movimiento-box{
+    margin-top:20px;
+    background:var(--gris2);
+    padding:20px;
+    border-radius:14px;
+}
+
+.movimiento-box h4{
+    margin-bottom:10px;
+    color:var(--naranja);
+}
+
+.movimiento-box input,
+.movimiento-box textarea{
+    width:100%;
+    padding:10px;
+    border-radius:8px;
+    border:none;
+    background:#000;
+    color:white;
+    font-size:15px;
+}
+
+.movimiento-box textarea{
+    margin-top:10px;
+    resize:none;
+}
+
+.movimiento-box button{
+    margin-top:10px;
+}
+
+.btn-sumar{
+    background:var(--verde);
+    color:white;
+}
+
+.btn-restar{
+    background:var(--rojo);
+    color:white;
+}
+
+/* ================= HISTORIAL ================= */
+
+.historial-item{
+    background:#111;
+    padding:12px;
+    border-radius:10px;
+    margin:8px 0;
+    font-size:14px;
+    color:#bbb;
+    border-left:4px solid var(--naranja);
+}
+
+/* ================= VENTAS ================= */
 
 .ventas-card{
     max-width:900px;
@@ -221,7 +237,7 @@ button:active{
 
 .tabla-ventas th{
     padding:15px;
-    border-bottom:2px solid orange;
+    border-bottom:2px solid var(--naranja);
 }
 
 .tabla-ventas td{
@@ -235,6 +251,9 @@ button:active{
     padding:8px;
     font-size:16px;
     text-align:center;
+    background:#000;
+    color:white;
+    border:none;
 }
 
 .botones-ventas{
@@ -251,23 +270,7 @@ button:active{
     margin-top:20px;
 }
 
-/* RESPONSIVO PARA CELULAR */
-@media(max-width:600px){
-
-    .tabla-ventas{
-        font-size:14px;
-    }
-
-    .ventas-card{
-        padding:15px;
-    }
-
-    .ganancia{
-        font-size:20px;
-    }
-}
-
-    /* ================= NUEVO REGISTRO ================= */
+/* ================= REGISTRO ================= */
 
 .registro-nuevo{
     max-width:900px;
@@ -323,159 +326,130 @@ button:active{
     border-left:5px solid var(--naranja);
 }
 
-.tarjeta-carro button{
-    margin-top:10px;
-}
+/* ================= RESPONSIVE ================= */
 
-/* CELULAR */
-@media(max-width:600px){
+@media(max-width:768px){
+
+    body{
+        padding:12px;
+        padding-bottom:130px;
+    }
+
+    h1{
+        font-size:22px;
+    }
+
     .form-carro{
         grid-template-columns:1fr;
     }
-}
-.btn-agregar{
-background:green;
-color:white;
-padding:10px 15px;
-border:none;
-border-radius:8px;
-cursor:pointer;
-}
-    .inventario-app{
-max-width:900px;
-margin:auto;
+
+    .ventas-card{
+        padding:15px;
+    }
+
+    .tabla-ventas{
+        font-size:14px;
+    }
+
+    .ganancia{
+        font-size:20px;
+    }
 }
 
-.card-item{
-background:#1a1a1a;
-border:2px solid orange;
-border-radius:16px;
-padding:20px;
-margin:15px 0;
-cursor:pointer;
-transition:0.2s;
-}
-
-.card-item:hover{
-transform:scale(1.02);
-}
-
-.stock-bajo{
-color:red;
-font-weight:bold;
-}
-
-.detalle-box{
-background:#111;
-border:2px solid orange;
-border-radius:16px;
-padding:20px;
-margin-top:20px;
-}
-
-.movimiento-box{
-margin-top:20px;
-background:#1a1a1a;
-padding:15px;
-border-radius:12px;
-}
 </style>
 </head>
 
 <body>
 
-  
-  <div class="menu">
-    <button id="btnAlmacen" class="activo" onclick="mostrar('almacen')">
-        🛢 Inventario
-    </button>
-
-    <button id="btnVentas" onclick="mostrar('ventas')">
-        💰 Ventas
-    </button>
-
-    <button id="btnRegistro" onclick="mostrar('registro')">
-        🚗 Registro
-    </button>
+<!-- ================= MENU ================= -->
+<div class="menu">
+    <button id="btnAlmacen" class="activo" onclick="mostrar('almacen')">🛢 Inventario</button>
+    <button id="btnVentas" onclick="mostrar('ventas')">💰 Ventas</button>
+    <button id="btnRegistro" onclick="mostrar('registro')">🚗 Registro</button>
 </div>
 
 
-<section id="registro" class="seccion">
-<h1>Registro de Carros</h1>
+<!-- ================= INVENTARIO ================= -->
+<section id="almacen" class="seccion activa">
 
-<div class="registro-nuevo">
-
-<div class="form-carro">
-    <div class="campo">
-        <label>Placas</label>
-        <input type="text" id="placas">
-    </div>
-
-    <div class="campo">
-        <label>Marca</label>
-        <input type="text" id="marca">
-    </div>
-
-    <div class="campo">
-        <label>Modelo</label>
-        <input type="text" id="modelo">
-    </div>
-
-    <div class="campo">
-        <label>Servicio Realizado</label>
-        <input type="text" id="servicio">
-    </div>
-
-    <div class="campo">
-        <label>Fecha</label>
-        <input type="date" id="fecha">
-    </div>
-</div>
-
-<button onclick="guardarCarro()" class="sumar btn-guardar">
-    Guardar Registro
-</button>
-
-<hr>
-
-<div id="listaCarros"></div>
-
-</div>
-</section>
 <h1>Inventario del Taller</h1>
 
 <div class="inventario-app">
 
-<!-- VISTA LISTA -->
-<div id="vistaLista">
-    <button onclick="mostrarFormularioNuevo()" class="btn-agregar">
-        ➕ Nuevo Artículo
-    </button>
+    <!-- LISTA -->
+    <div id="vistaLista">
 
-    <div id="listaInventario"></div>
+        <div class="card-item" onclick="abrirDetalle(0)">
+            <h3>Aceite 5W-30 Sintético</h3>
+        </div>
+
+        <div class="card-item" onclick="abrirDetalle(1)">
+            <h3>Filtro de Aceite Toyota</h3>
+        </div>
+
+        <div class="card-item" onclick="abrirDetalle(2)">
+            <h3>Anticongelante Rojo</h3>
+        </div>
+
+    </div>
+
+    <!-- DETALLE -->
+    <div id="vistaDetalle" style="display:none;">
+
+        <button onclick="volverLista()">⬅ Volver</button>
+
+        <div class="detalle-box">
+
+            <h2 id="detalleNombre"></h2>
+
+            <p><strong>Fecha de Registro:</strong> <span id="detalleFecha"></span></p>
+
+            <div class="precio-destacado">
+                Precio: $<span id="detallePrecio"></span>
+            </div>
+
+            <div class="stock-destacado">
+                Stock Disponible: <span id="detalleStock"></span>
+            </div>
+
+            <div class="movimiento-box">
+
+                <h4>Movimiento de Inventario</h4>
+
+                <input type="number" id="cantidadMovimiento" placeholder="Cantidad">
+
+                <textarea id="notaMovimiento" placeholder="Nota opcional"></textarea>
+
+                <button class="btn-sumar" onclick="sumarStock()">➕ Agregar</button>
+                <button class="btn-restar" onclick="restarStock()">➖ Restar</button>
+
+            </div>
+
+            <div id="historialMovimientos"></div>
+
+        </div>
+
+    </div>
+
 </div>
 
-<!-- VISTA DETALLE -->
-<div id="vistaDetalle" style="display:none;">
-    <button onclick="volverLista()">⬅ Volver</button>
-    <div id="detalleProducto"></div>
-</div>
+</section>
 
-</div>
+
 <!-- ================= VENTAS ================= -->
-<!-- ================= VENTAS NUEVO DISEÑO ================= -->
 <section id="ventas" class="seccion">
+
 <h1>Venta de Aceite</h1>
 
-<div class="card ventas-card">
+<div class="ventas-card">
 
 <table class="tabla-ventas">
 <thead>
 <tr>
-<th style="width:40%;">Producto</th>
-<th style="width:15%;">Cantidad</th>
-<th style="width:15%;">Precio</th>
-<th style="width:15%;">Total</th>
+<th>Producto</th>
+<th>Cantidad</th>
+<th>Precio</th>
+<th>Total</th>
 </tr>
 </thead>
 
@@ -489,26 +463,21 @@ border-radius:12px;
 <input type="number" id="cantidadVenta" min="1" value="1">
 </td>
 
-<td>
-$<span id="precioUnitario">0</span>
-</td>
-
-<td>
-$<span id="totalVenta">0</span>
-</td>
+<td>$<span id="precioUnitario">0</span></td>
+<td>$<span id="totalVenta">0</span></td>
 </tr>
 </tbody>
 </table>
 
 <div class="botones-ventas">
-<button onclick="calcularTotal()" class="sumar">Calcular</button>
-<button onclick="vender()" class="sumar">Confirmar</button>
-<button onclick="cancelarVenta()" class="restar">Cancelar</button>
+<button onclick="calcularTotal()" class="btn-sumar">Calcular</button>
+<button onclick="vender()" class="btn-sumar">Confirmar</button>
+<button onclick="cancelarVenta()" class="btn-restar">Cancelar</button>
 </div>
 
 <hr>
-    <h2 style="text-align:center; color:orange;">Historial de Ventas</h2>
 
+<h2 style="text-align:center; color:orange;">Historial de Ventas</h2>
 <div id="listaHistorial"></div>
 
 <h2 class="ganancia">
@@ -516,28 +485,60 @@ Ganancia Hoy: $<span id="gananciaHoy">0</span>
 </h2>
 
 <div class="botones-ventas">
-<button onclick="borrarVentasHoy()" class="restar">
-Borrar Ventas de Hoy
-</button>
-
-<button onclick="reiniciarTodo()" class="restar">
-Reiniciar Todo
-</button>
+<button onclick="borrarVentasHoy()" class="btn-restar">Borrar Ventas de Hoy</button>
+<button onclick="reiniciarTodo()" class="btn-restar">Reiniciar Todo</button>
 </div>
 
 </div>
+
 </section>
+
+
+<!-- ================= REGISTRO ================= -->
+<section id="registro" class="seccion">
+
+<h1>Registro de Carros</h1>
+
+<div class="registro-nuevo">
+
+<div class="form-carro">
+
+<div class="campo">
+<label>Placas</label>
+<input type="text" id="placas">
+</div>
+
+<div class="campo">
+<label>Marca</label>
+<input type="text" id="marca">
+</div>
+
+<div class="campo">
+<label>Modelo</label>
+<input type="text" id="modelo">
+</div>
+
+<div class="campo">
+<label>Servicio Realizado</label>
+<input type="text" id="servicio">
+</div>
+
+<div class="campo">
+<label>Fecha</label>
+<input type="date" id="fecha">
+</div>
+
+</div>
 <script>
+
 // ================= MENU =================
 function mostrar(id){
+
     document.querySelectorAll('.seccion').forEach(s=>{
         s.classList.remove('activa');
     });
 
-    const seccion = document.getElementById(id);
-    if(seccion){
-        seccion.classList.add('activa');
-    }
+    document.getElementById(id).classList.add('activa');
 
     document.querySelectorAll('.menu button').forEach(b=>{
         b.classList.remove('activo');
@@ -547,277 +548,261 @@ function mostrar(id){
         'btn' + id.charAt(0).toUpperCase() + id.slice(1)
     );
 
-    if(btn){
-        btn.classList.add('activo');
-    }
-}
-// ================= INVENTARIO TABLA PROFESIONAL =================
-
-// Base de datos local
-let inventario = JSON.parse(localStorage.getItem("inventarioTabla")) || [];
-
-// Referencia tabla
-const tabla = document.getElementById("tablaInventario");
-
-// ================= GUARDAR =================
-function guardarInventario(){
-    localStorage.setItem("inventarioTabla", JSON.stringify(inventario));
+    if(btn) btn.classList.add('activo');
 }
 
-// ================= RENDER =================
-function renderTabla(){
 
-    if(!tabla) return;
 
-    tabla.innerHTML = "";
+// ================= INVENTARIO MODERNO =================
 
-    inventario.forEach((item,index)=>{
+// Productos predeterminados
+let inventario = JSON.parse(localStorage.getItem("inventarioNuevo")) || [
 
-        const colorStock = item.stock <= 3 ? "red" : "white";
+    {
+        nombre:"Aceite 5W-30 Sintético",
+        precio:850,
+        stock:10,
+        fecha:"01/02/2026",
+        historial:[]
+    },
 
-        tabla.innerHTML += `
-        <tr>
-            <td>${item.producto}</td>
-            <td>${item.categoria}</td>
-            <td>${item.marca}</td>
-            <td>$${item.precio}</td>
-            <td style="color:${colorStock}; font-weight:bold;">
-                ${item.stock}
-            </td>
-            <td>
-                <button onclick="sumarStock(${index})">+</button>
-            </td>
-            <td>
-                <button onclick="restarStock(${index})">-</button>
-            </td>
-            <td>
-                <button onclick="eliminarArticulo(${index})">
-                    Eliminar
-                </button>
-            </td>
-        </tr>
-        `;
-    });
+    {
+        nombre:"Filtro de Aceite Toyota",
+        precio:250,
+        stock:5,
+        fecha:"01/02/2026",
+        historial:[]
+    },
 
-    guardarInventario();
-}
-
-// ================= AGREGAR =================
-function agregarArticulo(){
-
-    const producto = prompt("Nombre del producto:");
-    if(!producto) return;
-
-    const categoria = prompt("Categoría:");
-    if(!categoria) return;
-
-    const marca = prompt("Marca:");
-    if(!marca) return;
-
-    const precio = Number(prompt("Precio:"));
-    if(isNaN(precio) || precio < 0){
-        alert("Precio inválido");
-        return;
+    {
+        nombre:"Anticongelante Rojo",
+        precio:300,
+        stock:8,
+        fecha:"01/02/2026",
+        historial:[]
     }
 
-    const stock = Number(prompt("Stock inicial:"));
-    if(isNaN(stock) || stock < 0){
-        alert("Stock inválido");
-        return;
-    }
+];
 
-    inventario.push({
-        producto: producto.trim(),
-        categoria: categoria.trim(),
-        marca: marca.trim(),
-        precio: precio,
-        stock: stock
-    });
-
-    renderTabla();
-}
-
-// ================= SUMAR =================
-function sumarStock(index){
-    inventario[index].stock++;
-    renderTabla();
-}
-
-// ================= RESTAR =================
-function restarStock(index){
-    if(inventario[index].stock > 0){
-        inventario[index].stock--;
-        renderTabla();
-    }
-}
-
-// ================= ELIMINAR =================
-function eliminarArticulo(index){
-
-    const confirmar = confirm("¿Eliminar este artículo?");
-    if(!confirmar) return;
-
-    inventario.splice(index,1);
-    renderTabla();
-}
-
-// ================= INICIAR =================
-window.addEventListener("load", ()=>{
-    renderTabla();
-});
-    // ================= INVENTARIO APP MODERNO =================
-
-let inventarioApp = JSON.parse(localStorage.getItem("inventarioApp")) || [];
 let productoActual = null;
 
-function guardarInventarioApp(){
-    localStorage.setItem("inventarioApp", JSON.stringify(inventarioApp));
+function guardarInventario(){
+    localStorage.setItem("inventarioNuevo", JSON.stringify(inventario));
 }
 
-// ===== RENDER LISTA =====
-function renderLista(){
 
-    const contenedor = document.getElementById("listaInventario");
-    contenedor.innerHTML = "";
 
-    inventarioApp.forEach((item,index)=>{
-
-        const colorStock = item.stock <= 3 ? "stock-bajo" : "";
-
-        contenedor.innerHTML += `
-        <div class="card-item" onclick="verDetalle(${index})">
-            <h3>${item.nombre}</h3>
-            <p>${item.categoria}</p>
-            <p class="${colorStock}">Stock: ${item.stock}</p>
-        </div>
-        `;
-    });
-
-    guardarInventarioApp();
-}
-
-// ===== NUEVO ARTICULO =====
-function mostrarFormularioNuevo(){
-
-    const nombre = prompt("Nombre del producto:");
-    if(!nombre) return;
-
-    const categoria = prompt("Categoría:");
-    if(!categoria) return;
-
-    const marca = prompt("Marca:");
-    if(!marca) return;
-
-    const precio = Number(prompt("Precio:"));
-    if(isNaN(precio)) return;
-
-    inventarioApp.push({
-        nombre,
-        categoria,
-        marca,
-        precio,
-        stock:0,
-        fechaCreacion: new Date().toLocaleDateString(),
-        historial:[]
-    });
-
-    renderLista();
-}
-
-// ===== VER DETALLE =====
-function verDetalle(index){
+// ===== ABRIR DETALLE =====
+function abrirDetalle(index){
 
     productoActual = index;
 
     document.getElementById("vistaLista").style.display="none";
     document.getElementById("vistaDetalle").style.display="block";
 
-    const item = inventarioApp[index];
+    const item = inventario[index];
 
-    let historialHTML = "";
+    document.getElementById("detalleNombre").innerText = item.nombre;
+    document.getElementById("detallePrecio").innerText = item.precio;
+    document.getElementById("detalleStock").innerText = item.stock;
+    document.getElementById("detalleFecha").innerText = item.fecha;
 
-    item.historial.forEach(m=>{
-        historialHTML += `
-        <p>${m.fecha} - ${m.tipo} ${m.cantidad}</p>
-        `;
-    });
-
-    document.getElementById("detalleProducto").innerHTML = `
-        <div class="detalle-box">
-            <h2>${item.nombre}</h2>
-            <p>Categoría: ${item.categoria}</p>
-            <p>Marca: ${item.marca}</p>
-            <p>Precio: $${item.precio}</p>
-            <p><strong>Stock actual: ${item.stock}</strong></p>
-            <p>Creado: ${item.fechaCreacion}</p>
-
-            <button onclick="mostrarMovimiento()">Modificar Stock</button>
-
-            <div id="movimientoArea"></div>
-
-            <h3>Historial</h3>
-            ${historialHTML || "<p>Sin movimientos</p>"}
-        </div>
-    `;
+    renderHistorial();
 }
+
+
 
 // ===== VOLVER =====
 function volverLista(){
+
     document.getElementById("vistaLista").style.display="block";
     document.getElementById("vistaDetalle").style.display="none";
+
 }
 
-// ===== MOSTRAR MOVIMIENTO =====
-function mostrarMovimiento(){
 
-    document.getElementById("movimientoArea").innerHTML = `
-        <div class="movimiento-box">
-            <select id="tipoMovimiento">
-                <option value="sumar">Sumar</option>
-                <option value="restar">Restar</option>
-            </select>
 
-            <input type="number" id="cantidadMovimiento" placeholder="Cantidad">
+// ===== SUMAR STOCK =====
+function sumarStock(){
 
-            <button onclick="guardarMovimiento()">Guardar</button>
-        </div>
-    `;
-}
-
-// ===== GUARDAR MOVIMIENTO =====
-function guardarMovimiento(){
-
-    const tipo = document.getElementById("tipoMovimiento").value;
     const cantidad = Number(document.getElementById("cantidadMovimiento").value);
+    const nota = document.getElementById("notaMovimiento").value;
 
     if(isNaN(cantidad) || cantidad <= 0) return;
 
-    const item = inventarioApp[productoActual];
+    const item = inventario[productoActual];
 
-    if(tipo === "sumar"){
-        item.stock += cantidad;
-    }else{
-        if(item.stock < cantidad) return alert("No hay suficiente stock");
-        item.stock -= cantidad;
-    }
+    item.stock += cantidad;
 
     item.historial.push({
-        tipo,
-        cantidad,
+        tipo:"Entrada",
+        cantidad:cantidad,
+        nota:nota || "",
         fecha:new Date().toLocaleString()
     });
 
-    guardarInventarioApp();
-    verDetalle(productoActual);
+    actualizarVista();
 }
 
+
+
+// ===== RESTAR STOCK =====
+function restarStock(){
+
+    const cantidad = Number(document.getElementById("cantidadMovimiento").value);
+    const nota = document.getElementById("notaMovimiento").value;
+
+    if(isNaN(cantidad) || cantidad <= 0) return;
+
+    const item = inventario[productoActual];
+
+    if(item.stock < cantidad){
+        alert("No hay suficiente stock");
+        return;
+    }
+
+    item.stock -= cantidad;
+
+    item.historial.push({
+        tipo:"Salida",
+        cantidad:cantidad,
+        nota:nota || "",
+        fecha:new Date().toLocaleString()
+    });
+
+    actualizarVista();
+}
+
+
+
+// ===== ACTUALIZAR DETALLE =====
+function actualizarVista(){
+
+    guardarInventario();
+
+    document.getElementById("detalleStock").innerText =
+        inventario[productoActual].stock;
+
+    document.getElementById("cantidadMovimiento").value="";
+    document.getElementById("notaMovimiento").value="";
+
+    renderHistorial();
+}
+
+
+
+// ===== RENDER HISTORIAL =====
+function renderHistorial(){
+
+    const contenedor = document.getElementById("historialMovimientos");
+    contenedor.innerHTML = "";
+
+    const historial = inventario[productoActual].historial;
+
+    if(historial.length === 0){
+        contenedor.innerHTML = "<p>Sin movimientos</p>";
+        return;
+    }
+
+    historial.slice().reverse().forEach(m=>{
+        contenedor.innerHTML += `
+            <div class="historial-item">
+                <strong>${m.tipo}</strong> - ${m.cantidad}<br>
+                ${m.fecha}<br>
+                ${m.nota}
+            </div>
+        `;
+    });
+}
+
+
+
+// ================= VENTAS (BASE SIMPLE) =================
+
+let gananciaHoy = 0;
+
+function calcularTotal(){
+
+    const select = document.getElementById("productoVenta");
+    const cantidad = Number(document.getElementById("cantidadVenta").value);
+
+    if(isNaN(cantidad) || cantidad <= 0) return;
+
+    const producto = inventario[select.value];
+
+    document.getElementById("precioUnitario").innerText = producto.precio;
+    document.getElementById("totalVenta").innerText =
+        producto.precio * cantidad;
+}
+
+
+
+function vender(){
+
+    const select = document.getElementById("productoVenta");
+    const cantidad = Number(document.getElementById("cantidadVenta").value);
+
+    const producto = inventario[select.value];
+
+    if(producto.stock < cantidad){
+        alert("No hay suficiente stock");
+        return;
+    }
+
+    producto.stock -= cantidad;
+    gananciaHoy += producto.precio * cantidad;
+
+    document.getElementById("gananciaHoy").innerText = gananciaHoy;
+
+    guardarInventario();
+    alert("Venta realizada");
+}
+
+
+
+// ===== CARGAR SELECT VENTAS =====
+function cargarProductosVenta(){
+
+    const select = document.getElementById("productoVenta");
+    if(!select) return;
+
+    select.innerHTML="";
+
+    inventario.forEach((item,index)=>{
+        select.innerHTML += `
+            <option value="${index}">
+                ${item.nombre}
+            </option>
+        `;
+    });
+}
+
+
+
 // ===== INICIAR =====
-window.addEventListener("load", renderLista);
+window.addEventListener("load", ()=>{
+    guardarInventario();
+    cargarProductosVenta();
+});
 
 </script>
+<button onclick="guardarCarro()" class="btn-sumar btn-guardar">
+Guardar Registro
+</button>
+
+<hr>
+
+<div id="listaCarros"></div>
+
+</div>
+
+</section>
+
+
     
 </body>
 </html>
+
 
 
 
