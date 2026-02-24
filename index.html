@@ -333,38 +333,6 @@ button:active{
         grid-template-columns:1fr;
     }
 }
-    .inventario-container{
-max-width:1100px;
-margin:auto;
-}
-
-.tabla-inventario{
-width:100%;
-border-collapse:collapse;
-margin-top:20px;
-}
-
-.tabla-inventario th{
-background:#1a1a1a;
-color:orange;
-padding:12px;
-border-bottom:2px solid orange;
-}
-
-.tabla-inventario td{
-padding:10px;
-text-align:center;
-border-bottom:1px solid #333;
-}
-
-.tabla-inventario input{
-width:80px;
-text-align:center;
-background:#000;
-color:white;
-border:1px solid #444;
-}
-
 .btn-agregar{
 background:green;
 color:white;
@@ -372,6 +340,44 @@ padding:10px 15px;
 border:none;
 border-radius:8px;
 cursor:pointer;
+}
+    .inventario-app{
+max-width:900px;
+margin:auto;
+}
+
+.card-item{
+background:#1a1a1a;
+border:2px solid orange;
+border-radius:16px;
+padding:20px;
+margin:15px 0;
+cursor:pointer;
+transition:0.2s;
+}
+
+.card-item:hover{
+transform:scale(1.02);
+}
+
+.stock-bajo{
+color:red;
+font-weight:bold;
+}
+
+.detalle-box{
+background:#111;
+border:2px solid orange;
+border-radius:16px;
+padding:20px;
+margin-top:20px;
+}
+
+.movimiento-box{
+margin-top:20px;
+background:#1a1a1a;
+padding:15px;
+border-radius:12px;
 }
 </style>
 </head>
@@ -436,43 +442,26 @@ cursor:pointer;
 
 </div>
 </section>
-<section id="almacen" class="seccion activa">
 <h1>Inventario del Taller</h1>
 
-<div class="inventario-container">
+<div class="inventario-app">
 
-<button onclick="mostrarFormulario()" class="btn-agregar">
-➕ Agregar Nuevo Artículo
-</button>
+<!-- VISTA LISTA -->
+<div id="vistaLista">
+    <button onclick="mostrarFormularioNuevo()" class="btn-agregar">
+        ➕ Nuevo Artículo
+    </button>
 
-<div id="formularioNuevo" style="display:none; margin-top:20px;">
-<input type="text" id="nuevoNombre" placeholder="Nombre del producto">
-<input type="text" id="nuevoCategoria" placeholder="Categoría (Ej: Aceite de Frenos)">
-<input type="text" id="nuevoMarca" placeholder="Marca">
-<input type="number" id="nuevoPrecio" placeholder="Precio">
-<input type="number" id="nuevoStock" placeholder="Stock inicial">
-<button onclick="agregarArticulo()">Guardar</button>
+    <div id="listaInventario"></div>
 </div>
 
-<table class="tabla-inventario">
-<thead>
-<tr>
-<th>Producto</th>
-<th>Categoría</th>
-<th>Marca</th>
-<th>Precio</th>
-<th>Stock</th>
-<th>+</th>
-<th>-</th>
-<th>Eliminar</th>
-</tr>
-</thead>
-<tbody id="tablaInventario"></tbody>
-</table>
+<!-- VISTA DETALLE -->
+<div id="vistaDetalle" style="display:none;">
+    <button onclick="volverLista()">⬅ Volver</button>
+    <div id="detalleProducto"></div>
+</div>
 
 </div>
-</section> 
-
 <!-- ================= VENTAS ================= -->
 <!-- ================= VENTAS NUEVO DISEÑO ================= -->
 <section id="ventas" class="seccion">
@@ -676,11 +665,160 @@ function eliminarArticulo(index){
 window.addEventListener("load", ()=>{
     renderTabla();
 });
+    // ================= INVENTARIO APP MODERNO =================
+
+let inventarioApp = JSON.parse(localStorage.getItem("inventarioApp")) || [];
+let productoActual = null;
+
+function guardarInventarioApp(){
+    localStorage.setItem("inventarioApp", JSON.stringify(inventarioApp));
+}
+
+// ===== RENDER LISTA =====
+function renderLista(){
+
+    const contenedor = document.getElementById("listaInventario");
+    contenedor.innerHTML = "";
+
+    inventarioApp.forEach((item,index)=>{
+
+        const colorStock = item.stock <= 3 ? "stock-bajo" : "";
+
+        contenedor.innerHTML += `
+        <div class="card-item" onclick="verDetalle(${index})">
+            <h3>${item.nombre}</h3>
+            <p>${item.categoria}</p>
+            <p class="${colorStock}">Stock: ${item.stock}</p>
+        </div>
+        `;
+    });
+
+    guardarInventarioApp();
+}
+
+// ===== NUEVO ARTICULO =====
+function mostrarFormularioNuevo(){
+
+    const nombre = prompt("Nombre del producto:");
+    if(!nombre) return;
+
+    const categoria = prompt("Categoría:");
+    if(!categoria) return;
+
+    const marca = prompt("Marca:");
+    if(!marca) return;
+
+    const precio = Number(prompt("Precio:"));
+    if(isNaN(precio)) return;
+
+    inventarioApp.push({
+        nombre,
+        categoria,
+        marca,
+        precio,
+        stock:0,
+        fechaCreacion: new Date().toLocaleDateString(),
+        historial:[]
+    });
+
+    renderLista();
+}
+
+// ===== VER DETALLE =====
+function verDetalle(index){
+
+    productoActual = index;
+
+    document.getElementById("vistaLista").style.display="none";
+    document.getElementById("vistaDetalle").style.display="block";
+
+    const item = inventarioApp[index];
+
+    let historialHTML = "";
+
+    item.historial.forEach(m=>{
+        historialHTML += `
+        <p>${m.fecha} - ${m.tipo} ${m.cantidad}</p>
+        `;
+    });
+
+    document.getElementById("detalleProducto").innerHTML = `
+        <div class="detalle-box">
+            <h2>${item.nombre}</h2>
+            <p>Categoría: ${item.categoria}</p>
+            <p>Marca: ${item.marca}</p>
+            <p>Precio: $${item.precio}</p>
+            <p><strong>Stock actual: ${item.stock}</strong></p>
+            <p>Creado: ${item.fechaCreacion}</p>
+
+            <button onclick="mostrarMovimiento()">Modificar Stock</button>
+
+            <div id="movimientoArea"></div>
+
+            <h3>Historial</h3>
+            ${historialHTML || "<p>Sin movimientos</p>"}
+        </div>
+    `;
+}
+
+// ===== VOLVER =====
+function volverLista(){
+    document.getElementById("vistaLista").style.display="block";
+    document.getElementById("vistaDetalle").style.display="none";
+}
+
+// ===== MOSTRAR MOVIMIENTO =====
+function mostrarMovimiento(){
+
+    document.getElementById("movimientoArea").innerHTML = `
+        <div class="movimiento-box">
+            <select id="tipoMovimiento">
+                <option value="sumar">Sumar</option>
+                <option value="restar">Restar</option>
+            </select>
+
+            <input type="number" id="cantidadMovimiento" placeholder="Cantidad">
+
+            <button onclick="guardarMovimiento()">Guardar</button>
+        </div>
+    `;
+}
+
+// ===== GUARDAR MOVIMIENTO =====
+function guardarMovimiento(){
+
+    const tipo = document.getElementById("tipoMovimiento").value;
+    const cantidad = Number(document.getElementById("cantidadMovimiento").value);
+
+    if(isNaN(cantidad) || cantidad <= 0) return;
+
+    const item = inventarioApp[productoActual];
+
+    if(tipo === "sumar"){
+        item.stock += cantidad;
+    }else{
+        if(item.stock < cantidad) return alert("No hay suficiente stock");
+        item.stock -= cantidad;
+    }
+
+    item.historial.push({
+        tipo,
+        cantidad,
+        fecha:new Date().toLocaleString()
+    });
+
+    guardarInventarioApp();
+    verDetalle(productoActual);
+}
+
+// ===== INICIAR =====
+window.addEventListener("load", renderLista);
 
 </script>
     
 </body>
 </html>
+
 
 
 
