@@ -355,7 +355,21 @@ button:active{
         font-size:20px;
     }
 }
+.presupuesto-box{
+    max-width:500px;
+    margin:40px auto;
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
 
+.presupuesto-box input{
+    padding:12px;
+    border-radius:8px;
+    border:none;
+    background:#111;
+    color:white;
+}
 </style>
 </head>
 
@@ -366,6 +380,7 @@ button:active{
     <button id="btnAlmacen" class="activo" onclick="mostrar('almacen')">🛢 Inventario</button>
     <button id="btnVentas" onclick="mostrar('ventas')">💰 Ventas</button>
     <button id="btnRegistro" onclick="mostrar('registro')">🚗 Registro</button>
+    <button id="btnPresupuesto" onclick="mostrar('presupuesto')">📄 Presupuesto</button>
 </div>
 
 
@@ -523,6 +538,26 @@ Ganancia Hoy: $<span id="gananciaHoy">0</span>
 </div>
 
 </div>
+    <section id="presupuesto" class="seccion">
+
+<h1>Generar Presupuesto</h1>
+
+<div class="presupuesto-box">
+
+    <input type="text" id="nombreCliente" placeholder="Nombre del cliente">
+    <input type="text" id="vehiculoCliente" placeholder="Vehículo">
+
+    <input type="number" id="cantidadItem" placeholder="Cantidad">
+    <input type="text" id="descripcionItem" placeholder="Descripción del trabajo">
+    <input type="number" id="precioItem" placeholder="Importe">
+
+    <button class="btn-sumar" onclick="generarPDF()">
+        Generar PDF
+    </button>
+
+</div>
+
+</section>
 <script>
 
 // ================= MENU =================
@@ -599,6 +634,11 @@ function abrirDetalle(index){
     document.getElementById("detalleStock").innerText = item.stock;
 
     renderHistorial();
+    if(item.stock <= 3){
+    document.getElementById("detalleStock").style.color="red";
+}else{
+    document.getElementById("detalleStock").style.color="white";
+}
 }
 
 
@@ -678,6 +718,11 @@ function actualizarVista(){
     document.getElementById("notaMovimiento").value="";
 
     renderHistorial();
+    if(item.stock <= 3){
+    document.getElementById("detalleStock").style.color="red";
+}else{
+    document.getElementById("detalleStock").style.color="white";
+}
 }
 
 
@@ -777,33 +822,70 @@ window.addEventListener("load", ()=>{
     guardarInventario();
     cargarProductosVenta();
 });
-    function borrarMovimiento(index){
+   function borrarMovimiento(index){
 
     if(!confirm("¿Eliminar este movimiento?")) return;
 
-    inventario[productoActual].historial.splice(index,1);
+    const item = inventario[productoActual];
+    const movimiento = item.historial[index];
+
+    // Revertir stock
+    if(movimiento.tipo === "Entrada"){
+        item.stock -= movimiento.cantidad;
+    }else{
+        item.stock += movimiento.cantidad;
+    }
+
+    item.historial.splice(index,1);
 
     guardarInventario();
-    renderHistorial();
+    actualizarVista();
+}
+    
+</script>
+<script>
+
+async function generarPDF() {
+
+    const { PDFDocument } = PDFLib;
+
+    // Cargar tu plantilla
+    const existingPdfBytes = await fetch('Plantilla_Borjon.pdf').then(res => res.arrayBuffer());
+
+    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+    const page = pdfDoc.getPages()[0];
+
+    const { width, height } = page.getSize();
+
+    const nombre = document.getElementById("nombre").value;
+    const vehiculo = document.getElementById("vehiculo").value;
+    const cantidad = document.getElementById("cantidad").value;
+    const descripcion = document.getElementById("descripcion").value;
+    const importe = document.getElementById("importe").value;
+
+    page.drawText(nombre, { x: 350, y: 620, size: 12 });
+    page.drawText(vehiculo, { x: 350, y: 580, size: 12 });
+    page.drawText(cantidad, { x: 60, y: 520, size: 12 });
+    page.drawText(descripcion, { x: 120, y: 520, size: 12 });
+    page.drawText(importe, { x: 500, y: 520, size: 12 });
+
+    const pdfBytes = await pdfDoc.save();
+
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = "Presupuesto_Borjon.pdf";
+    link.click();
 }
 
 </script>
-<button onclick="guardarCarro()" class="btn-sumar btn-guardar">
-Guardar Registro
-</button>
-
-<hr>
-
-<div id="listaCarros"></div>
-
-</div>
 
 </section>
-
-
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
     
 </body>
 </html>
+
 
 
 
