@@ -402,15 +402,11 @@ button:active{
 
             <h2 id="detalleNombre"></h2>
 
-            <p><strong>Fecha de Registro:</strong> <span id="detalleFecha"></span></p>
+           <h2 id="detalleNombre" style="text-align:center;"></h2>
 
-            <div class="precio-destacado">
-                Precio: $<span id="detallePrecio"></span>
-            </div>
-
-            <div class="stock-destacado">
-                Stock Disponible: <span id="detalleStock"></span>
-            </div>
+<div class="stock-destacado">
+    Aceites disponibles: <span id="detalleStock"></span>
+</div>
 
             <div class="movimiento-box">
 
@@ -592,7 +588,6 @@ function guardarInventario(){
 
 
 
-// ===== ABRIR DETALLE =====
 function abrirDetalle(index){
 
     productoActual = index;
@@ -603,9 +598,7 @@ function abrirDetalle(index){
     const item = inventario[index];
 
     document.getElementById("detalleNombre").innerText = item.nombre;
-    document.getElementById("detallePrecio").innerText = item.precio;
     document.getElementById("detalleStock").innerText = item.stock;
-    document.getElementById("detalleFecha").innerText = item.fecha;
 
     renderHistorial();
 }
@@ -691,7 +684,6 @@ function actualizarVista(){
 
 
 
-// ===== RENDER HISTORIAL =====
 function renderHistorial(){
 
     const contenedor = document.getElementById("historialMovimientos");
@@ -704,19 +696,22 @@ function renderHistorial(){
         return;
     }
 
-    historial.slice().reverse().forEach(m=>{
+    historial.slice().reverse().forEach((m,i)=>{
+
+        const indexReal = historial.length - 1 - i;
+
         contenedor.innerHTML += `
             <div class="historial-item">
                 <strong>${m.tipo}</strong> - ${m.cantidad}<br>
                 ${m.fecha}<br>
-                ${m.nota}
+                ${m.nota || ""}<br>
+                <button onclick="borrarMovimiento(${indexReal})">
+                    ❌ Borrar
+                </button>
             </div>
         `;
     });
 }
-
-
-
 // ================= VENTAS (BASE SIMPLE) =================
 
 let gananciaHoy = 0;
@@ -784,6 +779,15 @@ window.addEventListener("load", ()=>{
     guardarInventario();
     cargarProductosVenta();
 });
+    function borrarMovimiento(index){
+
+    if(!confirm("¿Eliminar este movimiento?")) return;
+
+    inventario[productoActual].historial.splice(index,1);
+
+    guardarInventario();
+    renderHistorial();
+}
 
 </script>
 <button onclick="guardarCarro()" class="btn-sumar btn-guardar">
@@ -802,6 +806,7 @@ Guardar Registro
     
 </body>
 </html>
+
 
 
 
