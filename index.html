@@ -548,19 +548,25 @@ Ganancia Hoy: $<span id="gananciaHoy">0</span>
 
 <div class="presupuesto-box">
 
-    <input type="text" id="nombreCliente" placeholder="Nombre del cliente">
-    <input type="text" id="vehiculoCliente" placeholder="Vehículo">
+<input type="text" id="nombreCliente" placeholder="Nombre del cliente">
+<input type="text" id="vehiculoCliente" placeholder="Vehículo">
 
-    <input type="number" id="cantidadItem" placeholder="Cantidad">
-    <input type="text" id="descripcionItem" placeholder="Descripción del trabajo">
-    <input type="number" id="precioItem" placeholder="Importe">
+<h3>Trabajos</h3>
 
-    <button class="btn-sumar" onclick="generarPDF()">
-        Generar PDF
-    </button>
+<div id="listaTrabajos"></div>
+
+<button onclick="agregarTrabajo()" class="btn-sumar">➕ Agregar Trabajo</button>
+
+<h3>Resumen</h3>
+<p>Subtotal: $<span id="subtotal">0</span></p>
+<p>IVA (16%): $<span id="iva">0</span></p>
+<p>Total: $<span id="total">0</span></p>
+
+<button class="btn-sumar" onclick="generarPDF()">
+Generar PDF
+</button>
 
 </div>
-
 </section>
 <script>
 
@@ -849,29 +855,93 @@ window.addEventListener("load", ()=>{
 </script>
 <script>
 
+    let trabajos = [];
+
+function agregarTrabajo(){
+    const cont = document.getElementById("listaTrabajos");
+
+    const index = trabajos.length;
+
+    cont.innerHTML += `
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <input type="number" placeholder="Cant." 
+                onchange="actualizarTrabajo(${index}, 'cantidad', this.value)">
+            <input type="text" placeholder="Descripción"
+                onchange="actualizarTrabajo(${index}, 'descripcion', this.value)">
+            <input type="number" placeholder="Importe"
+                onchange="actualizarTrabajo(${index}, 'importe', this.value)">
+        </div>
+    `;
+
+    trabajos.push({
+        cantidad:0,
+        descripcion:"",
+        importe:0
+    });
+}
+
+function actualizarTrabajo(index, campo, valor){
+    trabajos[index][campo] = valor;
+    calcularTotales();
+}
+
+function calcularTotales(){
+    let subtotal = 0;
+
+    trabajos.forEach(t=>{
+        subtotal += Number(t.importe || 0);
+    });
+
+    const iva = subtotal * 0.16;
+    const total = subtotal + iva;
+
+    document.getElementById("subtotal").innerText = subtotal.toFixed(2);
+    document.getElementById("iva").innerText = iva.toFixed(2);
+    document.getElementById("total").innerText = total.toFixed(2);
+}
+
 async function generarPDF() {
 
     const { PDFDocument } = PDFLib;
 
-    // Cargar tu plantilla
     const existingPdfBytes = await fetch('Plantilla_Borjon.pdf').then(res => res.arrayBuffer());
-
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     const page = pdfDoc.getPages()[0];
 
-    const { width, height } = page.getSize();
+    const nombre = document.getElementById("nombreCliente").value;
+    const vehiculo = document.getElementById("vehiculoCliente").value;
 
-  const nombre = document.getElementById("nombreCliente").value;
-  const vehiculo = document.getElementById("vehiculoCliente").value;
-  const cantidad = document.getElementById("cantidadItem").value;
-  const descripcion = document.getElementById("descripcionItem").value;
-  const importe = document.getElementById("precioItem").value;
-    
-    page.drawText(nombre, { x: 350, y: 620, size: 12 });
-    page.drawText(vehiculo, { x: 350, y: 580, size: 12 });
-    page.drawText(cantidad, { x: 60, y: 520, size: 12 });
-    page.drawText(descripcion, { x: 120, y: 520, size: 12 });
-    page.drawText(importe, { x: 500, y: 520, size: 12 });
+    const fecha = new Date();
+    const dia = fecha.getDate().toString();
+    const mes = (fecha.getMonth()+1).toString();
+    const año = fecha.getFullYear().toString();
+
+    // ===== ENCABEZADO =====
+    page.drawText(dia, { x: 90, y: 645, size: 12 });
+    page.drawText(mes, { x: 170, y: 645, size: 12 });
+    page.drawText(año, { x: 250, y: 645, size: 12 });
+
+    page.drawText(nombre, { x: 350, y: 650, size: 12 });
+    page.drawText(vehiculo, { x: 350, y: 600, size: 12 });
+
+    // ===== TABLA =====
+    let y = 540;
+
+    trabajos.forEach(t=>{
+        page.drawText(String(t.cantidad), { x: 60, y: y, size: 10 });
+        page.drawText(String(t.descripcion), { x: 120, y: y, size: 10 });
+        page.drawText(String(t.importe), { x: 500, y: y, size: 10 });
+        y -= 20;
+    });
+
+    // ===== TOTALES =====
+    const subtotal = Number(document.getElementById("subtotal").innerText);
+    const iva = Number(document.getElementById("iva").innerText);
+    const total = Number(document.getElementById("total").innerText);
+
+    page.drawText(subtotal.toFixed(2), { x: 500, y: 180, size: 12 });
+    page.drawText(iva.toFixed(2), { x: 500, y: 160, size: 12 });
+    page.drawText(total.toFixed(2), { x: 500, y: 140, size: 12 });
 
     const pdfBytes = await pdfDoc.save();
 
@@ -880,8 +950,9 @@ async function generarPDF() {
     link.href = URL.createObjectURL(blob);
     link.download = "Presupuesto_Borjon.pdf";
     link.click();
-}
 
+    alert("Presupuesto generado correctamente ✅");
+}
 </script>
 
 </section>
@@ -889,6 +960,7 @@ async function generarPDF() {
     
 </body>
 </html>
+
 
 
 
