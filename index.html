@@ -922,7 +922,7 @@ async function generarPDF() {
     const mes = (fecha.getMonth()+1).toString();
     const año = fecha.getFullYear().toString();
 //ENCABEZADO//
-   page.drawText(dia, { x: 100, y: 625, size: 12 });
+   page.drawText(dia, { x: 200, y: 700, size: 12 });
    page.drawText(mes, { x: 185, y: 625, size: 12 });
    page.drawText(año, { x: 265, y: 625, size: 12 });
 
@@ -968,6 +968,7 @@ async function generarPDF() {
     
 </body>
 </html>
+
 
 
 
