@@ -538,6 +538,8 @@ Ganancia Hoy: $<span id="gananciaHoy">0</span>
 </div>
 
 </div>
+   <section/> 
+       
     <section id="presupuesto" class="seccion">
 
 <h1>Generar Presupuesto</h1>
@@ -857,12 +859,12 @@ async function generarPDF() {
 
     const { width, height } = page.getSize();
 
-    const nombre = document.getElementById("nombre").value;
-    const vehiculo = document.getElementById("vehiculo").value;
-    const cantidad = document.getElementById("cantidad").value;
-    const descripcion = document.getElementById("descripcion").value;
-    const importe = document.getElementById("importe").value;
-
+  const nombre = document.getElementById("nombreCliente").value;
+  const vehiculo = document.getElementById("vehiculoCliente").value;
+  const cantidad = document.getElementById("cantidadItem").value;
+  const descripcion = document.getElementById("descripcionItem").value;
+  const importe = document.getElementById("precioItem").value;
+    
     page.drawText(nombre, { x: 350, y: 620, size: 12 });
     page.drawText(vehiculo, { x: 350, y: 580, size: 12 });
     page.drawText(cantidad, { x: 60, y: 520, size: 12 });
@@ -885,6 +887,7 @@ async function generarPDF() {
     
 </body>
 </html>
+
 
 
 
