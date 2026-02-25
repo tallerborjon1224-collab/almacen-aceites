@@ -538,9 +538,11 @@ Ganancia Hoy: $<span id="gananciaHoy">0</span>
 </div>
 
 </div>
-   <section/> 
-       
-    <section id="presupuesto" class="seccion">
+</section>
+
+
+<!-- ================= PRESUPUESTO ================= -->
+<section id="presupuesto" class="seccion">
 
 <h1>Generar Presupuesto</h1>
 
@@ -720,7 +722,7 @@ function actualizarVista(){
     document.getElementById("notaMovimiento").value="";
 
     renderHistorial();
-    if(item.stock <= 3){
+    if(inventario[productoActual].stock <= 3){
     document.getElementById("detalleStock").style.color="red";
 }else{
     document.getElementById("detalleStock").style.color="white";
@@ -887,6 +889,7 @@ async function generarPDF() {
     
 </body>
 </html>
+
 
 
 
