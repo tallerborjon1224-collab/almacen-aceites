@@ -549,7 +549,9 @@ Ganancia Hoy: $<span id="gananciaHoy">0</span>
 <div class="presupuesto-box">
 
 <input type="text" id="nombreCliente" placeholder="Nombre del cliente">
-<input type="text" id="vehiculoCliente" placeholder="Vehículo">
+<input type="text" id="marcaVehiculo" placeholder="Marca">
+<input type="text" id="modeloVehiculo" placeholder="Modelo">
+<input type="number" id="anioVehiculo" placeholder="Año">
 
 <h3>Trabajos</h3>
 
@@ -909,28 +911,34 @@ async function generarPDF() {
     const page = pdfDoc.getPages()[0];
 
     const nombre = document.getElementById("nombreCliente").value;
-    const vehiculo = document.getElementById("vehiculoCliente").value;
+    const marca = document.getElementById("marcaVehiculo").value;
+    const modelo = document.getElementById("modeloVehiculo").value;
+    const anioVehiculo = document.getElementById("anioVehiculo").value;
+
+    const vehiculo = marca + " " + modelo + " " + anioVehiculo;
 
     const fecha = new Date();
     const dia = fecha.getDate().toString();
     const mes = (fecha.getMonth()+1).toString();
     const año = fecha.getFullYear().toString();
+//ENCABEZADO//
+   page.drawText(dia, { x: 100, y: 625, size: 12 });
+   page.drawText(mes, { x: 185, y: 625, size: 12 });
+   page.drawText(año, { x: 265, y: 625, size: 12 });
 
-    // ===== ENCABEZADO =====
-    page.drawText(dia, { x: 90, y: 645, size: 12 });
-    page.drawText(mes, { x: 170, y: 645, size: 12 });
-    page.drawText(año, { x: 250, y: 645, size: 12 });
-
-    page.drawText(nombre, { x: 350, y: 650, size: 12 });
-    page.drawText(vehiculo, { x: 350, y: 600, size: 12 });
+   page.drawText(nombre, { x: 360, y: 635, size: 12 });
+   page.drawText(vehiculo, { x: 360, y: 595, size: 12 });
 
     // ===== TABLA =====
     let y = 540;
 
     trabajos.forEach(t=>{
         page.drawText(String(t.cantidad), { x: 60, y: y, size: 10 });
-        page.drawText(String(t.descripcion), { x: 120, y: y, size: 10 });
-        page.drawText(String(t.importe), { x: 500, y: y, size: 10 });
+        page.drawText(
+    String(t.descripcion).substring(0, 35),
+    { x: 120, y: y, size: 10 }
+);
+        page.drawText("$" + String(t.importe), { x: 510, y: y, size: 10 });
         y -= 20;
     });
 
@@ -960,6 +968,7 @@ async function generarPDF() {
     
 </body>
 </html>
+
 
 
 
