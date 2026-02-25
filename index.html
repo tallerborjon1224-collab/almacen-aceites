@@ -922,9 +922,9 @@ async function generarPDF() {
     const mes = (fecha.getMonth()+1).toString();
     const año = fecha.getFullYear().toString();
 //ENCABEZADO//
-   page.drawText(dia, { x: 200, y: 700, size: 12 });
-   page.drawText(mes, { x: 185, y: 625, size: 12 });
-   page.drawText(año, { x: 265, y: 625, size: 12 });
+   page.drawText(dia, { x: 110, y: 610, size: 12 });
+page.drawText(mes, { x: 200, y: 610, size: 12 });
+page.drawText(año, { x: 285, y: 610, size: 12 });
 
    page.drawText(nombre, { x: 360, y: 635, size: 12 });
    page.drawText(vehiculo, { x: 360, y: 595, size: 12 });
@@ -934,18 +934,19 @@ async function generarPDF() {
 
     trabajos.forEach(t=>{
         page.drawText(String(t.cantidad), { x: 60, y: y, size: 10 });
-        page.drawText(
-    String(t.descripcion).substring(0, 35),
-    { x: 120, y: y, size: 10 }
-);
+       const importeTexto = "$" + String(t.importe);
+const width = page.getWidth();
+
+const textWidth = 50; // ajuste manual
+page.drawText(importeTexto, { x: 560 - (importeTexto.length * 5), y: y, size: 10 });
         page.drawText("$" + String(t.importe), { x: 510, y: y, size: 10 });
         y -= 20;
     });
 
     // ===== TOTALES =====
-    const subtotal = Number(document.getElementById("subtotal").innerText);
-    const iva = Number(document.getElementById("iva").innerText);
-    const total = Number(document.getElementById("total").innerText);
+   page.drawText("$" + subtotal.toFixed(2), { x: 520, y: 180, size: 12 });
+page.drawText("$" + iva.toFixed(2), { x: 520, y: 160, size: 12 });
+page.drawText("$" + total.toFixed(2), { x: 520, y: 140, size: 12 });
 
     page.drawText(subtotal.toFixed(2), { x: 500, y: 180, size: 12 });
     page.drawText(iva.toFixed(2), { x: 500, y: 160, size: 12 });
@@ -968,6 +969,7 @@ async function generarPDF() {
     
 </body>
 </html>
+
 
 
 
