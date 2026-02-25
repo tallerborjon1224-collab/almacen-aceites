@@ -932,25 +932,28 @@ page.drawText(año, { x: 285, y: 610, size: 12 });
     // ===== TABLA =====
     let y = 540;
 
-    trabajos.forEach(t=>{
-        page.drawText(String(t.cantidad), { x: 60, y: y, size: 10 });
-       const importeTexto = "$" + String(t.importe);
-const width = page.getWidth();
+  trabajos.forEach(t=>{
+    page.drawText(String(t.cantidad), { x: 60, y: y, size: 10 });
 
-const textWidth = 50; // ajuste manual
-page.drawText(importeTexto, { x: 560 - (importeTexto.length * 5), y: y, size: 10 });
-        page.drawText("$" + String(t.importe), { x: 510, y: y, size: 10 });
-        y -= 20;
-    });
+    const importeTexto = "$" + Number(t.importe).toFixed(2);
+    page.drawText(importeTexto, { x: 520, y: y, size: 10 });
+
+    y -= 20;
+});
+
+    let subtotal = 0;
+
+trabajos.forEach(t=>{
+    subtotal += Number(t.importe || 0);
+});
+
+const iva = subtotal * 0.08;
+const total = subtotal + iva;
 
     // ===== TOTALES =====
    page.drawText("$" + subtotal.toFixed(2), { x: 520, y: 180, size: 12 });
 page.drawText("$" + iva.toFixed(2), { x: 520, y: 160, size: 12 });
 page.drawText("$" + total.toFixed(2), { x: 520, y: 140, size: 12 });
-
-    page.drawText(subtotal.toFixed(2), { x: 500, y: 180, size: 12 });
-    page.drawText(iva.toFixed(2), { x: 500, y: 160, size: 12 });
-    page.drawText(total.toFixed(2), { x: 500, y: 140, size: 12 });
 
     const pdfBytes = await pdfDoc.save();
 
@@ -969,6 +972,7 @@ page.drawText("$" + total.toFixed(2), { x: 520, y: 140, size: 12 });
     
 </body>
 </html>
+
 
 
 
