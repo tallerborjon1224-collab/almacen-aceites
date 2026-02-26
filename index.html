@@ -377,12 +377,12 @@ button:active{
 
 <!-- ================= MENU ================= -->
 <div class="menu">
+    <button id="btnRegistro" onclick="mostrar('registro')">🚗 Registro</button>
     <button id="btnAlmacen" class="activo" onclick="mostrar('almacen')">🛢 Inventario</button>
     <button id="btnVentas" onclick="mostrar('ventas')">💰 Ventas</button>
-    <button id="btnRegistro" onclick="mostrar('registro')">🚗 Registro</button>
     <button id="btnPresupuesto" onclick="mostrar('presupuesto')">📄 Presupuesto</button>
 </div>
-
+ 
 
 <!-- ================= INVENTARIO ================= -->
 <section id="almacen" class="seccion activa">
@@ -561,7 +561,7 @@ Ganancia Hoy: $<span id="gananciaHoy">0</span>
 
 <h3>Resumen</h3>
 <p>Subtotal: $<span id="subtotal">0</span></p>
-<p>IVA (16%): $<span id="iva">0</span></p>
+<p>IVA (0.08%): $<span id="iva">0</span></p>
 <p>Total: $<span id="total">0</span></p>
 
 <button class="btn-sumar" onclick="generarPDF()">
@@ -932,11 +932,18 @@ page.drawText(año, { x: 285, y: 610, size: 12 });
     // ===== TABLA =====
     let y = 540;
 
-  trabajos.forEach(t=>{
-    page.drawText(String(t.cantidad), { x: 60, y: y, size: 10 });
+ const fontSize = 10;
+
+trabajos.forEach(t => {
+
+    page.drawText(String(t.cantidad), { x: 60, y: y, size: fontSize });
 
     const importeTexto = "$" + Number(t.importe).toFixed(2);
-    page.drawText(importeTexto, { x: 520, y: y, size: 10 });
+
+    const textWidth = importeTexto.length * 5.5;
+    const xPosition = 580 - textWidth; // borde derecho tabla
+
+    page.drawText(importeTexto, { x: xPosition, y: y, size: fontSize });
 
     y -= 20;
 });
@@ -951,9 +958,14 @@ const iva = subtotal * 0.08;
 const total = subtotal + iva;
 
     // ===== TOTALES =====
-   page.drawText("$" + subtotal.toFixed(2), { x: 520, y: 180, size: 12 });
-page.drawText("$" + iva.toFixed(2), { x: 520, y: 160, size: 12 });
-page.drawText("$" + total.toFixed(2), { x: 520, y: 140, size: 12 });
+  function drawRight(text, yPos){
+    const textWidth = text.length * 6;
+    page.drawText(text, { x: 580 - textWidth, y: yPos, size: 12 });
+}
+
+drawRight("$" + subtotal.toFixed(2), 180);
+drawRight("$" + iva.toFixed(2), 160);
+drawRight("$" + total.toFixed(2), 140);
 
     const pdfBytes = await pdfDoc.save();
 
@@ -972,6 +984,7 @@ page.drawText("$" + total.toFixed(2), { x: 520, y: 140, size: 12 });
     
 </body>
 </html>
+
 
 
 
