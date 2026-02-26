@@ -922,9 +922,21 @@ async function generarPDF() {
     const mes = (fecha.getMonth()+1).toString();
     const año = fecha.getFullYear().toString();
 //ENCABEZADO//
-   page.drawText(dia, { x: 110, y: 610, size: 12 });
-page.drawText(mes, { x: 200, y: 610, size: 12 });
-page.drawText(año, { x: 285, y: 610, size: 12 });
+  const fontSizeFecha = 12;
+
+function drawCentered(text, centerX, yPos){
+    const textWidth = text.length * 6;
+    page.drawText(text, { 
+        x: centerX - (textWidth / 2), 
+        y: yPos, 
+        size: fontSizeFecha 
+    });
+}
+
+// Ajusta estos centros si hace falta mover 2-3 px
+drawCentered(dia, 125, 610);
+drawCentered(mes, 210, 610);
+drawCentered(año, 300, 610);
 
    page.drawText(nombre, { x: 360, y: 635, size: 12 });
    page.drawText(vehiculo, { x: 360, y: 595, size: 12 });
@@ -941,7 +953,7 @@ trabajos.forEach(t => {
     const importeTexto = "$" + Number(t.importe).toFixed(2);
 
     const textWidth = importeTexto.length * 5.5;
-    const xPosition = 580 - textWidth; // borde derecho tabla
+    const xPosition = 550 - textWidth; // borde derecho tabla
 
     page.drawText(importeTexto, { x: xPosition, y: y, size: fontSize });
 
@@ -960,7 +972,7 @@ const total = subtotal + iva;
     // ===== TOTALES =====
   function drawRight(text, yPos){
     const textWidth = text.length * 6;
-    page.drawText(text, { x: 580 - textWidth, y: yPos, size: 12 });
+    page.drawText(text, { x: 550 - textWidth, y: yPos, size: 12 });
 }
 
 drawRight("$" + subtotal.toFixed(2), 180);
@@ -984,6 +996,7 @@ drawRight("$" + total.toFixed(2), 140);
     
 </body>
 </html>
+
 
 
 
