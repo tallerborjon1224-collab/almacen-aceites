@@ -934,32 +934,34 @@ function drawCentered(text, centerX, yPos){
 }
 
 // Ajusta estos centros si hace falta mover 2-3 px
-drawCentered(dia, 50, 610);
-drawCentered(mes, 150, 610);
-drawCentered(año, 250, 610);
+drawCentered(dia, 115, 598);
+drawCentered(mes, 190, 598);
+drawCentered(año, 265, 598);
 
    page.drawText(nombre, { x: 360, y: 635, size: 12 });
    page.drawText(vehiculo, { x: 360, y: 595, size: 12 });
 
-    // ===== TABLA =====
-    let y = 540;
-
- const fontSize = 10;
+// ===== TABLA =====
+let y = 540;
+const fontSize = 10;
 
 trabajos.forEach(t => {
 
-    page.drawText(String(t.cantidad), { x: 60, y: y, size: fontSize });
+    // CANTIDAD
+    page.drawText(String(t.cantidad), { x: 70, y: y, size: fontSize });
 
+    // DESCRIPCIÓN
+    page.drawText(t.descripcion || "", { x: 120, y: y, size: fontSize });
+
+    // IMPORTE
     const importeTexto = "$" + Number(t.importe).toFixed(2);
-
     const textWidth = importeTexto.length * 5.5;
-    const xPosition = 550 - textWidth; // borde derecho tabla
+    const xPosition = 545 - textWidth;
 
     page.drawText(importeTexto, { x: xPosition, y: y, size: fontSize });
 
-    y -= 20;
+    y -= 18;
 });
-
     let subtotal = 0;
 
 trabajos.forEach(t=>{
@@ -972,7 +974,7 @@ const total = subtotal + iva;
     // ===== TOTALES =====
   function drawRight(text, yPos){
     const textWidth = text.length * 6;
-    page.drawText(text, { x: 550 - textWidth, y: yPos, size: 12 });
+    page.drawText(text, { x: 545 - textWidth, y: yPos, size: 12 });
 }
 
 drawRight("$" + subtotal.toFixed(2), 180);
@@ -996,6 +998,7 @@ drawRight("$" + total.toFixed(2), 140);
     
 </body>
 </html>
+
 
 
 
