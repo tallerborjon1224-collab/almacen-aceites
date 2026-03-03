@@ -323,7 +323,9 @@ button:active{
     height:100vh;
     background:#111;
     border-right:2px solid var(--naranja);
-    padding:20px;
+
+    padding:80px 20px 20px 20px; /* 👈 CAMBIO IMPORTANTE */
+    
     display:flex;
     flex-direction:column;
     gap:12px;
@@ -334,7 +336,9 @@ button:active{
 .menu-lateral .logo{
     text-align:center;
     color:var(--naranja);
-    margin-bottom:20px;
+    margin-bottom:25px;
+    font-size:20px;
+    letter-spacing:1px;
 }
 
 /* BOTONES */
@@ -342,10 +346,11 @@ button:active{
     background:#1a1a1a;
     color:white;
     border:none;
-    padding:12px;
+    padding:14px;
     border-radius:10px;
     text-align:left;
     cursor:pointer;
+    transition:.2s;
 }
 
 /* HOVER */
@@ -373,6 +378,9 @@ body{
 
 .body-expandido{
     margin-left:0 !important;
+}
+    .btn-menu{
+    box-shadow:0 0 10px rgba(0,0,0,.5);
 }
     
 </style>
@@ -1126,6 +1134,7 @@ function verVehiculos(){
     
 </body>
 </html>
+
 
 
 
