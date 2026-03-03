@@ -57,45 +57,6 @@ button{
 button:active{
     transform:scale(0.95);
 }
-
-/* ================= MENU INFERIOR ================= */
-
-.menu{
-    position:fixed;
-    bottom:0;
-    left:0;
-    width:100%;
-    background:#111;
-    border-top:2px solid var(--naranja);
-    display:flex;
-    justify-content:center;
-    gap:20px;
-    padding:10px 0;
-    z-index:9999;
-}
-
-.menu button{
-    background:var(--gris2);
-    color:white;
-    border:1px solid var(--naranja);
-    border-radius:12px;
-    font-size:14px;
-}
-
-.menu button.activo{
-    background:var(--naranja);
-    color:black;
-}
-
-/* ================= TITULOS ================= */
-
-.titulo-seccion{
-    text-align:center;
-    color:var(--naranja);
-    font-size:26px;
-    margin-top:20px;
-}
-
 /* ================= INVENTARIO ================= */
 
 .inventario-app{
@@ -334,20 +295,95 @@ button:active{
 
     .ganancia{ font-size:20px; }
 }
+/* ================= MENU LATERAL PRO ================= */
 
+.menu-lateral{
+    position:fixed;
+    left:0;
+    top:0;
+    width:240px;
+    height:100vh;
+    background:linear-gradient(
+        180deg,
+        #000 0%,
+        #0a0a0a 50%,
+        #111 100%
+    );
+    border-right:2px solid var(--naranja);
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+    box-shadow:0 0 20px rgba(255,140,26,0.25);
+}
+
+/* LOGO */
+.menu-lateral .logo{
+    text-align:center;
+    color:var(--naranja);
+    margin-bottom:20px;
+    text-shadow:0 0 10px var(--naranja);
+}
+
+/* BOTONES */
+.menu-lateral button{
+    background:#111;
+    color:white;
+    border:1px solid #333;
+    padding:14px;
+    border-radius:12px;
+    text-align:left;
+    font-size:15px;
+    transition:0.25s;
+}
+
+/* HOVER NEON */
+.menu-lateral button:hover{
+    border-color:var(--naranja);
+    box-shadow:0 0 12px rgba(255,140,26,0.6);
+    transform:translateX(5px);
+}
+
+/* ACTIVO */
+.menu-lateral button.activo{
+    background:var(--naranja);
+    color:black;
+    font-weight:bold;
+    box-shadow:0 0 15px var(--naranja);
+}
+
+/* MOVER CONTENIDO A LA DERECHA */
+body{
+    margin-left:260px;
+}
+    
 </style>
 </head>
 
 <body>
 
 <!-- ================= MENU ================= -->
-<div class="menu">
-   <button id="btnOrdenes" onclick="mostrar('ordenes')">📋 Órdenes de Trabajo</button>
-    <button id="btnAlmacen" class="activo" onclick="mostrar('almacen')">🛢 Inventario</button>
-    <button id="btnVentas" onclick="mostrar('ventas')">💰 Ventas</button>
-    <button id="btnPresupuesto" onclick="mostrar('presupuesto')">📄 Presupuesto</button>
+<div class="menu-lateral">
+
+    <h2 class="logo">⚙ TALLER</h2>
+
+    <button id="btnOrdenes" onclick="mostrar('ordenes')">
+        📋 Órdenes de Trabajo
+    </button>
+
+    <button id="btnAlmacen" onclick="mostrar('almacen')" class="activo">
+        🛢 Inventario
+    </button>
+
+    <button id="btnVentas" onclick="mostrar('ventas')">
+        💰 Ventas
+    </button>
+
+    <button id="btnPresupuesto" onclick="mostrar('presupuesto')">
+        📄 Presupuesto
+    </button>
+
 </div>
- 
 
 <!-- ================= INVENTARIO ================= -->
 <section id="almacen" class="seccion activa">
@@ -1064,6 +1100,7 @@ function verVehiculos(){
     
 </body>
 </html>
+
 
 
 
