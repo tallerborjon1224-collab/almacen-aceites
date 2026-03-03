@@ -773,23 +773,6 @@ function renderHistorial(){
         `;
     });
 }
-// ================= VENTAS (BASE SIMPLE) =================
-
-let gananciaHoy = 0;
-
-function calcularTotal(){
-
-    const select = document.getElementById("productoVenta");
-    const cantidad = Number(document.getElementById("cantidadVenta").value);
-
-    if(isNaN(cantidad) || cantidad <= 0) return;
-
-    const producto = inventario[select.value];
-
-    document.getElementById("precioUnitario").innerText = producto.precio;
-    document.getElementById("totalVenta").innerText =
-        producto.precio * cantidad;
-}
 
 
 // ================= VENTAS (BASE SIMPLE) =================
@@ -1074,6 +1057,7 @@ mostrarOrdenes();
     
 </body>
 </html>
+
 
 
 
