@@ -87,7 +87,16 @@ button:active{
     color:black;
 }
 
-/* ================= INVENTARIO LISTA ================= */
+/* ================= TITULOS ================= */
+
+.titulo-seccion{
+    text-align:center;
+    color:var(--naranja);
+    font-size:26px;
+    margin-top:20px;
+}
+
+/* ================= INVENTARIO ================= */
 
 .inventario-app{
     max-width:900px;
@@ -109,16 +118,8 @@ button:active{
     box-shadow:0 0 12px rgba(255,140,26,0.4);
 }
 
-.card-item h3{
-    font-size:20px;
-    margin-bottom:8px;
-    color:white;
-}
-
-.card-item p{
-    margin:4px 0;
-    color:#ccc;
-}
+.card-item h3{ margin-bottom:8px; }
+.card-item p{ margin:4px 0; color:#ccc; }
 
 .stock-bajo{
     color:red;
@@ -135,27 +136,10 @@ button:active{
     margin-top:20px;
 }
 
-.detalle-box h2{
-    font-size:28px;
-    margin-bottom:15px;
-    color:white;
-}
-
-.detalle-box p{
-    font-size:17px;
-    margin:8px 0;
-    color:#ccc;
-}
-
-.detalle-box strong{
-    color:var(--naranja);
-}
-
 .precio-destacado{
     font-size:22px;
     color:var(--verde);
     font-weight:bold;
-    margin-top:10px;
 }
 
 .stock-destacado{
@@ -175,7 +159,6 @@ button:active{
 }
 
 .movimiento-box h4{
-    margin-bottom:10px;
     color:var(--naranja);
 }
 
@@ -187,27 +170,10 @@ button:active{
     border:none;
     background:#000;
     color:white;
-    font-size:15px;
 }
 
-.movimiento-box textarea{
-    margin-top:10px;
-    resize:none;
-}
-
-.movimiento-box button{
-    margin-top:10px;
-}
-
-.btn-sumar{
-    background:var(--verde);
-    color:white;
-}
-
-.btn-restar{
-    background:var(--rojo);
-    color:white;
-}
+.btn-sumar{ background:var(--verde); color:white; }
+.btn-restar{ background:var(--rojo); color:white; }
 
 /* ================= HISTORIAL ================= */
 
@@ -216,7 +182,6 @@ button:active{
     padding:12px;
     border-radius:10px;
     margin:8px 0;
-    font-size:14px;
     color:#bbb;
     border-left:4px solid var(--naranja);
 }
@@ -232,7 +197,6 @@ button:active{
 .tabla-ventas{
     width:100%;
     border-collapse:collapse;
-    font-size:18px;
 }
 
 .tabla-ventas th{
@@ -249,11 +213,10 @@ button:active{
 .tabla-ventas input{
     width:100%;
     padding:8px;
-    font-size:16px;
-    text-align:center;
     background:#000;
     color:white;
     border:none;
+    text-align:center;
 }
 
 .botones-ventas{
@@ -270,91 +233,8 @@ button:active{
     margin-top:20px;
 }
 
-/* ================= REGISTRO ================= */
+/* ================= PRESUPUESTO ================= */
 
-.registro-nuevo{
-    max-width:900px;
-    margin:auto;
-    background:var(--gris);
-    border:2px solid var(--naranja);
-    border-radius:20px;
-    padding:25px;
-}
-
-.form-carro{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:20px;
-}
-
-.campo{
-    display:flex;
-    flex-direction:column;
-}
-
-.campo label{
-    margin-bottom:5px;
-    font-weight:bold;
-    color:var(--naranja);
-}
-
-.campo input{
-    padding:10px;
-    border-radius:8px;
-    border:none;
-    background:#000;
-    color:white;
-    font-size:15px;
-}
-
-.btn-guardar{
-    margin-top:20px;
-    width:100%;
-    padding:12px;
-    font-size:16px;
-}
-
-#listaCarros{
-    margin-top:20px;
-}
-
-.tarjeta-carro{
-    background:var(--gris2);
-    padding:15px;
-    border-radius:12px;
-    margin-bottom:15px;
-    border-left:5px solid var(--naranja);
-}
-
-/* ================= RESPONSIVE ================= */
-
-@media(max-width:768px){
-
-    body{
-        padding:12px;
-        padding-bottom:130px;
-    }
-
-    h1{
-        font-size:22px;
-    }
-
-    .form-carro{
-        grid-template-columns:1fr;
-    }
-
-    .ventas-card{
-        padding:15px;
-    }
-
-    .tabla-ventas{
-        font-size:14px;
-    }
-
-    .ganancia{
-        font-size:20px;
-    }
-}
 .presupuesto-box{
     max-width:500px;
     margin:40px auto;
@@ -370,6 +250,91 @@ button:active{
     background:#111;
     color:white;
 }
+
+/* ================= ORDENES (NUEVO DISEÑO PRO) ================= */
+
+.ordenes-contenedor{
+    max-width:600px;
+    margin:20px auto;
+    text-align:center;
+}
+
+.card-form{
+    background:#1b1b1b;
+    border:2px solid var(--naranja);
+    border-radius:15px;
+    padding:20px;
+    margin-top:20px;
+}
+
+.card-form input,
+.card-form textarea{
+    width:100%;
+    margin:8px 0;
+    padding:10px;
+    border-radius:8px;
+    border:none;
+    background:#000;
+    color:white;
+}
+
+.btn-nuevo{
+    background:var(--naranja);
+    color:white;
+    padding:10px 18px;
+    border-radius:10px;
+    margin:10px;
+}
+
+.btn-secundario{
+    background:#333;
+    color:white;
+    padding:10px 18px;
+    border-radius:10px;
+}
+
+.btn-guardar{
+    background:var(--naranja);
+    color:white;
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    margin-top:10px;
+}
+
+/* LISTA VEHICULOS */
+
+.lista-card{
+    margin-top:20px;
+}
+
+.vehiculo-item{
+    background:#222;
+    border-left:5px solid var(--naranja);
+    padding:15px;
+    margin:10px 0;
+    border-radius:10px;
+    text-align:left;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:768px){
+
+    body{
+        padding:12px;
+        padding-bottom:130px;
+    }
+
+    h1{ font-size:22px; }
+
+    .ventas-card{ padding:15px; }
+
+    .tabla-ventas{ font-size:14px; }
+
+    .ganancia{ font-size:20px; }
+}
+
 </style>
 </head>
 
@@ -492,41 +457,40 @@ Ganancia Hoy: $<span id="gananciaHoy">0</span>
 
 
 <!-- ================= ORDENES ================= -->
-<section id="ordenes" class="seccion">
-<h2>Órdenes de Trabajo</h2>
+<div id="ordenes" class="seccion">
 
-<button onclick="mostrarFormulario()">+ Nueva Orden</button>
+<h2 class="titulo-seccion">📋 Órdenes de Trabajo</h2>
 
-<div id="formOrden" style="display:none; margin-top:15px;">
+<div class="ordenes-contenedor">
 
-<input id="cliente" placeholder="Nombre del cliente"><br><br>
-<input id="telefono" placeholder="Teléfono"><br><br>
+    <button class="btn-nuevo" onclick="mostrarFormularioOrden()">
+        + Nueva Orden
+    </button>
 
-<input id="marca" placeholder="Marca"><br><br>
-<input id="modelo" placeholder="Modelo"><br><br>
-<input id="placas" placeholder="Placas"><br><br>
+    <button class="btn-secundario" onclick="verVehiculos()">
+        🚗 Vehículos
+    </button>
 
-<textarea id="trabajo" placeholder="Descripción del trabajo"></textarea><br><br>
+    <!-- FORMULARIO -->
+    <div id="formOrden" class="card-form" style="display:none;">
 
-<input id="precio" type="number" placeholder="Precio"><br><br>
+        <input id="clienteOrden" placeholder="Cliente">
+        <input id="vehiculoOrden" placeholder="Vehículo">
+        <input id="placaOrden" placeholder="Placas">
+        <textarea id="descripcionOrden" placeholder="Descripción del trabajo"></textarea>
 
-<select id="estado">
-<option>Pendiente</option>
-<option>En proceso</option>
-<option>Terminado</option>
-</select>
+        <button class="btn-guardar" onclick="guardarOrden()">
+            Guardar Orden
+        </button>
 
-<br><br>
-<button onclick="guardarOrden()">Guardar Orden</button>
+    </div>
+
+    <!-- LISTA VEHICULOS -->
+    <div id="listaVehiculos" class="lista-card"></div>
 
 </div>
 
-<hr>
-
-<div id="listaOrdenes"></div>
-
-</section>
-
+</div>
 <!-- ================= PRESUPUESTO ================= -->
 <section id="presupuesto" class="seccion">
 
@@ -1052,11 +1016,56 @@ Precio: $${o.precio}
 }
 
 mostrarOrdenes();
+    let ordenes = JSON.parse(localStorage.getItem("ordenes")) || [];
+
+function mostrarFormularioOrden(){
+    document.getElementById("formOrden").style.display="block";
+}
+
+function guardarOrden(){
+
+    const orden = {
+        cliente: clienteOrden.value,
+        vehiculo: vehiculoOrden.value,
+        placa: placaOrden.value,
+        descripcion: descripcionOrden.value
+    };
+
+    ordenes.push(orden);
+
+    localStorage.setItem("ordenes", JSON.stringify(ordenes));
+
+    alert("Orden guardada ✅");
+
+    clienteOrden.value="";
+    vehiculoOrden.value="";
+    placaOrden.value="";
+    descripcionOrden.value="";
+}
+
+function verVehiculos(){
+
+    const lista = document.getElementById("listaVehiculos");
+    lista.innerHTML="";
+
+    ordenes.forEach(o => {
+
+        lista.innerHTML += `
+            <div class="vehiculo-item">
+                <b>${o.vehiculo}</b><br>
+                Cliente: ${o.cliente}<br>
+                Placas: ${o.placa}<br>
+                Trabajo: ${o.descripcion}
+            </div>
+        `;
+    });
+}
 </script>
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
     
 </body>
 </html>
+
 
 
 
