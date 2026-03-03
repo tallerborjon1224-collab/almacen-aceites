@@ -377,7 +377,7 @@ button:active{
 
 <!-- ================= MENU ================= -->
 <div class="menu">
-    <button id="btnRegistro" onclick="mostrar('registro')">🚗 Registro</button>
+    <button id="btnRegistro" onclick="mostrar('registro')">📋 Órdenes de Trabajo</button>
     <button id="btnAlmacen" class="activo" onclick="mostrar('almacen')">🛢 Inventario</button>
     <button id="btnVentas" onclick="mostrar('ventas')">💰 Ventas</button>
     <button id="btnPresupuesto" onclick="mostrar('presupuesto')">📄 Presupuesto</button>
@@ -392,19 +392,7 @@ button:active{
 <div class="inventario-app">
 
     <!-- LISTA -->
-    <div id="vistaLista">
-
-        <div class="card-item" onclick="abrirDetalle(0)">
-            <h3>Aceite 5W-30 Sintético</h3>
-        </div>
-
-        <div class="card-item" onclick="abrirDetalle(1)">
-            <h3>Filtro de Aceite Toyota</h3>
-        </div>
-
-        <div class="card-item" onclick="abrirDetalle(2)">
-            <h3>Anticongelante Rojo</h3>
-        </div>
+    <div id="vistaLista"></div>
 
     </div>
 
@@ -503,43 +491,42 @@ Ganancia Hoy: $<span id="gananciaHoy">0</span>
 </section>
 
 
-<!-- ================= REGISTRO ================= -->
-<section id="registro" class="seccion">
+<!-- ================= ORDENES ================= -->
+<div id="ordenes" class="seccion">
 
-<h1>Registro de Carros</h1>
+<h2>Órdenes de Trabajo</h2>
 
-<div class="registro-nuevo">
+<button onclick="mostrarFormulario()">+ Nueva Orden</button>
 
-<div class="form-carro">
+<div id="formOrden" style="display:none; margin-top:15px;">
 
-<div class="campo">
-<label>Placas</label>
-<input type="text" id="placas">
-</div>
+<input id="cliente" placeholder="Nombre del cliente"><br><br>
+<input id="telefono" placeholder="Teléfono"><br><br>
 
-<div class="campo">
-<label>Marca</label>
-<input type="text" id="marca">
-</div>
+<input id="marca" placeholder="Marca"><br><br>
+<input id="modelo" placeholder="Modelo"><br><br>
+<input id="placas" placeholder="Placas"><br><br>
 
-<div class="campo">
-<label>Modelo</label>
-<input type="text" id="modelo">
-</div>
+<textarea id="trabajo" placeholder="Descripción del trabajo"></textarea><br><br>
 
-<div class="campo">
-<label>Servicio Realizado</label>
-<input type="text" id="servicio">
-</div>
+<input id="precio" type="number" placeholder="Precio"><br><br>
 
-<div class="campo">
-<label>Fecha</label>
-<input type="date" id="fecha">
-</div>
+<select id="estado">
+<option>Pendiente</option>
+<option>En proceso</option>
+<option>Terminado</option>
+</select>
+
+<br><br>
+<button onclick="guardarOrden()">Guardar Orden</button>
 
 </div>
-</section>
 
+<hr>
+
+<div id="listaOrdenes"></div>
+
+</div>
 
 <!-- ================= PRESUPUESTO ================= -->
 <section id="presupuesto" class="seccion">
@@ -629,6 +616,25 @@ let productoActual = null;
 
 function guardarInventario(){
     localStorage.setItem("inventarioNuevo", JSON.stringify(inventario));
+}
+    function renderInventario(){
+
+    const cont = document.getElementById("vistaLista");
+    cont.innerHTML = "";
+
+    inventario.forEach((item,i)=>{
+
+        const colorStock = item.stock <= 3 ? "red" : "white";
+
+        cont.innerHTML += `
+            <div class="card-item" onclick="abrirDetalle(${i})">
+                <h3>${item.nombre}</h3>
+                <p style="color:${colorStock}">
+                    Stock: ${item.stock}
+                </p>
+            </div>
+        `;
+    });
 }
 
 
@@ -730,6 +736,7 @@ function actualizarVista(){
     document.getElementById("notaMovimiento").value="";
 
     renderHistorial();
+renderInventario();
     if(inventario[productoActual].stock <= 3){
     document.getElementById("detalleStock").style.color="red";
 }else{
@@ -786,7 +793,10 @@ function calcularTotal(){
 }
 
 
+// ================= VENTAS (BASE SIMPLE) =================
 
+let gananciaHoy = 0;
+let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
 function vender(){
 
     const select = document.getElementById("productoVenta");
@@ -800,15 +810,32 @@ function vender(){
     }
 
     producto.stock -= cantidad;
-    gananciaHoy += producto.precio * cantidad;
+
+    const totalVenta = producto.precio * cantidad;
+    gananciaHoy += totalVenta;
 
     document.getElementById("gananciaHoy").innerText = gananciaHoy;
 
+    // GUARDAR VENTA
+    ventas.push({
+        producto: producto.nombre,
+        cantidad: cantidad,
+        total: totalVenta,
+        fecha: new Date().toLocaleString()
+    });
+
+    localStorage.setItem("ventas", JSON.stringify(ventas));
+
+    // ALERTA STOCK
+    if(producto.stock <= 3){
+        alert("⚠ Stock bajo: " + producto.nombre);
+    }
+
     guardarInventario();
-    alert("Venta realizada");
+    renderInventario();
+
+    alert("Venta realizada ✅");
 }
-
-
 
 // ===== CARGAR SELECT VENTAS =====
 function cargarProductosVenta(){
@@ -833,6 +860,7 @@ function cargarProductosVenta(){
 window.addEventListener("load", ()=>{
     guardarInventario();
     cargarProductosVenta();
+    renderInventario();
 });
    function borrarMovimiento(index){
 
@@ -991,13 +1019,63 @@ drawRight("$" + total.toFixed(2), 140);
 
     alert("Presupuesto generado correctamente ✅");
 }
-</script>
+    let ordenes = JSON.parse(localStorage.getItem("ordenes")) || [];
 
-</section>
+function mostrarFormulario(){
+document.getElementById("formOrden").style.display="block";
+}
+
+function guardarOrden(){
+
+const orden = {
+cliente: document.getElementById("cliente").value,
+telefono: document.getElementById("telefono").value,
+marca: document.getElementById("marca").value,
+modelo: document.getElementById("modelo").value,
+placas: document.getElementById("placas").value,
+trabajo: document.getElementById("trabajo").value,
+precio: document.getElementById("precio").value,
+estado: document.getElementById("estado").value
+};
+
+ordenes.push(orden);
+
+localStorage.setItem("ordenes", JSON.stringify(ordenes));
+
+mostrarOrdenes();
+
+document.querySelectorAll("#formOrden input, #formOrden textarea")
+.forEach(e => e.value = "");
+
+document.getElementById("formOrden").style.display="none";
+}
+function mostrarOrdenes(){
+
+const lista = document.getElementById("listaOrdenes");
+lista.innerHTML="";
+
+ordenes.forEach(o=>{
+
+lista.innerHTML += `
+<div style="border:1px solid #444;padding:10px;margin:10px 0;border-radius:8px;">
+<b>${o.marca} ${o.modelo}</b><br>
+Cliente: ${o.cliente}<br>
+Trabajo: ${o.trabajo}<br>
+Estado: ${o.estado}<br>
+Precio: $${o.precio}
+</div>
+`;
+
+});
+}
+
+mostrarOrdenes();
+</script>
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
     
 </body>
 </html>
+
 
 
 
