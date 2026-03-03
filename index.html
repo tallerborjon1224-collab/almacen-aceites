@@ -492,8 +492,7 @@ Ganancia Hoy: $<span id="gananciaHoy">0</span>
 
 
 <!-- ================= ORDENES ================= -->
-<div id="ordenes" class="seccion">
-
+<section id="ordenes" class="seccion">
 <h2>Órdenes de Trabajo</h2>
 
 <button onclick="mostrarFormulario()">+ Nueva Orden</button>
@@ -526,7 +525,7 @@ Ganancia Hoy: $<span id="gananciaHoy">0</span>
 
 <div id="listaOrdenes"></div>
 
-</div>
+</section>
 
 <!-- ================= PRESUPUESTO ================= -->
 <section id="presupuesto" class="seccion">
@@ -562,55 +561,28 @@ Generar PDF
 // ================= MENU =================
 function mostrar(id){
 
-    document.querySelectorAll('.seccion').forEach(s=>{
-        s.classList.remove('activa');
+    // ocultar todas las secciones
+    document.querySelectorAll('.seccion').forEach(sec=>{
+        sec.classList.remove('activa');
     });
 
-    document.getElementById(id).classList.add('activa');
-
-    document.querySelectorAll('.menu button').forEach(b=>{
-        b.classList.remove('activo');
-    });
-
-    const btn = document.getElementById(
-        'btn' + id.charAt(0).toUpperCase() + id.slice(1)
-    );
-
-    if(btn) btn.classList.add('activo');
-}
-
-
-
-// ================= INVENTARIO MODERNO =================
-
-// Productos predeterminados
-let inventario = JSON.parse(localStorage.getItem("inventarioNuevo")) || [
-
-    {
-        nombre:"Aceite 5W-30 Sintético",
-        precio:850,
-        stock:10,
-        fecha:"01/02/2026",
-        historial:[]
-    },
-
-    {
-        nombre:"Filtro de Aceite Toyota",
-        precio:250,
-        stock:5,
-        fecha:"01/02/2026",
-        historial:[]
-    },
-
-    {
-        nombre:"Anticongelante Rojo",
-        precio:300,
-        stock:8,
-        fecha:"01/02/2026",
-        historial:[]
+    // mostrar sección seleccionada
+    const seccion = document.getElementById(id);
+    if(seccion){
+        seccion.classList.add('activa');
     }
 
-];
+    // quitar activo de botones
+    document.querySelectorAll('.menu button').forEach(btn=>{
+        btn.classList.remove('activo');
+    });
+
+    // activar botón correcto
+    if(id === "ordenes") document.getElementById("btnOrdenes").classList.add("activo");
+    if(id === "almacen") document.getElementById("btnAlmacen").classList.add("activo");
+    if(id === "ventas") document.getElementById("btnVentas").classList.add("activo");
+    if(id === "presupuesto") document.getElementById("btnPresupuesto").classList.add("activo");
+}
 
 let productoActual = null;
 
@@ -1075,6 +1047,7 @@ mostrarOrdenes();
     
 </body>
 </html>
+
 
 
 
