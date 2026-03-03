@@ -314,7 +314,7 @@ button:active{
     display:flex;
     flex-direction:column;
     gap:15px;
-    box-shadow:0 0 20px rgba(255,140,26,0.25);
+    
 }
 
 /* LOGO */
@@ -340,16 +340,14 @@ button:active{
 /* HOVER NEON */
 .menu-lateral button:hover{
     border-color:var(--naranja);
-    box-shadow:0 0 12px rgba(255,140,26,0.6);
-    transform:translateX(5px);
+    background:#1f1f1f;
+    transform:translateX(3px);
 }
-
 /* ACTIVO */
 .menu-lateral button.activo{
     background:var(--naranja);
     color:black;
     font-weight:bold;
-    box-shadow:0 0 15px var(--naranja);
 }
 
 /* MOVER CONTENIDO A LA DERECHA */
@@ -588,27 +586,28 @@ let inventario = JSON.parse(localStorage.getItem("inventarioNuevo")) || [
 // ================= MENU =================
 function mostrar(id){
 
-    // ocultar todas las secciones
+    // ocultar secciones
     document.querySelectorAll('.seccion').forEach(sec=>{
         sec.classList.remove('activa');
     });
 
     // mostrar sección seleccionada
     const seccion = document.getElementById(id);
-    if(seccion){
-        seccion.classList.add('activa');
-    }
+    if(seccion) seccion.classList.add('activa');
 
-    // quitar activo de botones
-    document.querySelectorAll('.menu button').forEach(btn=>{
+
+    // ===== MENU ACTIVO =====
+    document.querySelectorAll('.menu-lateral button').forEach(btn=>{
         btn.classList.remove('activo');
     });
 
-    // activar botón correcto
-    if(id === "ordenes") document.getElementById("btnOrdenes").classList.add("activo");
-    if(id === "almacen") document.getElementById("btnAlmacen").classList.add("activo");
-    if(id === "ventas") document.getElementById("btnVentas").classList.add("activo");
-    if(id === "presupuesto") document.getElementById("btnPresupuesto").classList.add("activo");
+    const botonActivo = document.getElementById(
+        'btn' + id.charAt(0).toUpperCase() + id.slice(1)
+    );
+
+    if(botonActivo){
+        botonActivo.classList.add('activo');
+    }
 }
 
 let productoActual = null;
@@ -1100,6 +1099,7 @@ function verVehiculos(){
     
 </body>
 </html>
+
 
 
 
