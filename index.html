@@ -382,6 +382,46 @@ body{
     .btn-menu{
     box-shadow:0 0 10px rgba(0,0,0,.5);
 }
+.titulo-form{
+    text-align:center;
+    color:var(--naranja);
+    margin-bottom:10px;
+}
+
+.form-card input,
+.form-card textarea{
+    background:#1a1a1a;
+    color:white;
+    border:1px solid #333;
+    padding:10px;
+    border-ra.orden-card{
+    background:#1a1a1a;
+    border-left:4px solid var(--naranja);
+    padding:15px;
+    margin-bottom:15px;
+    border-radius:10px;
+}
+
+.orden-card{
+    background:#1a1a1a;
+    border-left:4px solid var(--naranja);
+    padding:15px;
+    margin-bottom:15px;
+    border-radius:10px;
+}
+
+.orden-card h3{
+    color:var(--naranja);
+    text-align:center;
+}
+
+.trabajo{
+    background:#111;
+    padding:10px;
+    margin:10px 0;
+    border-radius:6px;
+}
+
     
 </style>
 </head>
@@ -519,38 +559,42 @@ Ganancia Hoy: $<span id="gananciaHoy">0</span>
 
 
 <!-- ================= ORDENES ================= -->
+<!-- ================= ORDENES DE TRABAJO ================= -->
 <div id="ordenes" class="seccion">
 
-<h2 class="titulo-seccion">📋 Órdenes de Trabajo</h2>
+    <h2 class="titulo-seccion">Órdenes de Trabajo</h2>
 
-<div class="ordenes-contenedor">
+    <div class="ordenes-contenedor">
 
-    <button class="btn-nuevo" onclick="mostrarFormularioOrden()">
-        + Nueva Orden
-    </button>
-
-    <button class="btn-secundario" onclick="verVehiculos()">
-        🚗 Vehículos
-    </button>
-
-    <!-- FORMULARIO -->
-    <div id="formOrden" class="card-form" style="display:none;">
-
-        <input id="clienteOrden" placeholder="Cliente">
-        <input id="vehiculoOrden" placeholder="Vehículo">
-        <input id="placaOrden" placeholder="Placas">
-        <textarea id="descripcionOrden" placeholder="Descripción del trabajo"></textarea>
-
-        <button class="btn-guardar" onclick="guardarOrden()">
-            Guardar Orden
+        <button class="btn-nuevo" onclick="mostrarFormularioOrden()">
+            + Nueva Orden
         </button>
 
+        <!-- FORMULARIO -->
+        <div id="formOrden" class="card-form" style="display:none;">
+
+            <input id="clienteNombre" placeholder="Nombre del cliente">
+            <input id="clienteTelefono" placeholder="Teléfono del cliente">
+
+            <input id="carroMarca" placeholder="Marca del carro">
+            <input id="carroModelo" placeholder="Modelo">
+            <input id="carroColor" placeholder="Color">
+
+            <input type="date" id="fechaTrabajo">
+
+            <textarea id="descripcionTrabajo"
+            placeholder="Descripción del trabajo"></textarea>
+
+            <button class="btn-guardar" onclick="guardarOrden()">
+                Guardar Orden
+            </button>
+
+        </div>
+
+        <!-- LISTA DE ORDENES -->
+        <div id="listaOrdenes" class="lista-card"></div>
+
     </div>
-
-    <!-- LISTA VEHICULOS -->
-    <div id="listaVehiculos" class="lista-card"></div>
-
-</div>
 
 </div>
 <!-- ================= PRESUPUESTO ================= -->
@@ -583,6 +627,46 @@ Generar PDF
 </div>
 </section>
 <script>
+    let ordenes = [];
+
+    function renderizarOrdenes(){
+
+    const contenedor = document.getElementById("listaOrdenes");
+
+    contenedor.innerHTML = "";
+
+    ordenes.forEach(o => {
+
+        const card = `
+            <div class="orden-card">
+
+                <h3>${o.marca} ${o.modelo}</h3>
+
+                <p><b>Cliente:</b> ${o.cliente}</p>
+                <p><b>Teléfono:</b> ${o.telefono}</p>
+                <p><b>Color:</b> ${o.color}</p>
+                <p><b>Fecha:</b> ${o.fecha}</p>
+
+                <div class="trabajo">
+                    ${o.descripcion}
+                </div>
+
+                <button onclick="borrarOrden(${o.id})">
+                    Eliminar
+                </button>
+
+            </div>
+        `;
+
+        contenedor.innerHTML += card;
+    });
+}
+    function borrarOrden(id){
+
+    ordenes = ordenes.filter(o => o.id !== id);
+
+    renderizarOrdenes();
+}
 // ================= INVENTARIO BASE =================
 let inventario = JSON.parse(localStorage.getItem("inventarioNuevo")) || [
 
@@ -1036,27 +1120,30 @@ document.getElementById("formOrden").style.display="block";
 
 function guardarOrden(){
 
-const orden = {
-cliente: document.getElementById("cliente").value,
-telefono: document.getElementById("telefono").value,
-marca: document.getElementById("marca").value,
-modelo: document.getElementById("modelo").value,
-placas: document.getElementById("placas").value,
-trabajo: document.getElementById("trabajo").value,
-precio: document.getElementById("precio").value,
-estado: document.getElementById("estado").value
-};
+    const nuevaOrden = {
+        id: Date.now(),
+        cliente: clienteNombre.value,
+        telefono: clienteTelefono.value,
+        marca: carroMarca.value,
+        modelo: carroModelo.value,
+        color: carroColor.value,
+        fecha: fechaTrabajo.value,
+        descripcion: descripcionTrabajo.value
+    };
 
-ordenes.push(orden);
+    ordenes.push(nuevaOrden);
 
-localStorage.setItem("ordenes", JSON.stringify(ordenes));
+    limpiarFormulario();
+    renderizarOrdenes();
+}
+    function limpiarFormulario(){
 
-mostrarOrdenes();
-
-document.querySelectorAll("#formOrden input, #formOrden textarea")
-.forEach(e => e.value = "");
-
-document.getElementById("formOrden").style.display="none";
+    clienteNombre.value="";
+    clienteTelefono.value="";
+    carroMarca.value="";
+    carroModelo.value="";
+    carroColor.value="";
+    descripcionTrabajo.value="";
 }
 function mostrarOrdenes(){
 
@@ -1081,29 +1168,50 @@ Precio: $${o.precio}
 mostrarOrdenes();
 
 function mostrarFormularioOrden(){
-    document.getElementById("formOrden").style.display="block";
+    const form = document.getElementById("formOrden");
+
+    form.style.display =
+        form.style.display === "none" ? "block" : "none";
 }
 
 function guardarOrden(){
 
     const orden = {
-        cliente: clienteOrden.value,
-        vehiculo: vehiculoOrden.value,
-        placa: placaOrden.value,
-        descripcion: descripcionOrden.value
+        cliente: document.getElementById("clienteNombre").value,
+        telefono: document.getElementById("clienteTelefono").value,
+        marca: document.getElementById("carroMarca").value,
+        modelo: document.getElementById("carroModelo").value,
+        color: document.getElementById("carroColor").value,
+        fecha: document.getElementById("fechaTrabajo").value,
+        descripcion: document.getElementById("descripcionTrabajo").value
     };
 
     ordenes.push(orden);
 
     localStorage.setItem("ordenes", JSON.stringify(ordenes));
 
-    alert("Orden guardada ✅");
-
-    clienteOrden.value="";
-    vehiculoOrden.value="";
-    placaOrden.value="";
-    descripcionOrden.value="";
+    renderOrdenes();
 }
+    function renderOrdenes(){
+
+    const lista = document.getElementById("listaOrdenes");
+    lista.innerHTML = "";
+
+    ordenes.forEach((o,i)=>{
+
+        lista.innerHTML += `
+            <div class="vehiculo-item">
+                <strong>${o.marca} ${o.modelo}</strong><br>
+                Cliente: ${o.cliente}<br>
+                Tel: ${o.telefono}<br>
+                Fecha: ${o.fecha}<br>
+                Trabajo: ${o.descripcion}
+            </div>
+        `;
+    });
+}
+
+renderOrdenes();
 
 function verVehiculos(){
 
@@ -1134,6 +1242,7 @@ function verVehiculos(){
     
 </body>
 </html>
+
 
 
 
