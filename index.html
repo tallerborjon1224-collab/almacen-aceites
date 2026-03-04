@@ -422,7 +422,68 @@ body{
     border-radius:6px;
 }
 
-    
+    /* ===== CLIENTES PRO ===== */
+
+.clientes-header{
+    display:flex;
+    justify-content:flex-end;
+    max-width:900px;
+    margin:10px auto;
+}
+
+.clientes-grid{
+    max-width:900px;
+    margin:20px auto;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:20px;
+}
+
+.cliente-card{
+    background:#1a1a1a;
+    border-radius:15px;
+    padding:18px;
+    box-shadow:0 0 10px rgba(0,0,0,.4);
+}
+
+.cliente-top{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:10px;
+}
+
+.cliente-avatar{
+    width:45px;
+    height:45px;
+    border-radius:10px;
+    background:var(--naranja);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    font-size:20px;
+    color:black;
+}
+
+.cliente-nombre{
+    font-size:18px;
+    font-weight:bold;
+}
+
+.cliente-info{
+    color:#bbb;
+    font-size:14px;
+    margin:4px 0;
+}
+
+.cliente-form{
+    max-width:500px;
+    margin:15px auto;
+    background:#1a1a1a;
+    padding:20px;
+    border-radius:12px;
+}
 </style>
 </head>
 
@@ -447,6 +508,9 @@ body{
 
     <button id="btnPresupuesto" onclick="mostrar('presupuesto')">
         📄 Presupuesto
+    </button>
+     <button id="btnClientes" onclick="mostrar('Clientes')">
+        👥 Clientes
     </button>
 
 </div>
@@ -625,6 +689,35 @@ Generar PDF
 </button>
 
 </div>
+    
+</section>
+    <!-- ================= CLIENTES ================= -->
+<section id="clientes" class="seccion">
+
+<h1 class="titulo-seccion">Clientes</h1>
+
+<div class="clientes-header">
+    <button class="btn-nuevo" onclick="toggleFormCliente()">
+        + Nuevo Cliente
+    </button>
+</div>
+
+<!-- FORM -->
+<div id="formCliente" class="cliente-form" style="display:none;">
+
+    <input id="cNombre" placeholder="Nombre del cliente">
+    <input id="cTelefono" placeholder="Teléfono">
+    <input id="cCorreo" placeholder="Correo">
+
+    <button onclick="guardarCliente()" class="btn-guardar">
+        Guardar
+    </button>
+
+</div>
+
+<!-- LISTA -->
+<div id="listaClientes" class="clientes-grid"></div>
+
 </section>
 <script>
   
@@ -1175,53 +1268,65 @@ function verVehiculos(){
     menu.classList.toggle("menu-cerrado");
     document.body.classList.toggle("body-expandido");
 }
+    // ===== CLIENTES =====
+
+let clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+
+function toggleFormCliente(){
+    const f = document.getElementById("formCliente");
+    f.style.display = f.style.display === "none" ? "block" : "none";
+}
+
+function guardarCliente(){
+
+    const nombre = document.getElementById("cNombre").value;
+    const telefono = document.getElementById("cTelefono").value;
+    const correo = document.getElementById("cCorreo").value;
+
+    if(!nombre) return alert("Escribe el nombre");
+
+    clientes.push({nombre,telefono,correo});
+
+    localStorage.setItem("clientes",JSON.stringify(clientes));
+
+    document.getElementById("formCliente").style.display="none";
+
+    renderClientes();
+}
+
+function renderClientes(){
+
+    const lista = document.getElementById("listaClientes");
+    lista.innerHTML="";
+
+    clientes.forEach((c,i)=>{
+
+        const inicial = c.nombre.charAt(0).toUpperCase();
+
+        lista.innerHTML += `
+            <div class="cliente-card">
+
+                <div class="cliente-top">
+                    <div class="cliente-avatar">${inicial}</div>
+
+                    <div class="cliente-nombre">
+                        ${c.nombre}
+                    </div>
+                </div>
+
+                <div class="cliente-info">📞 ${c.telefono || "-"}</div>
+                <div class="cliente-info">✉ ${c.correo || "-"}</div>
+
+            </div>
+        `;
+    });
+}
+
+renderClientes();
 </script>
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
     
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
