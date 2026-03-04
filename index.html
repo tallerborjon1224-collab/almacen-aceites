@@ -627,46 +627,7 @@ Generar PDF
 </div>
 </section>
 <script>
-    let ordenes = [];
-
-    function renderizarOrdenes(){
-
-    const contenedor = document.getElementById("listaOrdenes");
-
-    contenedor.innerHTML = "";
-
-    ordenes.forEach(o => {
-
-        const card = `
-            <div class="orden-card">
-
-                <h3>${o.marca} ${o.modelo}</h3>
-
-                <p><b>Cliente:</b> ${o.cliente}</p>
-                <p><b>Teléfono:</b> ${o.telefono}</p>
-                <p><b>Color:</b> ${o.color}</p>
-                <p><b>Fecha:</b> ${o.fecha}</p>
-
-                <div class="trabajo">
-                    ${o.descripcion}
-                </div>
-
-                <button onclick="borrarOrden(${o.id})">
-                    Eliminar
-                </button>
-
-            </div>
-        `;
-
-        contenedor.innerHTML += card;
-    });
-}
-    function borrarOrden(id){
-
-    ordenes = ordenes.filter(o => o.id !== id);
-
-    renderizarOrdenes();
-}
+  
 // ================= INVENTARIO BASE =================
 let inventario = JSON.parse(localStorage.getItem("inventarioNuevo")) || [
 
@@ -1112,60 +1073,9 @@ drawRight("$" + total.toFixed(2), 140);
 
     alert("Presupuesto generado correctamente ✅");
 }
-    let ordenes = JSON.parse(localStorage.getItem("ordenes")) || [];
+   // ================= ORDENES DE TRABAJO =================
 
-function mostrarFormulario(){
-document.getElementById("formOrden").style.display="block";
-}
-
-function guardarOrden(){
-
-    const nuevaOrden = {
-        id: Date.now(),
-        cliente: clienteNombre.value,
-        telefono: clienteTelefono.value,
-        marca: carroMarca.value,
-        modelo: carroModelo.value,
-        color: carroColor.value,
-        fecha: fechaTrabajo.value,
-        descripcion: descripcionTrabajo.value
-    };
-
-    ordenes.push(nuevaOrden);
-
-    limpiarFormulario();
-    renderizarOrdenes();
-}
-    function limpiarFormulario(){
-
-    clienteNombre.value="";
-    clienteTelefono.value="";
-    carroMarca.value="";
-    carroModelo.value="";
-    carroColor.value="";
-    descripcionTrabajo.value="";
-}
-function mostrarOrdenes(){
-
-const lista = document.getElementById("listaOrdenes");
-lista.innerHTML="";
-
-ordenes.forEach(o=>{
-
-lista.innerHTML += `
-<div style="border:1px solid #444;padding:10px;margin:10px 0;border-radius:8px;">
-<b>${o.marca} ${o.modelo}</b><br>
-Cliente: ${o.cliente}<br>
-Trabajo: ${o.trabajo}<br>
-Estado: ${o.estado}<br>
-Precio: $${o.precio}
-</div>
-`;
-
-});
-}
-
-mostrarOrdenes();
+let ordenes = JSON.parse(localStorage.getItem("ordenes")) || [];
 
 function mostrarFormularioOrden(){
     const form = document.getElementById("formOrden");
@@ -1190,27 +1100,55 @@ function guardarOrden(){
 
     localStorage.setItem("ordenes", JSON.stringify(ordenes));
 
+    limpiarFormulario();
     renderOrdenes();
 }
-    function renderOrdenes(){
+
+function limpiarFormulario(){
+    document.getElementById("clienteNombre").value="";
+    document.getElementById("clienteTelefono").value="";
+    document.getElementById("carroMarca").value="";
+    document.getElementById("carroModelo").value="";
+    document.getElementById("carroColor").value="";
+    document.getElementById("fechaTrabajo").value="";
+    document.getElementById("descripcionTrabajo").value="";
+}
+
+function renderOrdenes(){
 
     const lista = document.getElementById("listaOrdenes");
+    if(!lista) return;
+
     lista.innerHTML = "";
 
     ordenes.forEach((o,i)=>{
 
         lista.innerHTML += `
-            <div class="vehiculo-item">
-                <strong>${o.marca} ${o.modelo}</strong><br>
-                Cliente: ${o.cliente}<br>
-                Tel: ${o.telefono}<br>
-                Fecha: ${o.fecha}<br>
-                Trabajo: ${o.descripcion}
+            <div class="orden-card">
+                <h3>${o.marca} ${o.modelo}</h3>
+
+                <p><b>Cliente:</b> ${o.cliente}</p>
+                <p><b>Tel:</b> ${o.telefono}</p>
+                <p><b>Color:</b> ${o.color}</p>
+                <p><b>Fecha:</b> ${o.fecha}</p>
+
+                <div class="trabajo">${o.descripcion}</div>
+
+                <button onclick="eliminarOrden(${i})">
+                    🗑 Eliminar
+                </button>
             </div>
         `;
     });
 }
 
+function eliminarOrden(index){
+    ordenes.splice(index,1);
+    localStorage.setItem("ordenes", JSON.stringify(ordenes));
+    renderOrdenes();
+}
+
+// cargar al abrir app
 renderOrdenes();
 
 function verVehiculos(){
@@ -1242,6 +1180,7 @@ function verVehiculos(){
     
 </body>
 </html>
+
 
 
 
