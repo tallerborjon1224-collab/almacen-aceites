@@ -1,1333 +1,1010 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Almacén de Aceites</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ff8c1a">
-    <link rel="icon" type="image/png" href="icono.png">
-
-
-<style>
-
-/* ================= VARIABLES ================= */
-
-:root{
-    --naranja:#ff8c1a;
-    --negro:#000;
-    --gris:#1a1a1a;
-    --gris2:#262626;
-    --blanco:#fff;
-    --verde:#4CAF50;
-    --rojo:#c62828;
-}
-
-/* ================= BASE ================= */
-
-body{
-    margin:0;
-    background:var(--negro);
-    color:var(--blanco);
-    font-family:Arial, sans-serif;
-    padding:20px;
-    padding-bottom:120px;
-}
-
-h1{
-    text-align:center;
-    color:var(--naranja);
-    margin-bottom:25px;
-}
-
-.seccion{ display:none; }
-.seccion.activa{ display:block; }
-
-/* ================= BOTONES GENERALES ================= */
-
-button{
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
-    font-size:15px;
-    padding:8px 14px;
-    transition:0.15s ease;
-}
-
-button:active{
-    transform:scale(0.95);
-}
-/* ================= INVENTARIO ================= */
-
-.inventario-app{
-    max-width:900px;
-    margin:auto;
-}
-
-.card-item{
-    background:var(--gris);
-    border:2px solid var(--naranja);
-    border-radius:18px;
-    padding:20px;
-    margin:18px 0;
-    cursor:pointer;
-    transition:0.2s;
-}
-
-.card-item:hover{
-    transform:scale(1.02);
-    box-shadow:0 0 12px rgba(255,140,26,0.4);
-}
-
-.card-item h3{ margin-bottom:8px; }
-.card-item p{ margin:4px 0; color:#ccc; }
-
-.stock-bajo{
-    color:red;
-    font-weight:bold;
-}
-
-/* ================= DETALLE PRODUCTO ================= */
-
-.detalle-box{
-    background:var(--gris);
-    border:2px solid var(--naranja);
-    border-radius:18px;
-    padding:25px;
-    margin-top:20px;
-}
-
-.precio-destacado{
-    font-size:22px;
-    color:var(--verde);
-    font-weight:bold;
-}
-
-.stock-destacado{
-    font-size:26px;
-    color:var(--naranja);
-    font-weight:bold;
-    margin:18px 0;
-}
-
-/* ================= MOVIMIENTO STOCK ================= */
-
-.movimiento-box{
-    margin-top:20px;
-    background:var(--gris2);
-    padding:20px;
-    border-radius:14px;
-}
-
-.movimiento-box h4{
-    color:var(--naranja);
-}
-
-.movimiento-box input,
-.movimiento-box textarea{
-    width:100%;
-    padding:10px;
-    border-radius:8px;
-    border:none;
-    background:#000;
-    color:white;
-}
-
-.btn-sumar{ background:var(--verde); color:white; }
-.btn-restar{ background:var(--rojo); color:white; }
-
-/* ================= HISTORIAL ================= */
-
-.historial-item{
-    background:#111;
-    padding:12px;
-    border-radius:10px;
-    margin:8px 0;
-    color:#bbb;
-    border-left:4px solid var(--naranja);
-}
-
-/* ================= VENTAS ================= */
-
-.ventas-card{
-    max-width:900px;
-    margin:auto;
-    padding:30px;
-}
-
-.tabla-ventas{
-    width:100%;
-    border-collapse:collapse;
-}
-
-.tabla-ventas th{
-    padding:15px;
-    border-bottom:2px solid var(--naranja);
-}
-
-.tabla-ventas td{
-    padding:15px;
-    text-align:center;
-}
-
-.tabla-ventas select,
-.tabla-ventas input{
-    width:100%;
-    padding:8px;
-    background:#000;
-    color:white;
-    border:none;
-    text-align:center;
-}
-
-.botones-ventas{
-    display:flex;
-    justify-content:center;
-    gap:15px;
-    margin-top:20px;
-    flex-wrap:wrap;
-}
-
-.ganancia{
-    text-align:center;
-    font-size:24px;
-    margin-top:20px;
-}
-
-/* ================= PRESUPUESTO ================= */
-
-.presupuesto-box{
-    max-width:500px;
-    margin:40px auto;
-    display:flex;
-    flex-direction:column;
-    gap:15px;
-}
-
-.presupuesto-box input{
-    padding:12px;
-    border-radius:8px;
-    border:none;
-    background:#111;
-    color:white;
-}
-
-/* ================= ORDENES (NUEVO DISEÑO PRO) ================= */
-
-.ordenes-contenedor{
-    max-width:600px;
-    margin:20px auto;
-    text-align:center;
-}
-
-.card-form{
-    background:#1b1b1b;
-    border:2px solid var(--naranja);
-    border-radius:15px;
-    padding:20px;
-    margin-top:20px;
-}
-
-.card-form input,
-.card-form textarea{
-    width:100%;
-    margin:8px 0;
-    padding:10px;
-    border-radius:8px;
-    border:none;
-    background:#000;
-    color:white;
-}
-
-.btn-nuevo{
-    background:var(--naranja);
-    color:white;
-    padding:10px 18px;
-    border-radius:10px;
-    margin:10px;
-}
-
-.btn-secundario{
-    background:#333;
-    color:white;
-    padding:10px 18px;
-    border-radius:10px;
-}
-
-.btn-guardar{
-    background:var(--naranja);
-    color:white;
-    width:100%;
-    padding:12px;
-    border-radius:10px;
-    margin-top:10px;
-}
-
-/* LISTA VEHICULOS */
-
-.lista-card{
-    margin-top:20px;
-}
-
-.vehiculo-item{
-    background:#222;
-    border-left:5px solid var(--naranja);
-    padding:15px;
-    margin:10px 0;
-    border-radius:10px;
-    text-align:left;
-}
-
-/* ================= RESPONSIVE ================= */
-
-@media(max-width:768px){
-
-    body{
-        padding:12px;
-        padding-bottom:130px;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Taller Borjón - Almacén de Aceites</title>
+  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVGFsbGVyIEJvcmrDs24iLCJzaG9ydF9uYW1lIjoiQWxtYWPpbiIsInN0YXJ0X3VybCI6Ii4vIn0=">
+  <style>
+    :root {
+      --naranja: #ff8c1a;
+      --negro: #000;
+      --gris: #1a1a1a;
+      --gris2: #262626;
+      --blanco: #fff;
+      --verde: #28a745;
+      --rojo: #dc3545;
+      --amarillo: #ffc107;
     }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--negro); color: var(--blanco); font-family: Arial, sans-serif; }
+    .seccion { display: none; }
+    .seccion.activa { display: block; }
 
-    h1{ font-size:22px; }
+    .sidebar {
+      position: fixed; top: 0; left: 0; width: 220px; height: 100%;
+      background: var(--gris); border-right: 2px solid var(--naranja);
+      display: flex; flex-direction: column; z-index: 9999; overflow-y: auto;
+    }
+    .sidebar-titulo { padding: 16px; font-size: 16px; font-weight: bold; color: var(--naranja); border-bottom: 1px solid var(--naranja); text-align: center; }
+    .sidebar-logo { font-size: 12px; color: #888; padding: 8px; text-align: center; }
+    .sidebar-nav { flex: 1; padding: 8px 0; }
+    .sidebar-nav button, .sidebar-nav a {
+      display: block; width: 100%; text-align: left; padding: 12px 16px; margin: 2px 0;
+      background: none; color: var(--blanco); font-size: 14px; border: none;
+      border-left: 3px solid transparent; cursor: pointer; text-decoration: none; font-family: inherit;
+    }
+    .sidebar-nav button:hover, .sidebar-nav a:hover { background: var(--gris2); }
+    .sidebar-nav button.activo, .sidebar-nav a.activo { background: var(--gris2); color: var(--naranja); border-left-color: var(--naranja); }
+    .sidebar-footer { padding: 12px; font-size: 11px; color: #666; border-top: 1px solid #333; }
 
-    .ventas-card{ padding:15px; }
+    .contenido-principal { margin-left: 220px; padding: 20px; padding-bottom: 40px; min-height: 100vh; }
+    .breadcrumb { margin-bottom: 16px; font-size: 13px; color: #aaa; }
+    .breadcrumb a { color: var(--naranja); text-decoration: none; }
+    .breadcrumb span { color: #666; margin: 0 6px; }
+    h1 { color: var(--naranja); margin-top: 0; }
+    h2, h3 { color: var(--naranja); }
 
-    .tabla-ventas{ font-size:14px; }
+    .caja { background: var(--gris); border: 2px solid var(--naranja); border-radius: 12px; padding: 20px; margin-bottom: 20px; max-width: 900px; }
+    .caja p { margin: 8px 0; }
+    .caja-desc { color: #aaa; font-size: 14px; margin-bottom: 0.5rem; }
+    .resumen-numero { font-size: 28px; font-weight: bold; color: var(--naranja); }
+    .grid-dash { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .card-dash { background: var(--gris2); border-radius: 12px; padding: 16px; border: 1px solid var(--naranja); text-align: center; }
+    .card-dash .num { font-size: 24px; font-weight: bold; color: var(--naranja); }
+    .card-dash .label { font-size: 12px; color: #aaa; margin-top: 4px; }
+    .alerta-baja { background: rgba(220,53,69,0.2); border: 1px solid var(--rojo); border-radius: 8px; padding: 8px; margin: 4px 0; }
+    .msg-ok { background: rgba(40,167,69,0.2); border: 1px solid var(--verde); border-radius: 8px; padding: 8px; margin: 8px 0; display: none; }
+    .msg-ok.visible { display: block; }
 
-    .ganancia{ font-size:20px; }
-}
-/* ================= MENU LATERAL PRO ================= */
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    th, td { border: 1px solid var(--naranja); padding: 8px; text-align: left; }
+    th { background: var(--gris2); color: var(--naranja); }
+    input, select, textarea { background: #000; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 6px; }
+    input:focus, select:focus { outline: 1px solid var(--naranja); }
+    button { cursor: pointer; border-radius: 6px; padding: 8px 14px; font-size: 14px; border: 1px solid var(--naranja); background: var(--gris2); color: #fff; }
+    button.primario { background: var(--naranja); color: #000; }
+    button.peligro { background: var(--rojo); color: #fff; border-color: var(--rojo); }
+    .fila-inv { display: grid; grid-template-columns: 1fr 80px 80px auto; gap: 8px; align-items: center; margin: 6px 0; }
+    .fila-inv .cant { text-align: center; font-weight: bold; }
+    .card-cliente { background: var(--gris2); border: 2px solid var(--naranja); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+    .card-cliente .nombre { font-size: 18px; font-weight: bold; color: var(--naranja); margin-bottom: 8px; }
+    .card-cliente .info { font-size: 14px; color: #ccc; margin: 4px 0; }
+    .card-cliente .info span { color: #888; }
+    .card-cliente button { margin-top: 0.75rem; }
+    .grid-clientes { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .buscador { margin-bottom: 12px; }
+    .buscador input { width: 100%; max-width: 300px; }
 
-/* ================= MENU APP ================= */
+    .estado-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; }
+    .estado-pendiente { background: var(--amarillo); color: #000; }
+    .estado-proceso { background: #17a2b8; color: #fff; }
+    .estado-completada { background: var(--verde); color: #fff; }
+    .estado-entregada { background: #6c757d; color: #fff; }
+    .checklist-item { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+    .checklist-item input[type="checkbox"] { width: 18px; height: 18px; }
+    .checklist-item input[type="text"] { flex: 1; min-width: 0; }
 
-/* BOTON MENU */
-.btn-menu{
-    position:fixed;
-    top:15px;
-    left:15px;
-    background:var(--naranja);
-    color:black;
-    border:none;
-    font-size:22px;
-    padding:8px 14px;
-    border-radius:8px;
-    cursor:pointer;
-    z-index:10000;
-}
+    .pie-pagina { margin-top: 40px; padding-top: 20px; border-top: 1px solid #333; font-size: 12px; color: #666; text-align: center; }
 
-/* MENU LATERAL */
-.menu-lateral{
-    position:fixed;
-    top:0;
-    left:0;
-    width:240px;
-    height:100vh;
-    background:#111;
-    border-right:2px solid var(--naranja);
+    /* Formularios y utilidades */
+    .oculto { display: none !important; }
+    .form-fila { margin-bottom: 1rem; }
+    .form-fila label { display: block; margin-bottom: 0.25rem; color: #aaa; font-size: 13px; }
+    .form-fila input[type="text"], .form-fila input[type="number"], .form-fila input[type="email"], .form-fila input[type="tel"], .form-fila input[type="date"], .form-fila select { width: 100%; max-width: 100%; }
+    .form-fila-btn { display: flex; align-items: flex-end; }
+    .form-grid { display: grid; gap: 1rem; }
+    .form-grid-2 { grid-template-columns: 1fr 1fr; }
+    .form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .form-grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .input-num { width: 5rem; max-width: 100%; }
+    .input-fecha { width: 10rem; max-width: 100%; }
+    .acciones { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.25rem; align-items: center; }
+    .acciones.mb { margin-bottom: 1rem; }
+    .acciones button { margin: 0; }
+    .radio-grupo { display: flex; gap: 1.5rem; margin: 0.75rem 0; }
+    .radio-grupo label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--blanco); }
+    .radio-grupo input { width: auto; }
+    .sin-datos { text-align: center; padding: 2rem; color: #666; }
+    .tabla-movimientos th:nth-child(3), .tabla-movimientos td:nth-child(3) { white-space: nowrap; }
+    .tabla-movimientos td:last-child { width: 1%; }
 
-    padding:80px 20px 20px 20px; /* 👈 CAMBIO IMPORTANTE */
-    
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    transition:0.3s ease;
-}
-
-/* LOGO */
-.menu-lateral .logo{
-    text-align:center;
-    color:var(--naranja);
-    margin-bottom:25px;
-    font-size:20px;
-    letter-spacing:1px;
-}
-
-/* BOTONES */
-.menu-lateral button{
-    background:#1a1a1a;
-    color:white;
-    border:none;
-    padding:14px;
-    border-radius:10px;
-    text-align:left;
-    cursor:pointer;
-    transition:.2s;
-}
-
-/* HOVER */
-.menu-lateral button:hover{
-    background:#262626;
-}
-
-/* ACTIVO */
-.menu-lateral button.activo{
-    background:var(--naranja);
-    color:black;
-    font-weight:bold;
-}
-
-/* MENU OCULTO */
-.menu-cerrado{
-    transform:translateX(-260px);
-}
-
-/* BODY */
-body{
-    margin-left:260px;
-    transition:0.3s;
-}
-
-.body-expandido{
-    margin-left:0 !important;
-}
-    .btn-menu{
-    box-shadow:0 0 10px rgba(0,0,0,.5);
-}
-.titulo-form{
-    text-align:center;
-    color:var(--naranja);
-    margin-bottom:10px;
-}
-
-.form-card input,
-.form-card textarea{
-    background:#1a1a1a;
-    color:white;
-    border:1px solid #333;
-    padding:10px;
-    border-ra.orden-card{
-    background:#1a1a1a;
-    border-left:4px solid var(--naranja);
-    padding:15px;
-    margin-bottom:15px;
-    border-radius:10px;
-}
-
-.orden-card{
-    background:#1a1a1a;
-    border-left:4px solid var(--naranja);
-    padding:15px;
-    margin-bottom:15px;
-    border-radius:10px;
-}
-
-.orden-card h3{
-    color:var(--naranja);
-    text-align:center;
-}
-
-.trabajo{
-    background:#111;
-    padding:10px;
-    margin:10px 0;
-    border-radius:6px;
-}
-
-    /* ===== CLIENTES PRO ===== */
-
-.clientes-header{
-    display:flex;
-    justify-content:flex-end;
-    max-width:900px;
-    margin:10px auto;
-}
-
-.clientes-grid{
-    max-width:900px;
-    margin:20px auto;
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-    gap:20px;
-}
-
-.cliente-card{
-    background:#1a1a1a;
-    border-radius:15px;
-    padding:18px;
-    box-shadow:0 0 10px rgba(0,0,0,.4);
-}
-
-.cliente-top{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    margin-bottom:10px;
-}
-
-.cliente-avatar{
-    width:45px;
-    height:45px;
-    border-radius:10px;
-    background:var(--naranja);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:bold;
-    font-size:20px;
-    color:black;
-}
-
-.cliente-nombre{
-    font-size:18px;
-    font-weight:bold;
-}
-
-.cliente-info{
-    color:#bbb;
-    font-size:14px;
-    margin:4px 0;
-}
-
-.cliente-form{
-    max-width:500px;
-    margin:15px auto;
-    background:#1a1a1a;
-    padding:20px;
-    border-radius:12px;
-}
-</style>
+    /* Modal agregar producto */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; visibility: hidden; transition: opacity 0.25s, visibility 0.25s; }
+    .modal-overlay.visible { opacity: 1; visibility: visible; }
+    .modal-caja { background: var(--gris); border: 2px solid var(--naranja); border-radius: 16px; padding: 24px; max-width: 480px; width: 90%; max-height: 90vh; overflow-y: auto; transform: scale(0.9); transition: transform 0.25s; }
+    .modal-overlay.visible .modal-caja { transform: scale(1); }
+    .modal-caja h2 { margin-top: 0; margin-bottom: 1rem; color: var(--naranja); }
+    .modal-caja .form-fila { margin-bottom: 1rem; }
+    .badge-tipo { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; background: var(--gris2); color: var(--naranja); border: 1px solid var(--naranja); }
+    @media (max-width: 600px) {
+      .sidebar { width: 180px; }
+      .contenido-principal { margin-left: 180px; padding: 12px; }
+      .fila-inv { grid-template-columns: 1fr 60px auto; }
+      .grid-clientes { grid-template-columns: 1fr; }
+      .form-grid-2, .form-grid-3, .form-grid-4 { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
-
 <body>
-<button class="btn-menu" onclick="toggleMenu()">☰</button>
-<!-- ================= MENU ================= -->
-<div class="menu-lateral" id="menuLateral">
 
-    <h2 class="logo">TALLER BORJON</h2>
+  <aside class="sidebar">
+    <div class="sidebar-titulo">TALLER BORJÓN</div>
+    <div class="sidebar-logo">Almacén de Aceites</div>
+    <nav class="sidebar-nav">
+      <button type="button" id="btnInicio" class="activo" onclick="ir('inicio')">🏠 Inicio</button>
+      <button type="button" id="btnInventario" onclick="ir('inventario')">🛢 Inventario</button>
+      <button type="button" id="btnVentas" onclick="ir('ventas')">💰 Ventas</button>
+      <button type="button" id="btnPresupuesto" onclick="ir('presupuesto')">📄 Presupuesto</button>
+      <button type="button" id="btnOrdenes" onclick="ir('ordenes')">📋 Órdenes</button>
+      <button type="button" id="btnClientes" onclick="ir('clientes')">👥 Clientes</button>
+    </nav>
+    <div class="sidebar-footer">Taller Borjón v1.0</div>
+  </aside>
 
-    <button id="btnOrdenes" onclick="mostrar('ordenes')">
-        📋 Órdenes de Trabajo
-    </button>
+  <main class="contenido-principal">
+    <div id="msgGlobal" class="msg-ok"></div>
+    <div class="breadcrumb" id="breadcrumb">Inicio</div>
 
-    <button id="btnAlmacen" onclick="mostrar('almacen')" class="activo">
-        🛢 Inventario
-    </button>
+    <!-- ========== INICIO / DASHBOARD ========== -->
+    <section id="inicio" class="seccion activa">
+      <h1>Inicio</h1>
+      <div class="grid-dash">
+        <div class="card-dash"><div class="num" id="dashGananciaHoy">$0</div><div class="label">Ganancia hoy</div></div>
+        <div class="card-dash"><div class="num" id="dashOrdenesPend">0</div><div class="label">Órdenes pendientes</div></div>
+        <div class="card-dash"><div class="num" id="dashAceitesBajo">0</div><div class="label">Productos con cantidad baja</div></div>
+        <div class="card-dash"><div class="num" id="dashVentasHoy">0</div><div class="label">Ventas hoy</div></div>
+      </div>
+      <div class="caja">
+        <h3>Productos con cantidad baja (revisar)</h3>
+        <div id="listaAceitesBajo"></div>
+      </div>
+      <div class="caja">
+        <h3>Últimas ventas</h3>
+        <div id="ultimasVentas"></div>
+      </div>
+    </section>
 
-    <button id="btnVentas" onclick="mostrar('ventas')">
-        💰 Ventas
-    </button>
-
-    <button id="btnPresupuesto" onclick="mostrar('presupuesto')">
-        📄 Presupuesto
-    </button>
-    
-    <button id="btnClientes" onclick="mostrar('clientes')">
-    👥 Clientes
-</button>
-
-</div>
-
-<!-- ================= INVENTARIO ================= -->
-<section id="almacen" class="seccion activa">
-
-<h1>Inventario del Taller</h1>
-
-<div class="inventario-app">
-
-    <!-- LISTA -->
-    <div id="vistaLista"></div>
-
-    </div>
-
-    <!-- DETALLE -->
-    <div id="vistaDetalle" style="display:none;">
-
-        <button onclick="volverLista()">⬅ Volver</button>
-
-        <div class="detalle-box">
-
-           <h2 id="detalleNombre" style="text-align:center;"></h2>
-
-<div class="stock-destacado">
-    Aceites disponibles: <span id="detalleStock"></span>
-</div>
-
-            <div class="movimiento-box">
-
-                <h4>Movimiento de Inventario</h4>
-
-                <input type="number" id="cantidadMovimiento" placeholder="Cantidad">
-
-                <textarea id="notaMovimiento" placeholder="Nota opcional"></textarea>
-
-                <button class="btn-sumar" onclick="sumarStock()">➕ Agregar</button>
-                <button class="btn-restar" onclick="restarStock()">➖ Restar</button>
-
-            </div>
-
-            <div id="historialMovimientos"></div>
-
+    <!-- ========== INVENTARIO ========== -->
+    <section id="inventario" class="seccion">
+      <h1>Inventario del Taller</h1>
+      <div class="acciones mb">
+        <button type="button" class="primario" onclick="abrirModalAgregar()">➕ Agregar producto</button>
+      </div>
+      <div class="form-fila buscador">
+        <label for="buscarInv">Buscar</label>
+        <input type="text" id="buscarInv" placeholder="Nombre, categoría o tipo de producto..." oninput="filtrarInventario()">
+      </div>
+      <div class="caja">
+        <h3>Productos disponibles</h3>
+        <div class="form-fila">
+          <label for="umbralAceites">Aviso general: cuando un producto tenga menos de esta cantidad de unidades</label>
+          <input type="number" id="umbralAceites" class="input-num" min="1" value="5">
         </div>
-
-    </div>
-
-</div>
-
-</section>
-
-
-<!-- ================= VENTAS ================= -->
-<section id="ventas" class="seccion">
-
-<h1>Venta de Aceite</h1>
-
-<div class="ventas-card">
-
-<table class="tabla-ventas">
-<thead>
-<tr>
-<th>Producto</th>
-<th>Cantidad</th>
-<th>Precio</th>
-<th>Total</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>
-<select id="productoVenta"></select>
-</td>
-
-<td>
-<input type="number" id="cantidadVenta" min="1" value="1">
-</td>
-
-<td>$<span id="precioUnitario">0</span></td>
-<td>$<span id="totalVenta">0</span></td>
-</tr>
-</tbody>
-</table>
-
-<div class="botones-ventas">
-<button onclick="calcularTotal()" class="btn-sumar">Calcular</button>
-<button onclick="vender()" class="btn-sumar">Confirmar</button>
-<button onclick="cancelarVenta()" class="btn-restar">Cancelar</button>
-</div>
-
-<hr>
-
-<h2 style="text-align:center; color:orange;">Historial de Ventas</h2>
-<div id="listaHistorial"></div>
-
-<h2 class="ganancia">
-Ganancia Hoy: $<span id="gananciaHoy">0</span>
-</h2>
-
-<div class="botones-ventas">
-<button onclick="borrarVentasHoy()" class="btn-restar">Borrar Ventas de Hoy</button>
-<button onclick="reiniciarTodo()" class="btn-restar">Reiniciar Todo</button>
-</div>
-
-</div>
-
-</section>
-
-
-<!-- ================= ORDENES ================= -->
-<!-- ================= ORDENES DE TRABAJO ================= -->
-<div id="ordenes" class="seccion">
-
-    <h2 class="titulo-seccion">Órdenes de Trabajo</h2>
-
-    <div class="ordenes-contenedor">
-
-        <button class="btn-nuevo" onclick="mostrarFormularioOrden()">
-            + Nueva Orden
-        </button>
-
-        <!-- FORMULARIO -->
-        <div id="formOrden" class="card-form" style="display:none;">
-
-            <input id="clienteNombre" placeholder="Nombre del cliente">
-            <input id="clienteTelefono" placeholder="Teléfono del cliente">
-
-            <input id="carroMarca" placeholder="Marca del carro">
-            <input id="carroModelo" placeholder="Modelo">
-            <input id="carroColor" placeholder="Color">
-
-            <input type="date" id="fechaTrabajo">
-
-            <textarea id="descripcionTrabajo"
-            placeholder="Descripción del trabajo"></textarea>
-
-            <button class="btn-guardar" onclick="guardarOrden()">
-                Guardar Orden
-            </button>
-
+        <div id="listaInventario"></div>
+      </div>
+      <div class="caja">
+        <h3>Movimiento de inventario</h3>
+        <p class="caja-desc">Indica si agregas o restas productos, elige cuál y la cantidad.</p>
+        <div class="radio-grupo">
+          <label><input type="radio" name="tipoMov" value="agregar" checked> Agregar productos</label>
+          <label><input type="radio" name="tipoMov" value="restar"> Restar productos</label>
         </div>
-
-        <!-- LISTA DE ORDENES -->
-        <div id="listaOrdenes" class="lista-card"></div>
-
-    </div>
-
-</div>
-<!-- ================= PRESUPUESTO ================= -->
-<section id="presupuesto" class="seccion">
-
-<h1>Generar Presupuesto</h1>
-
-<div class="presupuesto-box">
-
-<input type="text" id="nombreCliente" placeholder="Nombre del cliente">
-<input type="text" id="marcaVehiculo" placeholder="Marca">
-<input type="text" id="modeloVehiculo" placeholder="Modelo">
-<input type="number" id="anioVehiculo" placeholder="Año">
-
-<h3>Trabajos</h3>
-
-<div id="listaTrabajos"></div>
-
-<button onclick="agregarTrabajo()" class="btn-sumar">➕ Agregar Trabajo</button>
-
-<h3>Resumen</h3>
-<p>Subtotal: $<span id="subtotal">0</span></p>
-<p>IVA (0.08%): $<span id="iva">0</span></p>
-<p>Total: $<span id="total">0</span></p>
-
-<button class="btn-sumar" onclick="generarPDF()">
-Generar PDF
-</button>
-
-</div>
-    
-</section>
-    <!-- ================= CLIENTES ================= -->
-<!-- ================= CLIENTES ================= -->
-<section id="clientes" class="seccion">
-
-<h1 class="titulo-seccion">Clientes</h1>
-
-<div class="clientes-header">
-    <button class="btn-nuevo" onclick="toggleFormCliente()">
-        + Nuevo Cliente
-    </button>
-</div>
-
-<div id="formCliente" class="cliente-form" style="display:none;">
-
-    <input id="cNombre" placeholder="Nombre del cliente">
-    <input id="cTelefono" placeholder="Teléfono">
-    <input id="cCorreo" placeholder="Correo">
-
-    <button onclick="guardarCliente()" class="btn-guardar">
-        Guardar
-    </button>
-
-</div>
-
-<div id="listaClientes" class="clientes-grid"></div>
-
-</section>
-<script>
-  
-// ================= INVENTARIO BASE =================
-let inventario = JSON.parse(localStorage.getItem("inventarioNuevo")) || [
-
-{
-    nombre:"Aceite 5W-30 Sintético",
-    precio:850,
-    stock:10,
-    fecha:"01/02/2026",
-    historial:[]
-},
-
-{
-    nombre:"Filtro de Aceite Toyota",
-    precio:250,
-    stock:5,
-    fecha:"01/02/2026",
-    historial:[]
-},
-
-{
-    nombre:"Anticongelante Rojo",
-    precio:300,
-    stock:8,
-    fecha:"01/02/2026",
-    historial:[]
-}
-
-];
-// ================= MENU =================
-function mostrar(id){
-
-    // ocultar secciones
-    document.querySelectorAll('.seccion').forEach(sec=>{
-        sec.classList.remove('activa');
-    });
-
-    // mostrar sección seleccionada
-    const seccion = document.getElementById(id);
-    if(seccion) seccion.classList.add('activa');
-
-
-    // ===== MENU ACTIVO =====
-    document.querySelectorAll('.menu-lateral button').forEach(btn=>{
-        btn.classList.remove('activo');
-    });
-
-    const botonActivo = document.getElementById(
-        'btn' + id.charAt(0).toUpperCase() + id.slice(1)
-    );
-
-    if(botonActivo){
-        botonActivo.classList.add('activo');
-    }
-}
-
-let productoActual = null;
-
-function guardarInventario(){
-    localStorage.setItem("inventarioNuevo", JSON.stringify(inventario));
-}
-    function renderInventario(){
-
-    const cont = document.getElementById("vistaLista");
-    cont.innerHTML = "";
-
-    inventario.forEach((item,i)=>{
-
-        const colorStock = item.stock <= 3 ? "red" : "white";
-
-        cont.innerHTML += `
-            <div class="card-item" onclick="abrirDetalle(${i})">
-                <h3>${item.nombre}</h3>
-                <p style="color:${colorStock}">
-                    Stock: ${item.stock}
-                </p>
-            </div>
-        `;
-    });
-}
-
-
-
-function abrirDetalle(index){
-
-    productoActual = index;
-
-    document.getElementById("vistaLista").style.display="none";
-    document.getElementById("vistaDetalle").style.display="block";
-
-    const item = inventario[index];
-
-    document.getElementById("detalleNombre").innerText = item.nombre;
-    document.getElementById("detalleStock").innerText = item.stock;
-
-    renderHistorial();
-    if(item.stock <= 3){
-    document.getElementById("detalleStock").style.color="red";
-}else{
-    document.getElementById("detalleStock").style.color="white";
-}
-}
-
-
-
-// ===== VOLVER =====
-function volverLista(){
-
-    document.getElementById("vistaLista").style.display="block";
-    document.getElementById("vistaDetalle").style.display="none";
-
-}
-
-
-
-// ===== SUMAR STOCK =====
-function sumarStock(){
-
-    const cantidad = Number(document.getElementById("cantidadMovimiento").value);
-    const nota = document.getElementById("notaMovimiento").value;
-
-    if(isNaN(cantidad) || cantidad <= 0) return;
-
-    const item = inventario[productoActual];
-
-    item.stock += cantidad;
-
-    item.historial.push({
-        tipo:"Entrada",
-        cantidad:cantidad,
-        nota:nota || "",
-        fecha:new Date().toLocaleString()
-    });
-
-    actualizarVista();
-}
-
-
-
-// ===== RESTAR STOCK =====
-function restarStock(){
-
-    const cantidad = Number(document.getElementById("cantidadMovimiento").value);
-    const nota = document.getElementById("notaMovimiento").value;
-
-    if(isNaN(cantidad) || cantidad <= 0) return;
-
-    const item = inventario[productoActual];
-
-    if(item.stock < cantidad){
-        alert("No hay suficiente stock");
-        return;
-    }
-
-    item.stock -= cantidad;
-
-    item.historial.push({
-        tipo:"Salida",
-        cantidad:cantidad,
-        nota:nota || "",
-        fecha:new Date().toLocaleString()
-    });
-
-    actualizarVista();
-}
-
-
-
-// ===== ACTUALIZAR DETALLE =====
-function actualizarVista(){
-
-    guardarInventario();
-
-    document.getElementById("detalleStock").innerText =
-        inventario[productoActual].stock;
-
-    document.getElementById("cantidadMovimiento").value="";
-    document.getElementById("notaMovimiento").value="";
-
-    renderHistorial();
-renderInventario();
-    if(inventario[productoActual].stock <= 3){
-    document.getElementById("detalleStock").style.color="red";
-}else{
-    document.getElementById("detalleStock").style.color="white";
-}
-}
-
-
-
-function renderHistorial(){
-
-    const contenedor = document.getElementById("historialMovimientos");
-    contenedor.innerHTML = "";
-
-    const historial = inventario[productoActual].historial;
-
-    if(historial.length === 0){
-        contenedor.innerHTML = "<p>Sin movimientos</p>";
-        return;
-    }
-
-    historial.slice().reverse().forEach((m,i)=>{
-
-        const indexReal = historial.length - 1 - i;
-
-        contenedor.innerHTML += `
-            <div class="historial-item">
-                <strong>${m.tipo}</strong> - ${m.cantidad}<br>
-                ${m.fecha}<br>
-                ${m.nota || ""}<br>
-                <button onclick="borrarMovimiento(${indexReal})">
-                    ❌ Borrar
-                </button>
-            </div>
-        `;
-    });
-}
-
-
-// ================= VENTAS (BASE SIMPLE) =================
-
-let gananciaHoy = 0;
-let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
-function vender(){
-
-    const select = document.getElementById("productoVenta");
-    const cantidad = Number(document.getElementById("cantidadVenta").value);
-
-    const producto = inventario[select.value];
-
-    if(producto.stock < cantidad){
-        alert("No hay suficiente stock");
-        return;
-    }
-
-    producto.stock -= cantidad;
-
-    const totalVenta = producto.precio * cantidad;
-    gananciaHoy += totalVenta;
-
-    document.getElementById("gananciaHoy").innerText = gananciaHoy;
-
-    // GUARDAR VENTA
-    ventas.push({
-        producto: producto.nombre,
-        cantidad: cantidad,
-        total: totalVenta,
-        fecha: new Date().toLocaleString()
-    });
-
-    localStorage.setItem("ventas", JSON.stringify(ventas));
-
-    // ALERTA STOCK
-    if(producto.stock <= 3){
-        alert("⚠ Stock bajo: " + producto.nombre);
-    }
-
-    guardarInventario();
-    renderInventario();
-
-    alert("Venta realizada ✅");
-}
-
-// ===== CARGAR SELECT VENTAS =====
-function cargarProductosVenta(){
-
-    const select = document.getElementById("productoVenta");
-    if(!select) return;
-
-    select.innerHTML="";
-
-    inventario.forEach((item,index)=>{
-        select.innerHTML += `
-            <option value="${index}">
-                ${item.nombre}
-            </option>
-        `;
-    });
-}
-
-
-
-// ===== INICIAR =====
-window.addEventListener("load", ()=>{
-    guardarInventario();
-    cargarProductosVenta();
-    renderInventario();
-});
-   function borrarMovimiento(index){
-
-    if(!confirm("¿Eliminar este movimiento?")) return;
-
-    const item = inventario[productoActual];
-    const movimiento = item.historial[index];
-
-    // Revertir stock
-    if(movimiento.tipo === "Entrada"){
-        item.stock -= movimiento.cantidad;
-    }else{
-        item.stock += movimiento.cantidad;
-    }
-
-    item.historial.splice(index,1);
-
-    guardarInventario();
-    actualizarVista();
-}
-    
-</script>
-<script>
-
-    let trabajos = [];
-
-function agregarTrabajo(){
-    const cont = document.getElementById("listaTrabajos");
-
-    const index = trabajos.length;
-
-    cont.innerHTML += `
-        <div style="display:flex; gap:10px; margin-bottom:10px;">
-            <input type="number" placeholder="Cant." 
-                onchange="actualizarTrabajo(${index}, 'cantidad', this.value)">
-            <input type="text" placeholder="Descripción"
-                onchange="actualizarTrabajo(${index}, 'descripcion', this.value)">
-            <input type="number" placeholder="Importe"
-                onchange="actualizarTrabajo(${index}, 'importe', this.value)">
+        <div id="formMovimiento"></div>
+      </div>
+      <div class="caja">
+        <h3>Historial de movimientos</h3>
+        <div class="acciones mb">
+          <button type="button" class="peligro" onclick="borrarTodoHistorialMov()">Borrar todo el historial</button>
         </div>
-    `;
+        <div id="historialMovimientos"></div>
+      </div>
+    </section>
 
-    trabajos.push({
-        cantidad:0,
-        descripcion:"",
-        importe:0
+    <!-- ========== VENTAS ========== -->
+    <section id="ventas" class="seccion">
+      <h1>Venta de Aceite</h1>
+      <div class="caja">
+        <div class="form-grid form-grid-3">
+          <div class="form-fila">
+            <label for="ventaProducto">Producto</label>
+            <select id="ventaProducto"></select>
+          </div>
+          <div class="form-fila">
+            <label for="ventaCantidad">Cantidad</label>
+            <input type="number" id="ventaCantidad" class="input-num" min="1" value="1">
+          </div>
+          <div class="form-fila form-fila-btn">
+            <button type="button" class="primario" onclick="agregarLineaVenta()">➕ Agregar a la venta</button>
+          </div>
+        </div>
+        <div class="form-fila">
+          <label for="ventaDescuento">Descuento (%)</label>
+          <input type="number" id="ventaDescuento" class="input-num" min="0" max="100" value="0">
+        </div>
+        <table>
+          <thead><tr><th>Producto</th><th>Cantidad</th><th>Precio unit.</th><th>Total</th><th></th></tr></thead>
+          <tbody id="lineasVenta"></tbody>
+        </table>
+        <p><strong>Subtotal:</strong> <span id="ventaSubtotal">$0</span> &nbsp; <strong>IVA (8%):</strong> <span id="ventaIVA">$0</span> &nbsp; <strong>Total:</strong> <span id="ventaTotal">$0</span></p>
+        <div class="acciones">
+          <button type="button" class="primario" onclick="confirmarVenta()">Confirmar venta</button>
+          <button type="button" onclick="cancelarVenta()">Cancelar</button>
+          <button type="button" onclick="imprimirTicket()">Imprimir ticket</button>
+        </div>
+      </div>
+      <div class="caja">
+        <h3>Historial de ventas</h3>
+        <div id="historialVentas"></div>
+      </div>
+      <p><strong>Ganancia hoy: <span id="gananciaHoy">$0</span></strong></p>
+      <div class="acciones">
+        <button type="button" class="peligro" onclick="borrarVentasHoy()">Borrar ventas de hoy</button>
+        <button type="button" class="peligro" onclick="reiniciarTodo()">Reiniciar todo</button>
+      </div>
+    </section>
+
+    <!-- ========== PRESUPUESTO ========== -->
+    <section id="presupuesto" class="seccion">
+      <h1>Generar Presupuesto</h1>
+      <div class="caja">
+        <p><strong>Nº Presupuesto:</strong> <span id="numPresupuesto">PRE-1</span></p>
+        <div class="form-grid form-grid-2">
+          <div class="form-fila">
+            <label for="presupuestoCliente">Cliente</label>
+            <select id="presupuestoCliente"></select>
+          </div>
+          <div class="form-fila">
+            <label for="presupuestoValidez">Válido hasta</label>
+            <input type="date" id="presupuestoValidez" class="input-fecha">
+          </div>
+        </div>
+        <h3>Trabajos</h3>
+        <div id="trabajosPresupuesto"></div>
+        <div class="acciones">
+          <button type="button" class="primario" onclick="agregarTrabajoPresupuesto()">➕ Agregar trabajo</button>
+        </div>
+        <h3>Resumen</h3>
+        <p><strong>Subtotal:</strong> <span id="presupSubtotal">$0</span> &nbsp; <strong>IVA (8%):</strong> <span id="presupIVA">$0</span> &nbsp; <strong>Total:</strong> <span id="presupTotal">$0</span></p>
+        <div class="acciones">
+          <button type="button" class="primario" onclick="generarPDFPresupuesto()">Generar PDF</button>
+          <button type="button" onclick="enviarPresupuestoMail()">Enviar por correo</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== ÓRDENES ========== -->
+    <section id="ordenes" class="seccion">
+      <h1>Órdenes de Trabajo</h1>
+      <div class="acciones mb">
+        <button type="button" class="primario" onclick="nuevaOrden()">+ Nueva orden</button>
+      </div>
+      <div id="listaOrdenes"></div>
+      <div id="formOrden" class="caja oculto">
+        <h3>Detalle de orden</h3>
+        <div class="form-grid form-grid-2">
+          <div class="form-fila">
+            <label for="ordenCliente">Cliente</label>
+            <select id="ordenCliente"></select>
+          </div>
+          <div class="form-fila">
+            <label for="ordenPresupuesto">Presupuesto</label>
+            <select id="ordenPresupuesto"></select>
+          </div>
+        </div>
+        <div class="form-grid form-grid-2">
+          <div class="form-fila">
+            <label for="ordenEntrega">Fecha entrega estimada</label>
+            <input type="date" id="ordenEntrega" class="input-fecha">
+          </div>
+          <div class="form-fila">
+            <label for="ordenEstado">Estado</label>
+            <select id="ordenEstado"><option value="pendiente">Pendiente</option><option value="proceso">En proceso</option><option value="completada">Completada</option><option value="entregada">Entregada</option></select>
+          </div>
+        </div>
+        <h3>Checklist de trabajos</h3>
+        <div id="ordenChecklist"></div>
+        <div class="acciones">
+          <button type="button" onclick="agregarCheckItem()">➕ Agregar ítem</button>
+        </div>
+        <div class="acciones">
+          <button type="button" class="primario" onclick="guardarOrden()">Guardar orden</button>
+          <button type="button" onclick="cerrarFormOrden()">Cerrar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== CLIENTES ========== -->
+    <section id="clientes" class="seccion">
+      <h1>Clientes</h1>
+      <div class="form-fila buscador">
+        <label for="buscarCliente">Buscar</label>
+        <input type="text" id="buscarCliente" placeholder="Nombre, teléfono o placa..." oninput="filtrarClientes()">
+      </div>
+      <div class="acciones mb">
+        <button type="button" class="primario" onclick="nuevoCliente()">+ Nuevo cliente</button>
+      </div>
+      <div id="listaClientes"></div>
+      <div id="formCliente" class="caja oculto">
+        <h3>Datos del cliente</h3>
+        <div class="form-grid form-grid-3">
+          <div class="form-fila">
+            <label for="clienteNombre">Nombre</label>
+            <input type="text" id="clienteNombre">
+          </div>
+          <div class="form-fila">
+            <label for="clienteTel">Teléfono</label>
+            <input type="tel" id="clienteTel">
+          </div>
+          <div class="form-fila">
+            <label for="clienteEmail">Email</label>
+            <input type="email" id="clienteEmail">
+          </div>
+        </div>
+        <div class="form-grid form-grid-2">
+          <div class="form-fila">
+            <label for="clienteVehiculo">Vehículo (marca/modelo)</label>
+            <input type="text" id="clienteVehiculo" placeholder="Ej. Nissan Versa 2020">
+          </div>
+          <div class="form-fila">
+            <label for="clientePlacas">Placas</label>
+            <input type="text" id="clientePlacas">
+          </div>
+        </div>
+        <div class="acciones">
+          <button type="button" class="primario" onclick="guardarCliente()">Guardar</button>
+          <button type="button" onclick="cerrarFormCliente()">Cerrar</button>
+        </div>
+      </div>
+      <div id="detalleCliente" class="caja oculto">
+        <h3>Historial del cliente</h3>
+        <div id="historialCliente"></div>
+        <div class="acciones">
+          <button type="button" onclick="document.getElementById('detalleCliente').classList.add('oculto')">Cerrar</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="pie-pagina">Taller Borjón · Almacén de Aceites · Versión 1.0</footer>
+  </main>
+
+  <!-- Modal: Agregar producto (aceites, frenos, power, filtros, etc.) -->
+  <div id="modalAgregarProducto" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalAgregarTitulo" onclick="if(event.target===this)cerrarModalAgregar()">
+    <div class="modal-caja" onclick="event.stopPropagation()">
+      <h2 id="modalAgregarTitulo">Agregar producto</h2>
+      <p class="caja-desc">Elige el tipo de producto y completa los datos. Todos usan el mismo inventario y movimientos.</p>
+      <div class="form-fila">
+        <label for="modalTipoProducto">Tipo de producto</label>
+        <select id="modalTipoProducto">
+          <option value="Aceites">Aceites (motor, transmisión)</option>
+          <option value="Aceite de frenos">Aceite de frenos</option>
+          <option value="Aceite de power">Aceite de power steering</option>
+          <option value="Refrigerante">Refrigerante / Anticongelante</option>
+          <option value="Filtros">Filtros</option>
+          <option value="Grasas">Grasas y lubricantes</option>
+          <option value="Otros">Otros</option>
+        </select>
+      </div>
+      <div class="form-fila">
+        <label for="modalNombreProducto">Nombre del producto</label>
+        <input type="text" id="modalNombreProducto" placeholder="Ej. 5W-30 Valvoline Sintético Galón o DOT 3 Castrol">
+      </div>
+      <div class="form-fila">
+        <label for="modalCategoriaProducto">Categoría o referencia (opcional)</label>
+        <input type="text" id="modalCategoriaProducto" placeholder="Ej. 5W-30, DOT 3, etc.">
+      </div>
+      <div class="form-grid form-grid-2">
+        <div class="form-fila">
+          <label for="modalCantidadProducto">Cantidad inicial</label>
+          <input type="number" id="modalCantidadProducto" class="input-num" value="0" min="0">
+        </div>
+        <div class="form-fila">
+          <label for="modalUmbralProducto">Aviso cuando quede menos de</label>
+          <input type="number" id="modalUmbralProducto" class="input-num" value="5" min="1">
+        </div>
+      </div>
+      <div class="acciones">
+        <button type="button" class="primario" onclick="guardarProductoModal()">➕ Agregar producto</button>
+        <button type="button" onclick="cerrarModalAgregar()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BREADCRUMBS = { inicio: 'Inicio', inventario: 'Inventario', ventas: 'Ventas', presupuesto: 'Presupuesto', ordenes: 'Órdenes de Trabajo', clientes: 'Clientes' };
+    const IVA = 0.08;
+
+    function escapeHtml(str) {
+      if (str == null) return '';
+      var s = String(str);
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    const STORAGE = { inv: 'tb_inventario', mov: 'tb_movimientos', ventas: 'tb_ventas', clientes: 'tb_clientes', ordenes: 'tb_ordenes', presupuestos: 'tb_presupuestos', contadorPresup: 'tb_contador_presup', contadorOrden: 'tb_contador_orden' };
+
+    let inventario = [];
+    let movimientos = [];
+    let ventas = [];
+    let clientes = [];
+    let ordenes = [];
+    let presupuestos = [];
+    let lineasVentaActual = [];
+    let trabajosPresupuesto = [];
+    let ordenActual = null;
+    let clienteActual = null;
+    let presupuestoActual = { trabajos: [] };
+
+    function ir(id) {
+      document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
+      document.getElementById(id).classList.add('activa');
+      document.querySelectorAll('.sidebar-nav button').forEach(b => b.classList.remove('activo'));
+      var btn = document.getElementById('btn' + id.charAt(0).toUpperCase() + id.slice(1));
+      if (btn) btn.classList.add('activo');
+      document.getElementById('breadcrumb').innerHTML = '<a href="#" onclick="ir(\'inicio\')">Inicio</a> <span>/</span> ' + (BREADCRUMBS[id] || id);
+      if (id === 'inventario') {
+        cargarInventarioDOM();
+        listarMovimientos();
+      }
+      if (id === 'inicio') actualizarDashboard();
+      if (id === 'ventas') { llenarSelectProductos(); listarVentas(); actualizarGananciaHoy(); }
+      if (id === 'presupuesto') {
+        llenarSelectClientes('presupuestoCliente');
+        actualizarNumPresupuesto();
+        if (!presupuestoActual.trabajos || presupuestoActual.trabajos.length === 0) presupuestoActual.trabajos = [{ descripcion: '', monto: 0 }];
+        dibujarTrabajosPresupuesto();
+        var val = document.getElementById('presupuestoValidez');
+        if (val && !val.value) { var d = new Date(); d.setDate(d.getDate() + 7); val.value = d.toISOString().slice(0, 10); }
+      }
+      if (id === 'ordenes') { listarOrdenes(); llenarSelectClientes('ordenCliente'); }
+      if (id === 'clientes') { listarClientes(); }
+    }
+
+    function msg(txt) { var m = document.getElementById('msgGlobal'); m.textContent = txt; m.classList.add('visible'); setTimeout(function() { m.classList.remove('visible'); }, 3000); }
+
+    function abrirModalAgregar() {
+      ir('inventario');
+      document.getElementById('modalAgregarProducto').classList.add('visible');
+      document.getElementById('modalNombreProducto').value = '';
+      document.getElementById('modalCategoriaProducto').value = '';
+      document.getElementById('modalCantidadProducto').value = '0';
+      document.getElementById('modalUmbralProducto').value = '5';
+      setTimeout(function() { document.getElementById('modalNombreProducto').focus(); }, 100);
+    }
+    function irYAgregarProducto() {
+      abrirModalAgregar();
+    }
+    function cerrarModalAgregar() {
+      document.getElementById('modalAgregarProducto').classList.remove('visible');
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.getElementById('modalAgregarProducto').classList.contains('visible')) cerrarModalAgregar();
     });
-}
-
-function actualizarTrabajo(index, campo, valor){
-    trabajos[index][campo] = valor;
-    calcularTotales();
-}
-
-function calcularTotales(){
-    let subtotal = 0;
-
-    trabajos.forEach(t=>{
-        subtotal += Number(t.importe || 0);
-    });
-
-    const iva = subtotal * 0.16;
-    const total = subtotal + iva;
-
-    document.getElementById("subtotal").innerText = subtotal.toFixed(2);
-    document.getElementById("iva").innerText = iva.toFixed(2);
-    document.getElementById("total").innerText = total.toFixed(2);
-}
-
-async function generarPDF() {
-
-    const { PDFDocument } = PDFLib;
-
-    const existingPdfBytes = await fetch('Plantilla_Borjon.pdf').then(res => res.arrayBuffer());
-    const pdfDoc = await PDFDocument.load(existingPdfBytes);
-    const page = pdfDoc.getPages()[0];
-
-    const nombre = document.getElementById("nombreCliente").value;
-    const marca = document.getElementById("marcaVehiculo").value;
-    const modelo = document.getElementById("modeloVehiculo").value;
-    const anioVehiculo = document.getElementById("anioVehiculo").value;
-
-    const vehiculo = marca + " " + modelo + " " + anioVehiculo;
-
-    const fecha = new Date();
-    const dia = fecha.getDate().toString();
-    const mes = (fecha.getMonth()+1).toString();
-    const año = fecha.getFullYear().toString();
-//ENCABEZADO//
-  const fontSizeFecha = 12;
-
-function drawCentered(text, centerX, yPos){
-    const textWidth = text.length * 6;
-    page.drawText(text, { 
-        x: centerX - (textWidth / 2), 
-        y: yPos, 
-        size: fontSizeFecha 
-    });
-}
-
-// Ajusta estos centros si hace falta mover 2-3 px
-drawCentered(dia, 115, 598);
-drawCentered(mes, 190, 598);
-drawCentered(año, 265, 598);
-
-   page.drawText(nombre, { x: 360, y: 635, size: 12 });
-   page.drawText(vehiculo, { x: 360, y: 595, size: 12 });
-
-// ===== TABLA =====
-let y = 540;
-const fontSize = 10;
-
-trabajos.forEach(t => {
-
-    // CANTIDAD
-    page.drawText(String(t.cantidad), { x: 70, y: y, size: fontSize });
-
-    // DESCRIPCIÓN
-    page.drawText(t.descripcion || "", { x: 120, y: y, size: fontSize });
-
-    // IMPORTE
-    const importeTexto = "$" + Number(t.importe).toFixed(2);
-    const textWidth = importeTexto.length * 5.5;
-    const xPosition = 545 - textWidth;
-
-    page.drawText(importeTexto, { x: xPosition, y: y, size: fontSize });
-
-    y -= 18;
-});
-    let subtotal = 0;
-
-trabajos.forEach(t=>{
-    subtotal += Number(t.importe || 0);
-});
-
-const iva = subtotal * 0.08;
-const total = subtotal + iva;
-
-    // ===== TOTALES =====
-  function drawRight(text, yPos){
-    const textWidth = text.length * 6;
-    page.drawText(text, { x: 545 - textWidth, y: yPos, size: 12 });
-}
-
-drawRight("$" + subtotal.toFixed(2), 180);
-drawRight("$" + iva.toFixed(2), 160);
-drawRight("$" + total.toFixed(2), 140);
-
-    const pdfBytes = await pdfDoc.save();
-
-    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = "Presupuesto_Borjon.pdf";
-    link.click();
-
-    alert("Presupuesto generado correctamente ✅");
-}
-   // ================= ORDENES DE TRABAJO =================
-
-let ordenes = JSON.parse(localStorage.getItem("ordenes")) || [];
-
-function mostrarFormularioOrden(){
-    const form = document.getElementById("formOrden");
-
-    form.style.display =
-        form.style.display === "none" ? "block" : "none";
-}
-
-function guardarOrden(){
-
-    const orden = {
-        cliente: document.getElementById("clienteNombre").value,
-        telefono: document.getElementById("clienteTelefono").value,
-        marca: document.getElementById("carroMarca").value,
-        modelo: document.getElementById("carroModelo").value,
-        color: document.getElementById("carroColor").value,
-        fecha: document.getElementById("fechaTrabajo").value,
-        descripcion: document.getElementById("descripcionTrabajo").value
-    };
-
-    ordenes.push(orden);
-
-    localStorage.setItem("ordenes", JSON.stringify(ordenes));
-
-    limpiarFormulario();
-    renderOrdenes();
-}
-
-function limpiarFormulario(){
-    document.getElementById("clienteNombre").value="";
-    document.getElementById("clienteTelefono").value="";
-    document.getElementById("carroMarca").value="";
-    document.getElementById("carroModelo").value="";
-    document.getElementById("carroColor").value="";
-    document.getElementById("fechaTrabajo").value="";
-    document.getElementById("descripcionTrabajo").value="";
-}
-
-function renderOrdenes(){
-
-    const lista = document.getElementById("listaOrdenes");
-    if(!lista) return;
-
-    lista.innerHTML = "";
-
-    ordenes.forEach((o,i)=>{
-
-        lista.innerHTML += `
-            <div class="orden-card">
-                <h3>${o.marca} ${o.modelo}</h3>
-
-                <p><b>Cliente:</b> ${o.cliente}</p>
-                <p><b>Tel:</b> ${o.telefono}</p>
-                <p><b>Color:</b> ${o.color}</p>
-                <p><b>Fecha:</b> ${o.fecha}</p>
-
-                <div class="trabajo">${o.descripcion}</div>
-
-                <button onclick="eliminarOrden(${i})">
-                    🗑 Eliminar
-                </button>
-            </div>
-        `;
-    });
-}
-
-function eliminarOrden(index){
-    ordenes.splice(index,1);
-    localStorage.setItem("ordenes", JSON.stringify(ordenes));
-    renderOrdenes();
-}
-
-// cargar al abrir app
-renderOrdenes();
-
-function verVehiculos(){
-
-    const lista = document.getElementById("listaVehiculos");
-    lista.innerHTML="";
-
-    ordenes.forEach(o => {
-
-        lista.innerHTML += `
-            <div class="vehiculo-item">
-                <b>${o.vehiculo}</b><br>
-                Cliente: ${o.cliente}<br>
-                Placas: ${o.placa}<br>
-                Trabajo: ${o.descripcion}
-            </div>
-        `;
-    });
-}
-    function toggleMenu(){
-
-    const menu = document.getElementById("menuLateral");
-
-    menu.classList.toggle("menu-cerrado");
-    document.body.classList.toggle("body-expandido");
-}
-    // ===== CLIENTES =====
-
-let clientes = JSON.parse(localStorage.getItem("clientes")) || [];
-
-function toggleFormCliente(){
-    const f = document.getElementById("formCliente");
-    f.style.display = f.style.display === "none" ? "block" : "none";
-}
-
-function guardarCliente(){
-
-    const nombre = document.getElementById("cNombre").value;
-    const telefono = document.getElementById("cTelefono").value;
-    const correo = document.getElementById("cCorreo").value;
-
-    if(!nombre) return alert("Escribe el nombre");
-
-    clientes.push({nombre,telefono,correo});
-
-    localStorage.setItem("clientes",JSON.stringify(clientes));
-
-    document.getElementById("formCliente").style.display="none";
-
-    renderClientes();
-}
-
-function renderClientes(){
-
-    const lista = document.getElementById("listaClientes");
-    lista.innerHTML="";
-
-    clientes.forEach((c,i)=>{
-
-        const inicial = c.nombre.charAt(0).toUpperCase();
-
-        lista.innerHTML += `
-            <div class="cliente-card">
-
-                <div class="cliente-top">
-                    <div class="cliente-avatar">${inicial}</div>
-
-                    <div class="cliente-nombre">
-                        ${c.nombre}
-                    </div>
-                </div>
-
-                <div class="cliente-info">📞 ${c.telefono || "-"}</div>
-                <div class="cliente-info">✉ ${c.correo || "-"}</div>
-
-            </div>
-        `;
-    });
-}
-
-renderClientes();
-</script>
-    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-    
+    function guardarProductoModal() {
+      var tipo = document.getElementById('modalTipoProducto').value;
+      var nombre = (document.getElementById('modalNombreProducto').value || '').trim();
+      if (!nombre) { msg('Escribe el nombre del producto'); return; }
+      var cat = (document.getElementById('modalCategoriaProducto').value || '').trim() || nombre.split(' ')[0];
+      var cant = parseInt(document.getElementById('modalCantidadProducto').value, 10) || 0;
+      var umbral = parseInt(document.getElementById('modalUmbralProducto').value, 10) || 5;
+      inventario = getInv();
+      var id = inventario.length ? Math.max.apply(null, inventario.map(function(p) { return p.id; })) + 1 : 1;
+      inventario.push({ id: id, tipo: tipo, nombre: nombre, categoria: cat, cantidad: cant, umbral: umbral });
+      setInv(inventario);
+      cerrarModalAgregar();
+      cargarInventarioDOM();
+      pintarFormMovimiento();
+      llenarSelectProductos();
+      actualizarDashboard();
+      msg('Producto agregado: ' + nombre);
+    }
+
+    // ----- INVENTARIO -----
+    function getInv() { try { return JSON.parse(localStorage.getItem(STORAGE.inv) || '[]'); } catch(e) { return []; } }
+    function getMov() { try { return JSON.parse(localStorage.getItem(STORAGE.mov) || '[]'); } catch(e) { return []; } }
+    function setInv(arr) { inventario = arr; localStorage.setItem(STORAGE.inv, JSON.stringify(arr)); }
+    function setMov(arr) { movimientos = arr; localStorage.setItem(STORAGE.mov, JSON.stringify(arr)); }
+
+    function initInventario() {
+      inventario = getInv();
+      if (inventario.length === 0) {
+        ['5W-30 Valvoline Sintético Galón', '5W-30 Valvoline Semisintético Galón', '10W-30 Shell Sintético Galón', '10W-30 Shell Semisintético Cuarto'].forEach(function(nombre, i) {
+          inventario.push({ id: i + 1, tipo: 'Aceites', nombre: nombre, categoria: nombre.split(' ')[0], cantidad: 0, umbral: 5 });
+        });
+        setInv(inventario);
+      } else {
+        inventario.forEach(function(p) {
+          if (!p.tipo) p.tipo = 'Aceites';
+        });
+        setInv(inventario);
+      }
+    }
+
+    function eliminarAceite(id) {
+      inventario = getInv();
+      inventario = inventario.filter(function(p) { return p.id !== id; });
+      setInv(inventario);
+      cargarInventarioDOM();
+      pintarFormMovimiento();
+      msg('Producto eliminado');
+    }
+
+    function cargarInventarioDOM() {
+      inventario = getInv();
+      var html = '';
+      inventario.forEach(function(p) {
+        var baja = (p.cantidad || 0) <= (p.umbral || 5);
+        var tipo = p.tipo || 'Aceites';
+        html += '<div class="fila-inv' + (baja ? ' alerta-baja' : '') + '"><span><span class="badge-tipo">' + escapeHtml(tipo) + '</span> ' + escapeHtml(p.nombre) + '</span><span class="cant" data-id="' + p.id + '">' + (p.cantidad || 0) + '</span><button type="button" onclick="editarUmbral(' + p.id + ')">Umbral</button><button type="button" class="peligro" onclick="eliminarAceite(' + p.id + ')">Eliminar</button></div>';
+      });
+      document.getElementById('listaInventario').innerHTML = html || '<p class="sin-datos">No hay productos. Haz clic en «Agregar producto» (menú o botón arriba).</p>';
+      pintarFormMovimiento();
+    }
+
+    function pintarFormMovimiento() {
+      inventario = getInv();
+      var sel = '<option value="">-- Seleccionar producto --</option>';
+      inventario.forEach(function(p) { sel += '<option value="' + p.id + '">[' + escapeHtml(p.tipo || 'Aceites') + '] ' + escapeHtml(p.nombre) + ' (' + (p.cantidad || 0) + ')</option>'; });
+      document.getElementById('formMovimiento').innerHTML = '<div class="form-grid form-grid-3"><div class="form-fila"><label for="selMovProd">Producto</label><select id="selMovProd">' + sel + '</select></div><div class="form-fila"><label for="movCant">Cantidad</label><input type="number" id="movCant" class="input-num" value="1" min="1"></div><div class="form-fila form-fila-btn"><button type="button" class="primario" onclick="aplicarMovimiento()">Aplicar movimiento</button></div></div>';
+    }
+
+    function movInv(id, delta) {
+      inventario = getInv();
+      var p = inventario.find(function(x) { return x.id === id; });
+      if (!p) return;
+      p.cantidad = Math.max(0, (p.cantidad || 0) + delta);
+      setInv(inventario);
+      movimientos = getMov();
+      var tipo = delta > 0 ? 'agregar' : 'restar';
+      movimientos.unshift({ fecha: new Date().toISOString(), productoId: id, producto: p.nombre, delta: delta > 0 ? '+' + delta : delta, tipo: tipo });
+      setMov(movimientos);
+      cargarInventarioDOM();
+      listarMovimientos();
+      msg('Inventario actualizado');
+    }
+
+    function aplicarMovimiento() {
+      var id = parseInt(document.getElementById('selMovProd').value, 10);
+      var cant = parseInt(document.getElementById('movCant').value, 10) || 1;
+      if (!id) { msg('Elige un producto'); return; }
+      var agregar = document.querySelector('input[name="tipoMov"]:checked') && document.querySelector('input[name="tipoMov"]:checked').value === 'agregar';
+      movInv(id, agregar ? cant : -cant);
+    }
+
+    function editarUmbral(id) {
+      inventario = getInv();
+      var p = inventario.find(function(x) { return x.id === id; });
+      if (!p) return;
+      var v = prompt('Alerta cuando quede menos de (unidades):', p.umbral || 5);
+      if (v === null) return;
+      p.umbral = Math.max(1, parseInt(v, 10) || 5);
+      setInv(inventario);
+      cargarInventarioDOM();
+    }
+
+    function borrarMovimiento(i) {
+      movimientos = getMov();
+      movimientos.splice(i, 1);
+      setMov(movimientos);
+      listarMovimientos();
+      msg('Movimiento borrado');
+    }
+
+    function borrarMovimientosDelDia(fechaStr) {
+      movimientos = getMov();
+      movimientos = movimientos.filter(function(m) { return (m.fecha || '').slice(0, 10) !== fechaStr; });
+      setMov(movimientos);
+      listarMovimientos();
+      msg('Movimientos del día borrados');
+    }
+
+    function borrarTodoHistorialMov() {
+      setMov([]);
+      listarMovimientos();
+      msg('Historial de movimientos borrado');
+    }
+
+    function listarMovimientos() {
+      movimientos = getMov();
+      var html = '<table class="tabla-movimientos"><thead><tr><th>Fecha</th><th>Producto</th><th>Cambio</th><th></th></tr></thead><tbody>';
+      movimientos.slice(0, 80).forEach(function(m, i) {
+        html += '<tr><td>' + new Date(m.fecha).toLocaleString() + '</td><td>' + escapeHtml(m.producto || '') + '</td><td>' + (m.delta || '') + ' ' + (m.tipo === 'agregar' ? '(agregar)' : '(restar)') + '</td><td><button type="button" onclick="borrarMovimiento(' + i + ')">Borrar</button></td></tr>';
+      });
+      html += '</tbody></table>';
+      document.getElementById('historialMovimientos').innerHTML = html || '<p class="sin-datos">No hay movimientos.</p>';
+    }
+
+    function filtrarInventario() {
+      var q = (document.getElementById('buscarInv').value || '').toLowerCase();
+      document.querySelectorAll('.fila-inv').forEach(function(fil) {
+        fil.style.display = !q || fil.textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+
+    // ----- VENTAS -----
+    function getVentas() { try { return JSON.parse(localStorage.getItem(STORAGE.ventas) || '[]'); } catch(e) { return []; } }
+    function setVentas(arr) { ventas = arr; localStorage.setItem(STORAGE.ventas, JSON.stringify(arr)); }
+
+    function llenarSelectProductos() {
+      inventario = getInv();
+      var sel = '<option value="">-- Producto --</option>';
+      inventario.forEach(function(p) { sel += '<option value="' + p.id + '">' + escapeHtml(p.nombre) + '</option>'; });
+      document.getElementById('ventaProducto').innerHTML = sel;
+    }
+
+    function agregarLineaVenta() {
+      var sel = document.getElementById('ventaProducto');
+      var id = parseInt(sel.value);
+      var cant = parseInt(document.getElementById('ventaCantidad').value) || 1;
+      if (!id) { msg('Elige un producto'); return; }
+      var p = inventario.find(x => x.id === id);
+      if (!p) return;
+      var precio = parseFloat(p.precio) || 0;
+      if (precio === 0) precio = parseFloat(prompt('Precio unitario para ' + p.nombre + ':', '0')) || 0;
+      lineasVentaActual.push({ productoId: id, nombre: p.nombre, cantidad: cant, precioUnit: precio, total: cant * precio });
+      renderLineasVenta();
+    }
+
+    function renderLineasVenta() {
+      var tbody = document.getElementById('lineasVenta');
+      tbody.innerHTML = '';
+      lineasVentaActual.forEach((l, i) => {
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + l.nombre + '</td><td>' + l.cantidad + '</td><td>$' + l.precioUnit + '</td><td>$' + l.total + '</td><td><button onclick="quitarLineaVenta(' + i + ')">Quitar</button></td>';
+        tbody.appendChild(tr);
+      });
+      var subtotal = lineasVentaActual.reduce((s, l) => s + l.total, 0);
+      var desc = (parseFloat(document.getElementById('ventaDescuento').value) || 0) / 100;
+      subtotal = subtotal * (1 - desc);
+      var iva = subtotal * IVA;
+      var total = subtotal + iva;
+      document.getElementById('ventaSubtotal').textContent = '$' + subtotal.toFixed(2);
+      document.getElementById('ventaIVA').textContent = '$' + iva.toFixed(2);
+      document.getElementById('ventaTotal').textContent = '$' + total.toFixed(2);
+    }
+
+    document.getElementById('ventaDescuento').addEventListener('input', renderLineasVenta);
+
+    function quitarLineaVenta(i) { lineasVentaActual.splice(i, 1); renderLineasVenta(); }
+
+    function confirmarVenta() {
+      if (lineasVentaActual.length === 0) { msg('Agrega al menos un producto'); return; }
+      inventario = getInv();
+      var subtotal = lineasVentaActual.reduce((s, l) => s + l.total, 0);
+      var desc = (parseFloat(document.getElementById('ventaDescuento').value) || 0) / 100;
+      subtotal = subtotal * (1 - desc);
+      var total = subtotal + (subtotal * IVA);
+      ventas = getVentas();
+      ventas.push({ fecha: new Date().toISOString(), lineas: JSON.parse(JSON.stringify(lineasVentaActual)), subtotal, total });
+      setVentas(ventas);
+      lineasVentaActual.forEach(l => {
+        var p = inventario.find(x => x.id === l.productoId);
+        if (p) p.cantidad = Math.max(0, (p.cantidad || 0) - l.cantidad);
+      });
+      setInv(inventario);
+      lineasVentaActual = [];
+      renderLineasVenta();
+      listarVentas();
+      actualizarGananciaHoy();
+      msg('Venta registrada');
+    }
+
+    function cancelarVenta() { lineasVentaActual = []; renderLineasVenta(); msg('Venta cancelada'); }
+
+    function imprimirTicket() {
+      if (lineasVentaActual.length === 0) { msg('No hay líneas para imprimir'); return; }
+      var w = window.open('', '_blank');
+      var sub = lineasVentaActual.reduce((s, l) => s + l.total, 0);
+      var desc = (parseFloat(document.getElementById('ventaDescuento').value) || 0) / 100;
+      sub = sub * (1 - desc);
+      var tot = sub + sub * IVA;
+      w.document.write('<pre style="font-family:monospace">TALLER BORJON - TICKET\n' + new Date().toLocaleString() + '\n\n' + lineasVentaActual.map(l => l.nombre + ' x' + l.cantidad + ' $' + l.total).join('\n') + '\n\nSubtotal: $' + sub.toFixed(2) + '\nTotal: $' + tot.toFixed(2) + '</pre>');
+      w.print();
+      w.close();
+    }
+
+    function listarVentas() {
+      ventas = getVentas();
+      var html = '<table><thead><tr><th>Fecha</th><th>Total</th></tr></thead><tbody>';
+      ventas.slice(-30).reverse().forEach(v => { html += '<tr><td>' + new Date(v.fecha).toLocaleString() + '</td><td>$' + (v.total || 0).toFixed(2) + '</td></tr>'; });
+      html += '</tbody></table>';
+      document.getElementById('historialVentas').innerHTML = html;
+    }
+
+    function actualizarGananciaHoy() {
+      ventas = getVentas();
+      var hoy = new Date().toDateString();
+      var total = ventas.filter(v => new Date(v.fecha).toDateString() === hoy).reduce((s, v) => s + (v.total || 0), 0);
+      document.getElementById('gananciaHoy').textContent = '$' + total.toFixed(2);
+    }
+
+    function borrarVentasHoy() {
+      ventas = getVentas();
+      var hoy = new Date().toDateString();
+      ventas = ventas.filter(v => new Date(v.fecha).toDateString() !== hoy);
+      setVentas(ventas);
+      listarVentas();
+      actualizarGananciaHoy();
+      msg('Ventas de hoy borradas');
+    }
+
+    function reiniciarTodo() {
+      setVentas([]);
+      lineasVentaActual = [];
+      renderLineasVenta();
+      listarVentas();
+      actualizarGananciaHoy();
+      msg('Ventas reiniciadas');
+    }
+
+    // ----- PRESUPUESTO -----
+    function getPresupuestos() { try { return JSON.parse(localStorage.getItem(STORAGE.presupuestos) || '[]'); } catch(e) { return []; } }
+    function getContadorPresup() { return parseInt(localStorage.getItem(STORAGE.contadorPresup) || '0'); }
+    function setContadorPresup(n) { localStorage.setItem(STORAGE.contadorPresup, String(n)); }
+
+    function actualizarNumPresupuesto() {
+      var n = getContadorPresup() + 1;
+      document.getElementById('numPresupuesto').textContent = 'PRE-' + new Date().getFullYear() + '-' + String(n).padStart(3, '0');
+    }
+
+    function agregarTrabajoPresupuesto() {
+      presupuestoActual.trabajos = presupuestoActual.trabajos || [];
+      presupuestoActual.trabajos.push({ descripcion: '', monto: 0 });
+      dibujarTrabajosPresupuesto();
+    }
+
+    function dibujarTrabajosPresupuesto() {
+      var div = document.getElementById('trabajosPresupuesto');
+      div.innerHTML = '';
+      (presupuestoActual.trabajos || []).forEach((t, i) => {
+        var p = document.createElement('p');
+        p.innerHTML = '<div class="form-grid form-grid-3"><div class="form-fila"><label>Descripción</label><input type="text" id="trabDesc' + i + '" value="' + escapeHtml(t.descripcion || '') + '" onchange="actualizarResumenPresupuesto()"></div><div class="form-fila"><label>Monto</label><input type="number" id="trabMonto' + i + '" class="input-num" value="' + (t.monto || 0) + '" onchange="actualizarResumenPresupuesto()"></div><div class="form-fila form-fila-btn"><button type="button" onclick="quitarTrabajoPresupuesto(' + i + ')">Quitar</button></div></div>';
+        div.appendChild(p);
+      });
+      actualizarResumenPresupuesto();
+    }
+
+    function quitarTrabajoPresupuesto(i) {
+      presupuestoActual.trabajos.splice(i, 1);
+      dibujarTrabajosPresupuesto();
+    }
+
+    function actualizarResumenPresupuesto() {
+      var subtotal = 0;
+      (presupuestoActual.trabajos || []).forEach((t, i) => {
+        var desc = document.getElementById('trabDesc' + i);
+        var monto = document.getElementById('trabMonto' + i);
+        if (desc) t.descripcion = desc.value;
+        if (monto) { t.monto = parseFloat(monto.value) || 0; subtotal += t.monto; }
+      });
+      var iva = subtotal * IVA;
+      document.getElementById('presupSubtotal').textContent = '$' + subtotal.toFixed(2);
+      document.getElementById('presupIVA').textContent = '$' + iva.toFixed(2);
+      document.getElementById('presupTotal').textContent = '$' + (subtotal + iva).toFixed(2);
+    }
+
+    function generarPDFPresupuesto() {
+      var num = document.getElementById('numPresupuesto').textContent;
+      var validez = document.getElementById('presupuestoValidez').value || new Date(Date.now() + 7*24*60*60*1000).toISOString().slice(0, 10);
+      var subtotal = 0;
+      (presupuestoActual.trabajos || []).forEach((t, i) => {
+        var m = document.getElementById('trabMonto' + i);
+        if (m) subtotal += parseFloat(m.value) || 0;
+      });
+      var total = subtotal + subtotal * IVA;
+      var html = '<h1>Presupuesto ' + num + '</h1><p>Taller Borjón</p><p>Válido hasta: ' + validez + '</p><table border="1"><tr><th>Trabajo</th><th>Monto</th></tr>';
+      (presupuestoActual.trabajos || []).forEach((t, i) => {
+        var d = document.getElementById('trabDesc' + i);
+        var m = document.getElementById('trabMonto' + i);
+        html += '<tr><td>' + (d ? d.value : '') + '</td><td>$' + (m ? parseFloat(m.value) : 0).toFixed(2) + '</td></tr>';
+      });
+      html += '</table><p><strong>Total: $' + total.toFixed(2) + '</strong></p>';
+      var w = window.open('', '_blank');
+      w.document.write(html);
+      w.document.title = 'Presupuesto-' + num;
+      w.print();
+      w.close();
+    }
+
+    function enviarPresupuestoMail() {
+      var num = document.getElementById('numPresupuesto').textContent;
+      window.location.href = 'mailto:?subject=Presupuesto%20' + encodeURIComponent(num) + '&body=Adjunto%20presupuesto%20' + encodeURIComponent(num);
+    }
+
+    // ----- ÓRDENES -----
+    function getOrdenes() { try { return JSON.parse(localStorage.getItem(STORAGE.ordenes) || '[]'); } catch(e) { return []; } }
+    function setOrdenes(arr) { ordenes = arr; localStorage.setItem(STORAGE.ordenes, JSON.stringify(arr)); }
+    function getContadorOrden() { return parseInt(localStorage.getItem(STORAGE.contadorOrden) || '0'); }
+    function setContadorOrden(n) { localStorage.setItem(STORAGE.contadorOrden, String(n)); }
+
+    function nuevaOrden() {
+      ordenActual = { id: getContadorOrden() + 1, clienteId: null, presupuestoId: null, entrega: '', estado: 'pendiente', checklist: [] };
+      document.getElementById('formOrden').classList.remove('oculto');
+      document.getElementById('ordenCliente').value = '';
+      document.getElementById('ordenPresupuesto').value = '';
+      document.getElementById('ordenEntrega').value = '';
+      document.getElementById('ordenEstado').value = 'pendiente';
+      ordenActual.checklist = [];
+      dibujarChecklist();
+    }
+
+    function agregarCheckItem() {
+      if (!ordenActual) return;
+      ordenActual.checklist.push({ texto: '', hecho: false });
+      dibujarChecklist();
+    }
+
+    function dibujarChecklist() {
+      var div = document.getElementById('ordenChecklist');
+      div.innerHTML = '';
+      (ordenActual && ordenActual.checklist || []).forEach((c, i) => {
+        var p = document.createElement('div');
+        p.className = 'checklist-item';
+        p.innerHTML = '<input type="checkbox" id="chk' + i + '" ' + (c.hecho ? 'checked' : '') + ' onchange="marcarCheck(' + i + ', this.checked)"><input type="text" id="chkTxt' + i + '" value="' + escapeHtml(c.texto || '') + '">';
+        div.appendChild(p);
+      });
+    }
+
+    function marcarCheck(i, checked) { if (ordenActual && ordenActual.checklist[i]) ordenActual.checklist[i].hecho = checked; }
+
+    function guardarOrden() {
+      if (!ordenActual) return;
+      ordenActual.clienteId = document.getElementById('ordenCliente').value ? parseInt(document.getElementById('ordenCliente').value) : null;
+      ordenActual.presupuestoId = document.getElementById('ordenPresupuesto').value ? parseInt(document.getElementById('ordenPresupuesto').value) : null;
+      ordenActual.entrega = document.getElementById('ordenEntrega').value;
+      ordenActual.estado = document.getElementById('ordenEstado').value;
+      (ordenActual.checklist || []).forEach((c, i) => {
+        var txt = document.getElementById('chkTxt' + i);
+        var chk = document.getElementById('chk' + i);
+        if (txt) c.texto = txt.value;
+        if (chk) c.hecho = chk.checked;
+      });
+      ordenes = getOrdenes();
+      var idx = ordenes.findIndex(o => o.id === ordenActual.id);
+      if (idx >= 0) ordenes[idx] = ordenActual; else { ordenes.push(ordenActual); setContadorOrden(ordenActual.id); }
+      setOrdenes(ordenes);
+      cerrarFormOrden();
+      listarOrdenes();
+      msg('Orden guardada');
+    }
+
+    function cerrarFormOrden() { document.getElementById('formOrden').classList.add('oculto'); ordenActual = null; }
+
+    function listarOrdenes() {
+      ordenes = getOrdenes();
+      clientes = getClientes();
+      var html = '<table><thead><tr><th>Id</th><th>Cliente</th><th>Entrega</th><th>Estado</th><th></th></tr></thead><tbody>';
+      ordenes.forEach(o => {
+        var cli = clientes.find(c => c.id === o.clienteId);
+        var est = { pendiente: 'Pendiente', proceso: 'En proceso', completada: 'Completada', entregada: 'Entregada' }[o.estado] || o.estado;
+        html += '<tr><td>' + o.id + '</td><td>' + (cli ? escapeHtml(cli.nombre) : '—') + '</td><td>' + (o.entrega || '—') + '</td><td><span class="estado-badge estado-' + (o.estado || 'pendiente') + '">' + est + '</span></td><td><button type="button" onclick="editarOrden(' + o.id + ')">Editar</button></td></tr>';
+      });
+      html += '</tbody></table>';
+      document.getElementById('listaOrdenes').innerHTML = html;
+      var selC = '<option value="">-- Cliente --</option>';
+      clientes.forEach(c => selC += '<option value="' + c.id + '">' + c.nombre + '</option>');
+      document.getElementById('ordenCliente').innerHTML = selC;
+      document.getElementById('ordenPresupuesto').innerHTML = '<option value="">-- Presupuesto --</option>';
+    }
+
+    function editarOrden(id) {
+      ordenActual = ordenes.find(o => o.id === id);
+      if (!ordenActual) return;
+      document.getElementById('formOrden').classList.remove('oculto');
+      document.getElementById('ordenCliente').value = ordenActual.clienteId || '';
+      document.getElementById('ordenEntrega').value = ordenActual.entrega || '';
+      document.getElementById('ordenEstado').value = ordenActual.estado || 'pendiente';
+      ordenActual.checklist = ordenActual.checklist || [];
+      dibujarChecklist();
+    }
+
+    // ----- CLIENTES -----
+    function getClientes() { try { return JSON.parse(localStorage.getItem(STORAGE.clientes) || '[]'); } catch(e) { return []; } }
+    function setClientes(arr) { clientes = arr; localStorage.setItem(STORAGE.clientes, JSON.stringify(arr)); }
+
+    function llenarSelectClientes(idSelect) {
+      clientes = getClientes();
+      var sel = '<option value="">-- Cliente --</option>';
+      clientes.forEach(c => sel += '<option value="' + c.id + '">' + c.nombre + '</option>');
+      var el = document.getElementById(idSelect);
+      if (el) el.innerHTML = sel;
+    }
+
+    function nuevoCliente() {
+      clienteActual = { id: (clientes.length ? Math.max(...clientes.map(c => c.id)) : 0) + 1, nombre: '', telefono: '', email: '', vehiculo: '', placas: '' };
+      document.getElementById('formCliente').classList.remove('oculto');
+      document.getElementById('detalleCliente').classList.add('oculto');
+      document.getElementById('clienteNombre').value = '';
+      document.getElementById('clienteTel').value = '';
+      document.getElementById('clienteEmail').value = '';
+      document.getElementById('clienteVehiculo').value = '';
+      document.getElementById('clientePlacas').value = '';
+    }
+
+    function guardarCliente() {
+      if (!clienteActual) return;
+      clienteActual.nombre = document.getElementById('clienteNombre').value;
+      clienteActual.telefono = document.getElementById('clienteTel').value;
+      clienteActual.email = document.getElementById('clienteEmail').value;
+      clienteActual.vehiculo = document.getElementById('clienteVehiculo').value;
+      clienteActual.placas = document.getElementById('clientePlacas').value;
+      clientes = getClientes();
+      var idx = clientes.findIndex(c => c.id === clienteActual.id);
+      if (idx >= 0) clientes[idx] = clienteActual; else clientes.push(clienteActual);
+      setClientes(clientes);
+      document.getElementById('formCliente').classList.add('oculto');
+      listarClientes();
+      msg('Cliente guardado');
+    }
+
+    function cerrarFormCliente() { document.getElementById('formCliente').classList.add('oculto'); clienteActual = null; }
+
+    function listarClientes() {
+      clientes = getClientes();
+      var q = (document.getElementById('buscarCliente') && document.getElementById('buscarCliente').value || '').toLowerCase();
+      var list = q ? clientes.filter(function(c) { return (c.nombre + ' ' + (c.telefono || '') + ' ' + (c.placas || '')).toLowerCase().includes(q); }) : clientes;
+      var html = '<div class="grid-clientes">';
+      list.forEach(function(c) {
+        html += '<div class="card-cliente">';
+        html += '<div class="nombre">' + escapeHtml(c.nombre || 'Sin nombre') + '</div>';
+        html += '<div class="info"><span>Tel:</span> ' + escapeHtml(c.telefono || '—') + '</div>';
+        html += '<div class="info"><span>Email:</span> ' + escapeHtml(c.email || '—') + '</div>';
+        html += '<div class="info"><span>Vehículo:</span> ' + escapeHtml(c.vehiculo || '—') + '</div>';
+        html += '<div class="info"><span>Placas:</span> ' + escapeHtml(c.placas || '—') + '</div>';
+        html += '<button type="button" onclick="verHistorialCliente(' + c.id + ')">Ver historial</button>';
+        html += '</div>';
+      });
+      html += '</div>';
+      document.getElementById('listaClientes').innerHTML = html || '<p class="sin-datos">No hay clientes. Agrega uno con el botón «Nuevo cliente».</p>';
+    }
+
+    function filtrarClientes() { listarClientes(); }
+
+    function verHistorialCliente(id) {
+      var c = clientes.find(x => x.id === id);
+      if (!c) return;
+      document.getElementById('detalleCliente').classList.remove('oculto');
+      var ord = getOrdenes().filter(o => o.clienteId === id);
+      var html = '<p><strong>' + escapeHtml(c.nombre) + '</strong> · ' + escapeHtml(c.telefono || '') + ' · ' + escapeHtml(c.vehiculo || '') + ' · ' + escapeHtml(c.placas || '') + '</p>';
+      html += '<p>Órdenes: ' + ord.length + '</p><ul>';
+      ord.forEach(function(o) { html += '<li>Orden #' + o.id + ' — ' + (o.estado || '') + ' — Entrega: ' + (o.entrega || '—') + '</li>'; });
+      html += '</ul>';
+      document.getElementById('historialCliente').innerHTML = html;
+    }
+
+    // ----- DASHBOARD -----
+    function actualizarDashboard() {
+      inventario = getInv();
+      ventas = getVentas();
+      ordenes = getOrdenes();
+      var hoy = new Date().toDateString();
+      var ganancia = ventas.filter(v => new Date(v.fecha).toDateString() === hoy).reduce((s, v) => s + (v.total || 0), 0);
+      var pendientes = ordenes.filter(o => (o.estado === 'pendiente' || o.estado === 'proceso')).length;
+      var umbralEl = document.getElementById('umbralAceites');
+      var umbral = (umbralEl && parseInt(umbralEl.value, 10)) || 5;
+      var bajos = inventario.filter(function(p) { return (p.cantidad || 0) <= (p.umbral || umbral); });
+      var ventasHoy = ventas.filter(function(v) { return new Date(v.fecha).toDateString() === hoy; }).length;
+      document.getElementById('dashGananciaHoy').textContent = '$' + ganancia.toFixed(2);
+      document.getElementById('dashOrdenesPend').textContent = pendientes;
+      document.getElementById('dashAceitesBajo').textContent = bajos.length;
+      document.getElementById('dashVentasHoy').textContent = ventasHoy;
+      var htmlBajo = '';
+      bajos.forEach(function(p) { htmlBajo += '<div class="alerta-baja">' + escapeHtml(p.nombre) + ': ' + (p.cantidad || 0) + ' unidades</div>'; });
+      document.getElementById('listaAceitesBajo').innerHTML = htmlBajo || '<p class="sin-datos">Ninguno</p>';
+      var ultimas = ventas.slice(-5).reverse();
+      var htmlV = '<table><tr><th>Fecha</th><th>Total</th></tr>';
+      ultimas.forEach(v => htmlV += '<tr><td>' + new Date(v.fecha).toLocaleString() + '</td><td>$' + (v.total || 0).toFixed(2) + '</td></tr>');
+      htmlV += '</table>';
+      document.getElementById('ultimasVentas').innerHTML = htmlV;
+    }
+
+    // ----- INICIO -----
+    initInventario();
+    inventario = getInv();
+    movimientos = getMov();
+    ventas = getVentas();
+    clientes = getClientes();
+    ordenes = getOrdenes();
+    presupuestos = getPresupuestos();
+    actualizarDashboard();
+  </script>
 </body>
 </html>
-
-
-
