@@ -245,34 +245,110 @@
     </section>
 
     <!-- ========== PRESUPUESTO ========== -->
-    <section id="presupuesto" class="seccion">
-      <h1>Generar Presupuesto</h1>
-      <div class="caja">
-        <p><strong>Nº Presupuesto:</strong> <span id="numPresupuesto">PRE-1</span></p>
-        <div class="form-grid form-grid-2">
-          <div class="form-fila">
-            <label for="presupuestoCliente">Cliente</label>
-            <select id="presupuestoCliente"></select>
-          </div>
-          <div class="form-fila">
-            <label for="presupuestoValidez">Válido hasta</label>
-            <input type="date" id="presupuestoValidez" class="input-fecha">
-          </div>
-        </div>
-        <h3>Trabajos</h3>
-        <div id="trabajosPresupuesto"></div>
-        <div class="acciones">
-          <button type="button" class="primario" onclick="agregarTrabajoPresupuesto()">➕ Agregar trabajo</button>
-        </div>
-        <h3>Resumen</h3>
-        <p><strong>Subtotal:</strong> <span id="presupSubtotal">$0</span> &nbsp; <strong>IVA (8%):</strong> <span id="presupIVA">$0</span> &nbsp; <strong>Total:</strong> <span id="presupTotal">$0</span></p>
-        <div class="acciones">
-          <button type="button" class="primario" onclick="generarPDFPresupuesto()">Generar PDF</button>
-          <button type="button" onclick="enviarPresupuestoMail()">Enviar por correo</button>
-        </div>
-      </div>
-    </section>
+   <section id="presupuesto" class="seccion">
 
+<h1>Generar Presupuesto</h1>
+
+<div class="caja">
+
+<p><strong>Nº Presupuesto:</strong> <span id="numPresupuesto">PRE-1</span></p>
+
+<div class="form-grid form-grid-2">
+
+<div class="form-fila">
+<label>Cliente</label>
+<select id="presupuestoCliente"></select>
+</div>
+
+<div class="form-fila">
+<label>Válido hasta</label>
+<input type="date" id="presupuestoValidez" class="input-fecha">
+</div>
+
+</div>
+
+</div>
+
+
+<div class="caja">
+
+<h3>Datos del vehículo</h3>
+
+<div class="form-grid form-grid-2">
+
+<div class="form-fila">
+<label>Vehículo</label>
+<input type="text" id="presupuestoVehiculo">
+</div>
+
+<div class="form-fila">
+<label>Placas</label>
+<input type="text" id="presupuestoPlacas">
+</div>
+
+</div>
+
+</div>
+
+
+<div class="caja">
+
+<h3>Trabajo a realizar</h3>
+
+<div class="form-fila">
+<label>Descripción</label>
+<textarea id="presupuestoTrabajo" rows="4"></textarea>
+</div>
+
+<div class="form-grid form-grid-3">
+
+<div class="form-fila">
+<label>Mano de obra</label>
+<input type="number" id="presupuestoMano" value="0">
+</div>
+
+<div class="form-fila">
+<label>Refacciones</label>
+<input type="number" id="presupuestoRefacciones" value="0">
+</div>
+
+<div class="form-fila">
+<label>Otros</label>
+<input type="number" id="presupuestoOtros" value="0">
+</div>
+
+</div>
+
+</div>
+
+
+<div class="caja">
+
+<h3>Total</h3>
+
+<p>
+<strong>Subtotal:</strong> <span id="presupSubtotal">$0</span>
+&nbsp;
+<strong>IVA:</strong> <span id="presupIVA">$0</span>
+&nbsp;
+<strong>Total:</strong> <span id="presupTotal">$0</span>
+</p>
+
+<div class="acciones">
+
+<button type="button" class="primario" onclick="generarPDFPresupuesto()">
+📄 Generar PDF
+</button>
+
+<button type="button" onclick="enviarPresupuestoMail()">
+✉ Enviar por correo
+</button>
+
+</div>
+
+</div>
+
+</section>
     <!-- ========== ÓRDENES ========== -->
     <section id="ordenes" class="seccion">
       <h1>Órdenes de Trabajo</h1>
@@ -365,7 +441,7 @@
       </div>
     </section>
 
-    <footer class="pie-pagina">Taller Borjón · Almacén de Aceites · Versión 1.0</footer>
+    <footer class="pie-pagina">Taller Borjón </footer>
   </main>
 
   <!-- Modal: Agregar producto (aceites, frenos, power, filtros, etc.) -->
@@ -995,6 +1071,24 @@
       htmlV += '</table>';
       document.getElementById('ultimasVentas').innerHTML = htmlV;
     }
+    function descargarPresupuesto(){
+
+const pdfURL = "AQUI_PONES_TU_LINK_DEL_PDF";
+
+const link = document.createElement("a");
+
+link.href = pdfURL;
+link.download = "presupuesto.pdf";
+
+document.body.appendChild(link);
+
+link.click();
+
+document.body.removeChild(link);
+
+msg("Presupuesto descargado");
+
+}
 
     // ----- INICIO -----
     initInventario();
@@ -1005,6 +1099,8 @@
     ordenes = getOrdenes();
     presupuestos = getPresupuestos();
     actualizarDashboard();
+  
   </script>
 </body>
 </html>
+
