@@ -124,6 +124,38 @@
       .grid-clientes { grid-template-columns: 1fr; }
       .form-grid-2, .form-grid-3, .form-grid-4 { grid-template-columns: 1fr; }
     }
+    #presupuesto .tabla input{
+width:100%;
+background:transparent;
+border:none;
+color:white;
+font-size:14px;
+outline:none;
+}
+
+#presupuesto .tabla input:focus{
+border-bottom:2px solid var(--naranja);
+}
+
+#presupuesto .tabla td{
+padding:8px;
+}
+
+    #presupuesto .tabla{
+width:100%;
+border-collapse:collapse;
+}
+
+#presupuesto .tabla th{
+background:#111;
+color:var(--naranja);
+text-align:left;
+padding:10px;
+}
+
+#presupuesto .tabla td{
+border-bottom:1px solid #333;
+}
   </style>
 </head>
 <body>
@@ -245,52 +277,53 @@
     </section>
 
     <!-- ========== PRESUPUESTO ========== -->
-   <section id="presupuesto" class="seccion">
+  <section id="presupuesto" class="seccion">
 
-<h1>Generar Presupuesto</h1>
+<h1>Presupuesto</h1>
 
 <div class="caja">
-
-<p><strong>Nº Presupuesto:</strong> <span id="numPresupuesto">PRE-1</span></p>
 
 <div class="form-grid form-grid-2">
 
 <div class="form-fila">
 <label>Cliente</label>
-<select id="presupuestoCliente"></select>
+<input type="text" id="presCliente">
 </div>
 
 <div class="form-fila">
-<label>Válido hasta</label>
-<input type="date" id="presupuestoValidez" class="input-fecha">
+<label>Fecha</label>
+<input type="date" id="presFecha">
 </div>
 
 </div>
 
 </div>
 
-1 placa Arduino Uno
-
-1 cable USB para conectar la placa a la computadora
-
-1 computadora
-
-Programa Arduino IDE para escribir y cargar el código
 
 <div class="caja">
 
 <h3>Datos del vehículo</h3>
 
-<div class="form-grid form-grid-2">
+<div class="form-grid form-grid-4">
 
 <div class="form-fila">
-<label>Vehículo</label>
-<input type="text" id="presupuestoVehiculo">
+<label>Marca</label>
+<input type="text" id="presMarca">
+</div>
+
+<div class="form-fila">
+<label>Modelo</label>
+<input type="text" id="presModelo">
+</div>
+
+<div class="form-fila">
+<label>Año</label>
+<input type="number" id="presAno">
 </div>
 
 <div class="form-fila">
 <label>Placas</label>
-<input type="text" id="presupuestoPlacas">
+<input type="text" id="presPlacas">
 </div>
 
 </div>
@@ -300,29 +333,25 @@ Programa Arduino IDE para escribir y cargar el código
 
 <div class="caja">
 
-<h3>Trabajo a realizar</h3>
+<h3>Trabajos / Refacciones</h3>
 
-<div class="form-fila">
-<label>Descripción</label>
-<textarea id="presupuestoTrabajo" rows="4"></textarea>
-</div>
+<table class="tabla">
 
-<div class="form-grid form-grid-3">
+<thead>
+<tr>
+<th>Descripción</th>
+<th>Precio</th>
+</tr>
+</thead>
 
-<div class="form-fila">
-<label>Mano de obra</label>
-<input type="number" id="presupuestoMano" value="0">
-</div>
+<tbody id="listaPartes">
+</tbody>
 
-<div class="form-fila">
-<label>Refacciones</label>
-<input type="number" id="presupuestoRefacciones" value="0">
-</div>
+</table>
 
-<div class="form-fila">
-<label>Otros</label>
-<input type="number" id="presupuestoOtros" value="0">
-</div>
+<div class="acciones">
+
+<button onclick="agregarParte()">➕ Agregar</button>
 
 </div>
 
@@ -331,24 +360,24 @@ Programa Arduino IDE para escribir y cargar el código
 
 <div class="caja">
 
-<h3>Total</h3>
+<h3>Totales</h3>
 
 <p>
-<strong>Subtotal:</strong> <span id="presupSubtotal">$0</span>
-&nbsp;
-<strong>IVA:</strong> <span id="presupIVA">$0</span>
-&nbsp;
-<strong>Total:</strong> <span id="presupTotal">$0</span>
+<strong>Subtotal:</strong> $<span id="presSubtotal">0</span>
+</p>
+
+<p>
+<strong>IVA (16%):</strong> $<span id="presIVA">0</span>
+</p>
+
+<p>
+<strong>Total:</strong> $<span id="presTotal">0</span>
 </p>
 
 <div class="acciones">
 
-<button type="button" class="primario" onclick="generarPDFPresupuesto()">
-📄 Generar PDF
-</button>
-
-<button type="button" onclick="enviarPresupuestoMail()">
-✉ Enviar por correo
+<button class="primario" onclick="generarPDFPresupuesto()">
+📄 Generar presupuesto
 </button>
 
 </div>
@@ -1096,6 +1125,99 @@ document.body.removeChild(link);
 msg("Presupuesto descargado");
 
 }
+    async function generarPDFPresupuesto(){
+
+const { jsPDF } = window.jspdf;
+
+const cliente = document.getElementById("presCliente").value;
+const fecha = document.getElementById("presFecha").value;
+
+const marca = document.getElementById("presMarca").value;
+const modelo = document.getElementById("presModelo").value;
+const ano = document.getElementById("presAno").value;
+const placas = document.getElementById("presPlacas").value;
+
+const subtotal = document.getElementById("presSubtotal").textContent;
+const iva = document.getElementById("presIVA").textContent;
+const total = document.getElementById("presTotal").textContent;
+
+const pdf = new jsPDF();
+
+pdf.setFontSize(18);
+pdf.text("Presupuesto",20,20);
+
+pdf.setFontSize(12);
+
+pdf.text("Cliente: "+cliente,20,40);
+pdf.text("Fecha: "+fecha,20,50);
+
+pdf.text("Vehículo:",20,70);
+pdf.text("Marca: "+marca,20,80);
+pdf.text("Modelo: "+modelo,20,90);
+pdf.text("Año: "+ano,20,100);
+pdf.text("Placas: "+placas,20,110);
+
+let y = 130;
+
+pdf.text("Trabajos / Refacciones",20,y);
+y+=10;
+
+document.querySelectorAll("#listaPartes tr").forEach(tr=>{
+
+const desc = tr.querySelector(".desc").value;
+const precio = tr.querySelector(".precio").value;
+
+pdf.text(desc+"  -  $"+precio,20,y);
+
+y+=10;
+
+});
+
+y+=10;
+
+pdf.text("Subtotal: $"+subtotal,20,y);
+y+=10;
+
+pdf.text("IVA: $"+iva,20,y);
+y+=10;
+
+pdf.text("Total: $"+total,20,y);
+
+pdf.save("presupuesto.pdf");
+
+msg("Presupuesto generado 📄");
+
+}
+    function agregarParte(){
+
+const tbody = document.getElementById("listaPartes");
+
+const tr = document.createElement("tr");
+
+tr.innerHTML = `
+<td><input type="text" class="desc"></td>
+<td><input type="number" class="precio" value="0" onchange="calcularTotal()"></td>
+`;
+
+tbody.appendChild(tr);
+
+}
+    function calcularTotal(){
+
+let subtotal = 0;
+
+document.querySelectorAll(".precio").forEach(p=>{
+subtotal += Number(p.value) || 0;
+});
+
+const iva = subtotal * 0.16;
+const total = subtotal + iva;
+
+document.getElementById("presSubtotal").textContent = subtotal.toFixed(2);
+document.getElementById("presIVA").textContent = iva.toFixed(2);
+document.getElementById("presTotal").textContent = total.toFixed(2);
+
+}
 
     // ----- INICIO -----
     initInventario();
@@ -1110,5 +1232,6 @@ msg("Presupuesto descargado");
   </script>
 </body>
 </html>
+
 
 
