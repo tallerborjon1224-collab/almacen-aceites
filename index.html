@@ -1058,8 +1058,8 @@
     
     .clientes-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 24px;
       padding: 8px;
     }
     
@@ -1070,33 +1070,33 @@
       padding: 20px;
       transition: all 0.3s ease;
       cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-sizing: border-box;
     }
     
     .cliente-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px var(--shadow);
       border-color: var(--naranja);
+      box-shadow: 0 6px 20px rgba(255, 140, 26, 0.15);
     }
     
     .cliente-card-header {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 16px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
     
     .cliente-avatar {
-      width: 60px;
-      height: 60px;
+      width: 56px;
+      height: 56px;
       background: linear-gradient(135deg, var(--naranja), var(--morado));
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 20px;
       color: white;
       font-weight: bold;
       flex-shrink: 0;
@@ -1104,26 +1104,77 @@
     
     .cliente-info {
       flex: 1;
+      min-width: 0;
+      overflow: hidden;
     }
     
     .cliente-nombre {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
       color: var(--text-primary);
-      margin-bottom: 4px;
-      border: none;
-      padding: 0;
-      background: transparent;
-      outline: none;
-      box-shadow: none;
+      margin-bottom: 6px;
+      line-height: 1.3;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
     
     .cliente-telefono {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text-secondary);
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
+    }
+    
+    .cliente-detalles-grid {
+      margin: 12px 0;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+    }
+    
+    .detalle-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    
+    .detalle-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .detalle-item strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    
+    .cliente-card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .btn-action {
+      flex: 1;
+      padding: 10px 8px;
+      border: none;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
     }
     
     .cliente-detalles-grid {
@@ -2420,24 +2471,166 @@
       
       var num = document.getElementById('numPresupuesto').textContent;
       var validez = document.getElementById('presupuestoValidez').value || new Date(Date.now() + 7*24*60*60*1000).toISOString().slice(0, 10);
+      
+      // Obtener información del cliente
+      var clienteNombre = '';
+      var clienteTelefono = '';
+      
+      if (clienteTipo === 'existente') {
+        const clienteId = document.getElementById('presupuestoCliente').value;
+        if (clienteId) {
+          const cliente = clientes.find(c => c.id === parseInt(clienteId));
+          if (cliente) {
+            clienteNombre = cliente.nombre;
+            clienteTelefono = cliente.telefono || '';
+          }
+        }
+      } else {
+        clienteNombre = document.getElementById('presupuestoClienteNombre').value.trim();
+        clienteTelefono = document.getElementById('presupuestoClienteTel').value.trim();
+      }
+      
+      // Información del vehículo
+      var vehiculoInfo = '';
+      var marca = document.getElementById('presupuestoVehiculoMarca').value.trim();
+      var modelo = document.getElementById('presupuestoVehiculoModelo').value.trim();
+      var ano = document.getElementById('presupuestoVehiculoAno').value.trim();
+      var color = document.getElementById('presupuestoVehiculoColor').value.trim();
+      
+      if (marca || modelo || ano || color) {
+        vehiculoInfo = `${marca} ${modelo} ${ano} ${color}`.trim();
+      }
+      
       var subtotal = 0;
+      var trabajosHTML = '';
+      
       (presupuestoActual.trabajos || []).forEach((t, i) => {
-        var m = document.getElementById('trabMonto' + i);
-        if (m) subtotal += parseFloat(m.value) || 0;
+        var desc = document.getElementById('trabDesc' + i);
+        var monto = document.getElementById('trabMonto' + i);
+        if (desc && desc.value.trim()) {
+          var montoVal = parseFloat(monto ? monto.value : 0) || 0;
+          subtotal += montoVal;
+          trabajosHTML += `<tr><td style="padding: 12px; border-bottom: 1px solid #eee;">${escapeHtml(desc.value)}</td><td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; font-weight: 500;">$${montoVal.toFixed(2)}</td></tr>`;
+        }
       });
-      var total = subtotal + subtotal * IVA;
-      var html = '<h1>Presupuesto ' + num + '</h1><p>Taller Borjón</p><p>Válido hasta: ' + validez + '</p><table border="1"><tr><th>Trabajo</th><th>Monto</th></tr>';
-      (presupuestoActual.trabajos || []).forEach((t, i) => {
-        var d = document.getElementById('trabDesc' + i);
-        var m = document.getElementById('trabMonto' + i);
-        html += '<tr><td>' + (d ? d.value : '') + '</td><td>$' + (m ? parseFloat(m.value) : 0).toFixed(2) + '</td></tr>';
-      });
-      html += '</table><p><strong>Total: $' + total.toFixed(2) + '</strong></p>';
+      
+      var iva = subtotal * IVA;
+      var total = subtotal + iva;
+      var fecha = new Date().toLocaleDateString('es-MX');
+      
+      var html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Presupuesto - Taller Borjón</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #f8f9fa; padding: 20px; }
+            .receipt { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; }
+            .header { background: linear-gradient(135deg, #ff8c1a 0%, #6f42c1 100%); color: white; padding: 30px; text-align: center; }
+            .header h1 { font-size: 28px; margin-bottom: 8px; font-weight: 700; }
+            .header p { font-size: 14px; opacity: 0.9; }
+            .receipt-body { padding: 30px; }
+            .receipt-info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; }
+            .info-group h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 6px; font-weight: 600; }
+            .info-group p { font-size: 14px; color: #333; font-weight: 500; }
+            .vehiculo-section { margin-bottom: 25px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #ff8c1a; }
+            .vehiculo-section h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 6px; font-weight: 600; }
+            .vehiculo-section p { font-size: 16px; color: #333; font-weight: 500; }
+            .trabajos-title { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 15px; font-weight: 600; }
+            .trabajos-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
+            .trabajos-table th { background: #f8f9fa; padding: 12px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; border-bottom: 2px solid #e0e0e0; font-weight: 600; }
+            .trabajos-table td { padding: 12px; border-bottom: 1px solid #eee; }
+            .trabajos-table tr:last-child td { border-bottom: none; }
+            .totals { background: #f8f9fa; border-radius: 8px; padding: 20px; }
+            .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+            .total-row:last-child { margin-bottom: 0; padding-top: 15px; border-top: 2px solid #e0e0e0; }
+            .total-label { font-size: 14px; color: #666; }
+            .total-value { font-size: 16px; color: #333; font-weight: 600; }
+            .grand-total { font-size: 20px; color: #ff8c1a; font-weight: 700; }
+            .validity { margin-top: 25px; padding: 15px; background: #fff3e0; border-radius: 8px; border-left: 4px solid #ff8c1a; }
+            .validity p { font-size: 14px; color: #e65100; font-weight: 500; }
+            .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #f0f0f0; }
+            .footer p { font-size: 12px; color: #999; margin-bottom: 5px; }
+            .footer .phone { color: #ff8c1a; font-weight: 600; font-size: 14px; }
+            @media print { body { background: white; } .receipt { box-shadow: none; max-width: 100%; } }
+          </style>
+        </head>
+        <body>
+          <div class="receipt">
+            <div class="header">
+              <h1>🔧 TALLER BORJÓN</h1>
+              <p>Almacén de Aceites y Servicio Automotriz</p>
+              <p style="margin-top: 10px; font-size: 18px; font-weight: 600;">PRESUPUESTO ${num}</p>
+            </div>
+            <div class="receipt-body">
+              <div class="receipt-info">
+                <div class="info-group">
+                  <h3>📅 Fecha de emisión</h3>
+                  <p>${fecha}</p>
+                </div>
+                <div class="info-group">
+                  <h3>📞 Cliente</h3>
+                  <p>${clienteNombre || 'Cliente sin nombre'}<br>${clienteTelefono || ''}</p>
+                </div>
+              </div>
+              
+              ${vehiculoInfo ? `
+              <div class="vehiculo-section">
+                <h3>🚗 Vehículo</h3>
+                <p>${vehiculoInfo}</p>
+              </div>
+              ` : ''}
+              
+              <div class="trabajos-title">🔧 Trabajos a realizar</div>
+              <table class="trabajos-table">
+                <thead>
+                  <tr>
+                    <th>Descripción del trabajo</th>
+                    <th style="text-align: right;">Monto</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${trabajosHTML || '<tr><td colspan="2" style="text-align: center; color: #999; padding: 20px;">Sin trabajos registrados</td></tr>'}
+                </tbody>
+              </table>
+              
+              <div class="totals">
+                <div class="total-row">
+                  <span class="total-label">Subtotal:</span>
+                  <span class="total-value">$${subtotal.toFixed(2)}</span>
+                </div>
+                <div class="total-row">
+                  <span class="total-label">IVA (16%):</span>
+                  <span class="total-value">$${iva.toFixed(2)}</span>
+                </div>
+                <div class="total-row">
+                  <span class="total-label" style="font-size: 16px; font-weight: 700;">TOTAL:</span>
+                  <span class="grand-total">$${total.toFixed(2)} MXN</span>
+                </div>
+              </div>
+              
+              <div class="validity">
+                <p>📅 Este presupuesto es válido hasta el ${validez}</p>
+              </div>
+              
+              <div class="footer">
+                <p style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 10px;">¡Gracias por su preferencia!</p>
+                <p>Para cualquier duda o aclaración, comuníquese con nosotros</p>
+                <p class="phone">📞 Tel: (686) 123-4567</p>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+      
       var w = window.open('', '_blank');
       w.document.write(html);
-      w.document.title = 'Presupuesto-' + num;
-      w.print();
-      w.close();
+      w.document.close();
+      w.focus();
+      setTimeout(function() { w.print(); }, 500);
     }
 
     function enviarPresupuestoMail() {
