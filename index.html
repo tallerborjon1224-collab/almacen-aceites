@@ -2,3856 +2,661 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Taller Borjón - Almacén de Aceites</title>
-  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVGFsbGVyIEJvcmrDs24iLCJzaG9ydF9uYW1lIjoiQWxtYWPpbiIsInN0YXJ0X3VybCI6Ii4vIn0=">
-  <style>
-    :root {
-      --naranja: #ff8c1a;
-      --negro: #000;
-      --gris: #1a1a1a;
-      --gris2: #262626;
-      --blanco: #fff;
-      --verde: #28a745;
-      --rojo: #dc3545;
-      --amarillo: #ffc107;
-      --azul: #007bff;
-      --morado: #6f42c1;
-      --cian: #17a2b8;
-      
-      /* Variables para modo claro/oscuro */
-      --bg-primary: var(--negro);
-      --bg-secondary: var(--gris);
-      --bg-tertiary: var(--gris2);
-      --text-primary: var(--blanco);
-      --text-secondary: #aaa;
-      --border-color: var(--naranja);
-      --shadow: rgba(0,0,0,0.3);
-    }
-    
-    [data-theme="light"] {
-      --bg-primary: #f8f9fa;
-      --bg-secondary: #fff;
-      --bg-tertiary: #e9ecef;
-      --text-primary: #212529;
-      --text-secondary: #6c757d;
-      --border-color: var(--naranja);
-      --shadow: rgba(0,0,0,0.1);
-    }
-    
-    * { box-sizing: border-box; }
-    body { 
-      margin: 0; 
-      background: var(--bg-primary); 
-      color: var(--text-primary); 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      transition: all 0.3s ease;
-    }
-    .seccion { display: none; }
-    .seccion.activa { display: block; }
-
-    .sidebar {
-      position: fixed; top: 0; left: 0; width: 220px; height: 100%;
-      background: var(--bg-secondary); border-right: 2px solid var(--border-color);
-      display: flex; flex-direction: column; z-index: 9999; overflow-y: auto;
-      box-shadow: 2px 0 10px var(--shadow);
-      transition: all 0.3s ease;
-    }
-    .sidebar-titulo { padding: 16px; font-size: 16px; font-weight: bold; color: var(--naranja); border-bottom: 1px solid var(--naranja); text-align: center; }
-    .sidebar-logo { font-size: 12px; color: #888; padding: 8px; text-align: center; }
-    .sidebar-nav { flex: 1; padding: 8px 0; }
-    .sidebar-nav button, .sidebar-nav a {
-      display: block; width: 100%; text-align: left; padding: 12px 16px; margin: 2px 0;
-      background: none; color: var(--text-primary); font-size: 14px; border: none;
-      border-left: 3px solid transparent; cursor: pointer; text-decoration: none; font-family: inherit;
-      transition: all 0.2s ease;
-    }
-    .sidebar-nav button:hover, .sidebar-nav a:hover { 
-      background: var(--bg-tertiary); 
-      transform: translateX(3px);
-    }
-    .sidebar-nav button.activo, .sidebar-nav a.activo { 
-      background: var(--bg-tertiary); 
-      color: var(--naranja); 
-      border-left-color: var(--naranja);
-      font-weight: bold;
-    }
-    .sidebar-footer { padding: 12px; font-size: 11px; color: #666; border-top: 1px solid #333; }
-
-    .contenido-principal { 
-      margin-left: 220px; 
-      padding: 20px; 
-      padding-bottom: 40px; 
-      min-height: 100vh;
-      background: var(--bg-primary);
-      transition: all 0.3s ease;
-    }
-    .breadcrumb { margin-bottom: 16px; font-size: 13px; color: var(--text-secondary); }
-    .breadcrumb a { color: var(--naranja); text-decoration: none; }
-    .breadcrumb span { color: var(--text-secondary); margin: 0 6px; }
-    h1 { color: var(--naranja); margin-top: 0; }
-    h2, h3 { color: var(--naranja); }
-
-    .caja { 
-      background: var(--bg-secondary); 
-      border: 2px solid var(--border-color); 
-      border-radius: 12px; 
-      padding: 20px; 
-      margin-bottom: 20px; 
-      max-width: 900px;
-      box-shadow: 0 4px 6px var(--shadow);
-      transition: all 0.3s ease;
-    }
-    .caja:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px var(--shadow);
-    }
-    .caja p { margin: 8px 0; }
-    .caja-desc { color: #aaa; font-size: 14px; margin-bottom: 0.5rem; }
-    .resumen-numero { font-size: 28px; font-weight: bold; color: var(--naranja); }
-    .grid-dash { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
-    .card-dash { 
-      background: var(--bg-secondary); 
-      border-radius: 12px; 
-      padding: 16px; 
-      border: 1px solid var(--border-color); 
-      text-align: center;
-      box-shadow: 0 2px 4px var(--shadow);
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-    .card-dash:hover {
-      transform: translateY(-4px) scale(1.02);
-      box-shadow: 0 8px 16px var(--shadow);
-    }
-    .card-dash .num { font-size: 24px; font-weight: bold; color: var(--naranja); }
-    .card-dash .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
-    .alerta-baja { background: rgba(220,53,69,0.2); border: 1px solid var(--rojo); border-radius: 8px; padding: 8px; margin: 4px 0; }
-    .msg-ok { background: rgba(40,167,69,0.2); border: 1px solid var(--verde); border-radius: 8px; padding: 8px; margin: 8px 0; display: none; }
-    .msg-ok.visible { display: block; }
-
-    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
-    th, td { border: 1px solid var(--naranja); padding: 8px; text-align: left; }
-    th { background: var(--gris2); color: var(--naranja); }
-    input, select, textarea { background: #000; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 6px; }
-    input:focus, select:focus { outline: 1px solid var(--naranja); }
-    button { cursor: pointer; border-radius: 6px; padding: 8px 14px; font-size: 14px; border: 1px solid var(--naranja); background: var(--gris2); color: #fff; }
-    button.primario { background: var(--naranja); color: #000; }
-    button.peligro { background: var(--rojo); color: #fff; border-color: var(--rojo); }
-    .fila-inv { display: grid; grid-template-columns: 1fr 80px 80px auto; gap: 8px; align-items: center; margin: 6px 0; }
-    .fila-inv .cant { text-align: center; font-weight: bold; }
-    .card-cliente { background: var(--gris2); border: 2px solid var(--naranja); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
-    .card-cliente .nombre { font-size: 18px; font-weight: bold; color: var(--naranja); margin-bottom: 8px; }
-    .card-cliente .info { font-size: 14px; color: #ccc; margin: 4px 0; }
-    .card-cliente .info span { color: #888; }
-    .card-cliente button { margin-top: 0.75rem; }
-    .grid-clientes { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-    .buscador { margin-bottom: 12px; }
-    .buscador input { width: 100%; max-width: 300px; }
-
-    .estado-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; }
-    .estado-pendiente { background: var(--amarillo); color: #000; }
-    .estado-proceso { background: #17a2b8; color: #fff; }
-    .estado-completada { background: var(--verde); color: #fff; }
-    .estado-entregada { background: #6c757d; color: #fff; }
-    .checklist-item { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
-    .checklist-item input[type="checkbox"] { width: 18px; height: 18px; }
-    .checklist-item input[type="text"] { flex: 1; min-width: 0; }
-
-    .pie-pagina { margin-top: 40px; padding-top: 20px; border-top: 1px solid #333; font-size: 12px; color: #666; text-align: center; }
-
-    /* Formularios y utilidades */
-    .oculto { display: none !important; }
-    .form-fila { margin-bottom: 1rem; }
-    .form-fila label { display: block; margin-bottom: 0.25rem; color: #aaa; font-size: 13px; }
-    .form-fila input[type="text"], .form-fila input[type="number"], .form-fila input[type="email"], .form-fila input[type="tel"], .form-fila input[type="date"], .form-fila select { width: 100%; max-width: 100%; }
-    .form-fila-btn { display: flex; align-items: flex-end; }
-    .form-grid { display: grid; gap: 1rem; }
-    .form-grid-2 { grid-template-columns: 1fr 1fr; }
-    .form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
-    .form-grid-4 { grid-template-columns: repeat(4, 1fr); }
-    .input-num { width: 5rem; max-width: 100%; }
-    .input-fecha { width: 10rem; max-width: 100%; }
-    .acciones { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.25rem; align-items: center; }
-    .acciones.mb { margin-bottom: 1rem; }
-    .acciones button { margin: 0; }
-    .radio-grupo { display: flex; gap: 1.5rem; margin: 0.75rem 0; }
-    .radio-grupo label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--blanco); }
-    .radio-grupo input { width: auto; }
-    .sin-datos { text-align: center; padding: 2rem; color: #666; }
-    .tabla-movimientos th:nth-child(3), .tabla-movimientos td:nth-child(3) { white-space: nowrap; }
-    .tabla-movimientos td:last-child { width: 1%; }
-
-    /* Modal agregar producto */
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; visibility: hidden; transition: opacity 0.25s, visibility 0.25s; }
-    .modal-overlay.visible { opacity: 1; visibility: visible; }
-    .modal-caja { background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 16px; padding: 24px; max-width: 480px; width: 90%; max-height: 90vh; overflow-y: auto; transform: scale(0.9); transition: transform 0.25s; }
-    .modal-overlay.visible .modal-caja { transform: scale(1); }
-    .modal-caja h2 { margin-top: 0; margin-bottom: 1rem; color: var(--naranja); }
-    .modal-caja .form-fila { margin-bottom: 1rem; }
-    .badge-tipo { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; background: var(--bg-tertiary); color: var(--naranja); border: 1px solid var(--naranja); }
-    
-    /* Estilos para el nuevo diseño de órdenes */
-    .orden-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px;
-      background: linear-gradient(135deg, var(--naranja), var(--morado));
-      border-radius: 12px;
-      margin-bottom: 24px;
-      color: white;
-    }
-    
-    .orden-titulo h2 {
-      margin: 0;
-      font-size: 24px;
-    }
-    
-    .orden-numero {
-      font-size: 18px;
-      font-weight: bold;
-      opacity: 0.9;
-    }
-    
-    .orden-fecha {
-      font-size: 14px;
-      opacity: 0.8;
-    }
-    
-    .orden-seccion {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 24px;
-      padding: 20px;
-      background: var(--bg-secondary);
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-      transition: all 0.3s ease;
-    }
-    
-    .orden-seccion:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px var(--shadow);
-    }
-    
-    .seccion-icono {
-      font-size: 48px;
-      min-width: 60px;
-      text-align: center;
-      opacity: 0.7;
-    }
-    
-    .seccion-contenido {
-      flex: 1;
-    }
-    
-    .seccion-contenido h3 {
-      margin: 0 0 16px 0;
-      color: var(--naranja);
-      font-size: 18px;
-    }
-    
-    .cliente-card, .vehiculo-card, .servicio-card {
-      display: flex;
-      gap: 20px;
-    }
-    
-    .cliente-foto, .vehiculo-imagen {
-      min-width: 80px;
-      height: 80px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg-tertiary);
-      border-radius: 12px;
-      border: 2px solid var(--border-color);
-    }
-    
-    .foto-placeholder, .car-placeholder {
-      font-size: 32px;
-      opacity: 0.6;
-    }
-    
-    .cliente-datos, .vehiculo-datos {
-      flex: 1;
-    }
-    
-    .dato-row {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
-    
-    .dato-grupo {
-      flex: 1;
-    }
-    
-    .dato-grupo label {
-      display: block;
-      margin-bottom: 4px;
-      font-size: 12px;
-      color: var(--text-secondary);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .dato-input, .dato-textarea {
-      width: 100%;
-      padding: 10px 12px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      color: var(--text-primary);
-      font-size: 14px;
-      transition: all 0.2s ease;
-    }
-    
-    .dato-input:focus, .dato-textarea:focus {
-      outline: none;
-      border-color: var(--naranja);
-      box-shadow: 0 0 0 3px rgba(255, 140, 26, 0.1);
-    }
-    
-    .dato-readonly {
-      padding: 10px 12px;
-      background: var(--bg-tertiary);
-      border: 1px solid transparent;
-      border-radius: 8px;
-      color: var(--text-primary);
-      font-size: 14px;
-      min-height: 40px;
-      display: flex;
-      align-items: center;
-    }
-    
-    .dato-readonly-highlight {
-      padding: 10px 12px;
-      background: linear-gradient(135deg, var(--naranja), var(--morado));
-      border: 1px solid var(--naranja);
-      border-radius: 8px;
-      color: white;
-      font-size: 14px;
-      font-weight: bold;
-      min-height: 40px;
-      display: flex;
-      align-items: center;
-    }
-    
-    .checklist-container {
-      background: var(--bg-tertiary);
-      padding: 16px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-    
-    .checklist-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-      padding: 12px;
-      background: var(--bg-secondary);
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-    
-    .checklist-item input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
-      accent-color: var(--naranja);
-    }
-    
-    .checklist-item input[type="text"] {
-      flex: 1;
-      padding: 8px 12px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      color: var(--text-primary);
-    }
-    
-    .btn-add-check {
-      width: 100%;
-      padding: 12px;
-      background: var(--naranja);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      margin-top: 12px;
-    }
-    
-    .btn-add-check:hover {
-      background: var(--morado);
-      transform: translateY(-2px);
-    }
-    
-    .orden-acciones {
-      display: flex;
-      gap: 16px;
-      justify-content: flex-end;
-      padding: 20px;
-      background: var(--bg-tertiary);
-      border-radius: 12px;
-      margin-top: 24px;
-    }
-    
-    .btn-primario, .btn-secundario {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    
-    .btn-primario {
-      background: linear-gradient(135deg, var(--naranja), var(--morado));
-      color: white;
-    }
-    
-    .btn-primario:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(255, 140, 26, 0.3);
-    }
-    
-    .btn-secundario {
-      background: var(--bg-secondary);
-      color: var(--text-primary);
-      border: 1px solid var(--border-color);
-    }
-    
-    .btn-secundario:hover {
-      background: var(--bg-tertiary);
-      transform: translateY(-2px);
-    }
-    
-    /* Estilos para selector de tipo de cliente */
-    .cliente-tipo-selector {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-      padding: 16px;
-      background: var(--bg-tertiary);
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-    
-    .radio-cliente {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 16px;
-      background: var(--bg-secondary);
-      border: 2px solid var(--border-color);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      flex: 1;
-      justify-content: center;
-    }
-    
-    .radio-cliente:hover {
-      background: var(--bg-tertiary);
-      transform: translateY(-2px);
-    }
-    
-    .radio-cliente input[type="radio"] {
-      accent-color: var(--naranja);
-    }
-    
-    .radio-cliente input[type="radio"]:checked + span {
-      color: var(--naranja);
-      font-weight: bold;
-    }
-    
-    .radio-cliente:has(input[type="radio"]:checked) {
-      background: linear-gradient(135deg, var(--naranja), var(--morado));
-      color: white;
-      border-color: var(--naranja);
-    }
-    
-    .radio-cliente:has(input[type="radio"]:checked) span {
-      color: white;
-    }
-    
-    .cliente-opcion {
-      transition: all 0.3s ease;
-    }
-    
-    .cliente-opcion.oculto {
-      display: none;
-    }
-    
-    .checkbox-grupo {
-      margin-top: 12px;
-      padding: 12px;
-      background: var(--bg-tertiary);
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-    
-    .checkbox-grupo label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    
-    .checkbox-grupo input[type="checkbox"] {
-      accent-color: var(--naranja);
-      width: 18px;
-      height: 18px;
-    }
-    
-    .info-manual {
-      margin-top: 12px;
-      padding: 8px 12px;
-      background: rgba(255, 140, 26, 0.1);
-      border-left: 3px solid var(--naranja);
-      border-radius: 4px;
-    }
-    
-    .info-manual small {
-      color: var(--text-secondary);
-      font-style: italic;
-    }
-    
-    /* Estilos para cards de órdenes */
-    .ordenes-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 20px;
-      padding: 20px 0;
-    }
-    
-    .orden-card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      overflow: hidden;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px var(--shadow);
-    }
-    
-    .orden-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px var(--shadow);
-    }
-    
-    .orden-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px;
-      background: var(--bg-tertiary);
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .orden-numero-mini {
-      font-size: 18px;
-      font-weight: bold;
-      color: var(--naranja);
-    }
-    
-    .orden-estado {
-      padding: 6px 12px;
-      border-radius: 20px;
-      color: white;
-      font-size: 12px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    
-    .orden-card-body {
-      padding: 16px;
-    }
-    
-    .cliente-info {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-    
-    .cliente-avatar {
-      width: 48px;
-      height: 48px;
-      background: var(--bg-tertiary);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      border: 2px solid var(--border-color);
-    }
-    
-    .cliente-datos-mini {
-      flex: 1;
-    }
-    
-    .cliente-nombre {
-      font-weight: bold;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-    }
-    
-    .cliente-detalle {
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-    
-    .orden-entrega {
-      background: rgba(255, 140, 26, 0.1);
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      margin-bottom: 8px;
-      border-left: 3px solid var(--naranja);
-    }
-    
-    .orden-descripcion {
-      background: var(--bg-tertiary);
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      margin-bottom: 8px;
-      border-left: 3px solid var(--azul);
-    }
-    
-    .orden-card-footer {
-      padding: 16px;
-      background: var(--bg-tertiary);
-      border-top: 1px solid var(--border-color);
-      text-align: right;
-    }
-    
-    .btn-editar-mini {
-      padding: 6px 12px;
-      background: var(--naranja);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .btn-editar-mini:hover {
-      background: var(--morado);
-      transform: translateY(-2px);
-    }
-    
-    /* Estilos para presupuestos */
-    .presupuesto-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      padding: 20px;
-      background: linear-gradient(135deg, var(--naranja), var(--morado));
-      border-radius: 12px;
-      color: white;
-      box-shadow: 0 4px 12px rgba(255, 140, 26, 0.3);
-    }
-    
-    .presupuesto-header h1 {
-      margin: 0;
-      font-size: 24px;
-      font-weight: bold;
-    }
-    
-    .presupuesto-numero {
-      text-align: right;
-    }
-    
-    .numero-label {
-      font-size: 12px;
-      opacity: 0.9;
-      margin-bottom: 4px;
-    }
-    
-    .numero-valor {
-      font-size: 20px;
-      font-weight: bold;
-      background: rgba(255, 255, 255, 0.2);
-      padding: 4px 12px;
-      border-radius: 6px;
-    }
-    
-    .presupuesto-main {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      margin-bottom: 24px;
-    }
-    
-    .presupuesto-card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      overflow: hidden;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px var(--shadow);
-    }
-    
-    .presupuesto-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px var(--shadow);
-      border-color: var(--naranja);
-    }
-    
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 16px 20px;
-      background: var(--bg-tertiary);
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .header-icon {
-      font-size: 20px;
-      opacity: 0.8;
-    }
-    
-    .header-title {
-      font-size: 16px;
-      font-weight: bold;
-      color: var(--naranja);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .card-body {
-      padding: 20px;
-    }
-    
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-    
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .form-group label {
-      margin-bottom: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .form-input {
-      padding: 12px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      color: var(--text-primary);
-      font-size: 14px;
-      transition: all 0.2s ease;
-    }
-    
-    .form-input:focus {
-      outline: none;
-      border-color: var(--naranja);
-      box-shadow: 0 0 0 3px rgba(255, 140, 26, 0.1);
-    }
-    
-    .trabajos-list {
-      margin-bottom: 16px;
-    }
-    
-    .btn-add-trabajo {
-      width: 100%;
-      padding: 12px;
-      background: var(--naranja);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .btn-add-trabajo:hover {
-      background: var(--morado);
-      transform: translateY(-2px);
-    }
-    
-    .presupuesto-resumen {
-      grid-column: 1 / -1;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    
-    .resumen-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 20px;
-      background: var(--bg-tertiary);
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .resumen-body {
-      padding: 24px;
-    }
-    
-    .resumen-fila {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .resumen-fila:last-child {
-      border-bottom: none;
-    }
-    
-    .resumen-fila.total {
-      background: linear-gradient(135deg, var(--naranja), var(--morado));
-      margin: 0 -24px;
-      padding: 16px 24px;
-      border-radius: 8px;
-      color: white;
-      font-weight: bold;
-    }
-    
-    .resumen-label {
-      font-size: 16px;
-      font-weight: 600;
-    }
-    
-    .resumen-valor {
-      font-size: 18px;
-      font-weight: bold;
-    }
-    
-    .resumen-acciones {
-      display: flex;
-      gap: 16px;
-      margin-top: 24px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border-color);
-    }
-    
-    .btn-pdf, .btn-mail {
-      flex: 1;
-      padding: 14px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    
-    .btn-pdf {
-      background: var(--verde);
-      color: white;
-    }
-    
-    .btn-pdf:hover {
-      background: #218838;
-      transform: translateY(-2px);
-    }
-    
-    .btn-mail {
-      background: var(--azul);
-      color: white;
-    }
-    
-    .btn-mail:hover {
-      background: #0056b3;
-      transform: translateY(-2px);
-    }
-    
-    /* Estilos para selector de cliente en presupuesto */
-    .cliente-tipo-selector-presupuesto {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-      padding: 16px;
-      background: var(--bg-tertiary);
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-    
-    .radio-cliente-presupuesto {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 16px;
-      background: var(--bg-secondary);
-      border: 2px solid var(--border-color);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      flex: 1;
-      justify-content: center;
-    }
-    
-    .radio-cliente-presupuesto:hover {
-      background: var(--bg-tertiary);
-      transform: translateY(-2px);
-    }
-    
-    .radio-cliente-presupuesto input[type="radio"] {
-      accent-color: var(--naranja);
-    }
-    
-    .radio-cliente-presupuesto input[type="radio"]:checked + span {
-      color: var(--naranja);
-      font-weight: bold;
-    }
-    
-    .radio-cliente-presupuesto:has(input[type="radio"]:checked) {
-      background: linear-gradient(135deg, var(--naranja), var(--morado));
-      color: white;
-      border-color: var(--naranja);
-    }
-    
-    .radio-cliente-presupuesto:has(input[type="radio"]:checked) span {
-      color: white;
-    }
-    
-    .cliente-opcion-presupuesto {
-      transition: all 0.3s ease;
-    }
-    
-    .cliente-opcion-presupuesto.oculto {
-      display: none;
-    }
-    
-    /* Estilos para la sección de clientes */
-    .clientes-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 32px;
-      padding: 24px;
-      background: linear-gradient(135deg, var(--naranja), var(--morado));
-      border-radius: 12px;
-      color: white;
-    }
-    
-    .clientes-header h1 {
-      margin: 0;
-      font-size: 28px;
-      font-weight: bold;
-    }
-    
-    .clientes-stats {
-      display: flex;
-      gap: 20px;
-    }
-    
-    .stat-card {
-      background: rgba(255, 255, 255, 0.2);
-      padding: 16px 24px;
-      border-radius: 8px;
-      text-align: center;
-      backdrop-filter: blur(10px);
-    }
-    
-    .stat-number {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-    
-    .stat-label {
-      font-size: 12px;
-      opacity: 0.9;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .clientes-controls {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 24px;
-      align-items: center;
-    }
-    
-    .search-container {
-      flex: 1;
-      position: relative;
-      max-width: 500px;
-    }
-    
-    .search-icon {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 18px;
-      opacity: 0.6;
-    }
-    
-    .search-container input {
-      width: 100%;
-      padding: 12px 16px 12px 48px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      color: var(--text-primary);
-      font-size: 14px;
-      transition: all 0.2s ease;
-    }
-    
-    .search-container input:focus {
-      outline: none;
-      border-color: var(--naranja);
-      box-shadow: 0 0 0 3px rgba(255, 140, 26, 0.1);
-    }
-    
-    .btn-add-cliente {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 20px;
-      background: var(--naranja);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .btn-add-cliente:hover {
-      background: var(--morado);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(255, 140, 26, 0.3);
-    }
-    
-    .btn-icon {
-      font-size: 16px;
-    }
-    
-    .clientes-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 24px;
-      padding: 8px;
-    }
-    
-    .cliente-card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 20px;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      box-sizing: border-box;
-    }
-    
-    .cliente-card:hover {
-      border-color: var(--naranja);
-      box-shadow: 0 6px 20px rgba(255, 140, 26, 0.15);
-    }
-    
-    .cliente-card-header {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
-    
-    .cliente-avatar {
-      width: 56px;
-      height: 56px;
-      background: linear-gradient(135deg, var(--naranja), var(--morado));
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: white;
-      font-weight: bold;
-      flex-shrink: 0;
-    }
-    
-    .cliente-info {
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-    }
-    
-    .cliente-nombre {
-      font-size: 16px;
-      font-weight: bold;
-      color: var(--text-primary);
-      margin-bottom: 6px;
-      line-height: 1.3;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-    }
-    
-    .cliente-telefono {
-      font-size: 13px;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    
-    .cliente-detalles-grid {
-      margin: 12px 0;
-      padding: 12px;
-      background: var(--bg-tertiary);
-      border-radius: 8px;
-    }
-    
-    .detalle-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 4px;
-    }
-    
-    .detalle-item:last-child {
-      margin-bottom: 0;
-    }
-    
-    .detalle-item strong {
-      color: var(--text-primary);
-      font-weight: 600;
-    }
-    
-    .cliente-card-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: auto;
-      padding-top: 16px;
-      border-top: 1px solid var(--border-color);
-    }
-    
-    .btn-action {
-      flex: 1;
-      padding: 10px 8px;
-      border: none;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-    
-    .cliente-detalles-grid {
-      display: grid;
-      gap: 12px;
-    }
-    
-    .detalle-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-    
-    .detalle-item strong {
-      color: var(--text-primary);
-      min-width: 60px;
-    }
-    
-    .cliente-card-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border-color);
-    }
-    
-    .btn-action {
-      flex: 1;
-      padding: 10px 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .btn-view {
-      background: var(--azul);
-      color: white;
-    }
-    
-    .btn-view:hover {
-      background: #0056b3;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
-    }
-    
-    .btn-edit {
-      background: var(--amarillo);
-      color: var(--negro);
-    }
-    
-    .btn-edit:hover {
-      background: #e0a800;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
-    }
-    
-    .btn-delete {
-      background: var(--rojo);
-      color: white;
-    }
-    
-    .btn-delete:hover {
-      background: #c82333;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
-    }
-    
-    /* Estilos para modales */
-    .modal-cliente {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      backdrop-filter: blur(4px);
-    }
-    
-    .modal-cliente.oculto {
-      display: none;
-    }
-    
-    .modal-content {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      max-width: 600px;
-      width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    }
-    
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 24px;
-      background: var(--bg-tertiary);
-      border-bottom: 1px solid var(--border-color);
-      border-radius: 12px 12px 0 0;
-    }
-    
-    .modal-header h3 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: bold;
-      color: var(--naranja);
-    }
-    
-    .modal-close {
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      padding: 4px;
-      border-radius: 4px;
-      transition: all 0.2s ease;
-    }
-    
-    .modal-close:hover {
-      background: var(--rojo);
-    }
-    
-    .modal-body {
-      padding: 24px;
-    }
-    
-    .modal-footer {
-      display: flex;
-      gap: 12px;
-      padding: 20px 24px;
-      background: var(--bg-tertiary);
-      border-top: 1px solid var(--border-color);
-      border-radius: 0 0 12px 12px;
-    }
-    
-    .btn-primary, .btn-secondary, .btn-edit {
-      flex: 1;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    
-    .btn-primary {
-      background: var(--verde);
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      background: #218838;
-    }
-    
-    .btn-secondary {
-      background: var(--gris);
-      color: white;
-    }
-    
-    .btn-secondary:hover {
-      background: #5a6268;
-    }
-    
-    .btn-edit {
-      background: var(--azul);
-      color: white;
-    }
-    
-    .btn-edit:hover {
-      background: #0056b3;
-    }
-    
-    .cliente-detalles {
-      display: grid;
-      gap: 20px;
-    }
-    
-    .detalle-section {
-      background: var(--bg-tertiary);
-      padding: 16px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-    
-    .detalle-section h4 {
-      margin: 0 0 12px 0;
-      color: var(--naranja);
-      font-size: 16px;
-      font-weight: bold;
-    }
-    
-    .detalle-grid {
-      display: grid;
-      gap: 8px;
-    }
-    
-    .detalle-grid-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .detalle-grid-item:last-child {
-      border-bottom: none;
-    }
-    
-    .detalle-label {
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-    
-    .detalle-valor {
-      color: var(--text-primary);
-    }
-    @media (max-width: 600px) {
-      .sidebar { width: 180px; }
-      .contenido-principal { margin-left: 180px; padding: 12px; }
-      .fila-inv { grid-template-columns: 1fr 60px auto; }
-      .grid-clientes { grid-template-columns: 1fr; }
-      .form-grid-2, .form-grid-3, .form-grid-4 { grid-template-columns: 1fr; }
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taller Pro Admin</title>
+  <link rel="stylesheet" href="EstiloXd.css">
 </head>
 <body>
+  <div class="backdrop" id="backdrop"></div>
 
-  <aside class="sidebar">
-    <div class="sidebar-titulo">TALLER BORJÓN</div>
-    <div class="sidebar-logo">Almacén de Aceites</div>
-    <nav class="sidebar-nav">
-      <button type="button" id="btnInicio" class="activo" onclick="ir('inicio')">🏠 Inicio</button>
-      <button type="button" id="btnInventario" onclick="ir('inventario')">🛢 Inventario</button>
-      <button type="button" id="btnVentas" onclick="ir('ventas')">💰 Ventas</button>
-      <button type="button" id="btnPresupuesto" onclick="ir('presupuesto')">📄 Presupuesto</button>
-      <button type="button" id="btnOrdenes" onclick="ir('ordenes')">📋 Órdenes</button>
-      <button type="button" id="btnClientes" onclick="ir('clientes')">👥 Clientes</button>
-      <button type="button" id="btnTheme" onclick="toggleTheme()" style="margin-top: 20px; background: var(--bg-tertiary);">🌓 Cambiar tema</button>
-    </nav>
-    <div class="sidebar-footer">Taller Borjón v1.0</div>
-  </aside>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-card">
+        <div class="brand-mark">TM</div>
+        <div>
+          <p class="eyebrow">Sistema administrativo</p>
+          <h1 id="brandName">Taller Black Orange</h1>
+          <p id="brandSubtitle">Control profesional de recepcion, servicio e inventario.</p>
+        </div>
+      </div>
 
-  <main class="contenido-principal">
-    <div id="msgGlobal" class="msg-ok"></div>
-    
-    <!-- Sistema de Notificaciones -->
-    <div id="notificationContainer" style="position: fixed; top: 20px; right: 20px; z-index: 10000; max-width: 350px;"></div>
-    
-    <!-- Búsqueda Global con Atajo -->
-    <div id="globalSearchModal" class="modal-overlay" style="display: none;">
-      <div class="modal-caja" style="max-width: 600px;">
-        <h2>🔍 Búsqueda Rápida</h2>
-        <input type="text" id="globalSearchInput" placeholder="Buscar clientes, productos, órdenes..." 
-               style="width: 100%; padding: 12px; font-size: 16px; margin-bottom: 16px;">
-        <div id="globalSearchResults" style="max-height: 400px; overflow-y: auto;"></div>
-        <button type="button" onclick="closeGlobalSearch()" style="margin-top: 12px;">Cerrar (ESC)</button>
-      </div>
-    </div>
-    
-    <div class="breadcrumb" id="breadcrumb">Inicio</div>
-
-    <!-- ========== INICIO / DASHBOARD ========== -->
-    <section id="inicio" class="seccion activa">
-      <h1>Inicio</h1>
-      <div class="grid-dash">
-        <div class="card-dash" onclick="ir('ventas')"><div class="num" id="dashGananciaHoy">$0</div><div class="label">Ganancia hoy</div></div>
-        <div class="card-dash" onclick="ir('ordenes')"><div class="num" id="dashOrdenesPend">0</div><div class="label">Órdenes pendientes</div></div>
-        <div class="card-dash" onclick="ir('inventario')"><div class="num" id="dashAceitesBajo">0</div><div class="label">Productos con cantidad baja</div></div>
-        <div class="card-dash" onclick="ir('ventas')"><div class="num" id="dashVentasHoy">0</div><div class="label">Ventas hoy</div></div>
-      </div>
-      
-      <!-- Gráficos Interactivos -->
-      <div class="caja">
-        <h3>📊 Estadísticas de Ventas (Últimos 7 días)</h3>
-        <canvas id="salesChart" width="400" height="200" style="width: 100%; max-height: 300px; background: var(--bg-tertiary); border-radius: 8px;"></canvas>
-      </div>
-      
-      <div class="caja">
-        <h3>🥧 Distribución de Productos</h3>
-        <canvas id="productsChart" width="400" height="200" style="width: 100%; max-height: 300px; background: var(--bg-tertiary); border-radius: 8px;"></canvas>
-      </div>
-      <div class="caja">
-        <h3>Productos con cantidad baja (revisar)</h3>
-        <div id="listaAceitesBajo"></div>
-      </div>
-      <div class="caja">
-        <h3>Últimas ventas</h3>
-        <div class="acciones mb">
-          <button type="button" onclick="exportarVentasPDF()">📄 Exportar a PDF</button>
-          <button type="button" onclick="exportarVentasExcel()">📊 Exportar a Excel</button>
-        </div>
-        <div id="ultimasVentas"></div>
-      </div>
-    </section>
-
-    <!-- ========== INVENTARIO ========== -->
-    <section id="inventario" class="seccion">
-      <h1>Inventario del Taller</h1>
-      <div class="acciones mb">
-        <button type="button" class="primario" onclick="abrirModalAgregar()">➕ Agregar producto</button>
-        <button type="button" onclick="exportarInventarioPDF()">📄 Exportar Inventario PDF</button>
-        <button type="button" onclick="exportarInventarioExcel()">📊 Exportar Inventario Excel</button>
-      </div>
-      <div class="form-fila buscador">
-        <label for="buscarInv">Buscar</label>
-        <input type="text" id="buscarInv" placeholder="Nombre, categoría o tipo de producto..." oninput="filtrarInventario()">
-      </div>
-      <div class="caja">
-        <h3>Productos disponibles</h3>
-        <div class="form-fila">
-          <label for="umbralAceites">Aviso general: cuando un producto tenga menos de esta cantidad de unidades</label>
-          <input type="number" id="umbralAceites" class="input-num" min="1" value="5">
-        </div>
-        <div id="listaInventario"></div>
-      </div>
-      <div class="caja">
-        <h3>Movimiento de inventario</h3>
-        <p class="caja-desc">Indica si agregas o restas productos, elige cuál y la cantidad.</p>
-        <div class="radio-grupo">
-          <label><input type="radio" name="tipoMov" value="agregar" checked> Agregar productos</label>
-          <label><input type="radio" name="tipoMov" value="restar"> Restar productos</label>
-        </div>
-        <div id="formMovimiento"></div>
-      </div>
-      <div class="caja">
-        <h3>Historial de movimientos</h3>
-        <div class="acciones mb">
-          <button type="button" class="peligro" onclick="borrarTodoHistorialMov()">Borrar todo el historial</button>
-        </div>
-        <div id="historialMovimientos"></div>
-      </div>
-    </section>
-
-    <!-- ========== VENTAS ========== -->
-    <section id="ventas" class="seccion">
-      <h1>Venta de Aceite</h1>
-      <div class="caja">
-        <div class="form-grid form-grid-3">
-          <div class="form-fila">
-            <label for="ventaProducto">Producto</label>
-            <select id="ventaProducto"></select>
-          </div>
-          <div class="form-fila">
-            <label for="ventaCantidad">Cantidad</label>
-            <input type="number" id="ventaCantidad" class="input-num" min="1" value="1">
-          </div>
-          <div class="form-fila form-fila-btn">
-            <button type="button" class="primario" onclick="agregarLineaVenta()">➕ Agregar a la venta</button>
-          </div>
-        </div>
-        <div class="form-fila">
-          <label for="ventaDescuento">Descuento (%)</label>
-          <input type="number" id="ventaDescuento" class="input-num" min="0" max="100" value="0">
-        </div>
-        <table>
-          <thead><tr><th>Producto</th><th>Cantidad</th><th>Precio unit.</th><th>Total</th><th></th></tr></thead>
-          <tbody id="lineasVenta"></tbody>
-        </table>
-        <p><strong>Subtotal:</strong> <span id="ventaSubtotal">$0</span> &nbsp; <strong>IVA (8%):</strong> <span id="ventaIVA">$0</span> &nbsp; <strong>Total:</strong> <span id="ventaTotal">$0</span></p>
-        <div class="acciones">
-          <button type="button" class="primario" onclick="confirmarVenta()">Confirmar venta</button>
-          <button type="button" onclick="cancelarVenta()">Cancelar</button>
-          <button type="button" onclick="imprimirTicket()">Imprimir ticket</button>
-        </div>
-      </div>
-      <div class="caja">
-        <h3>Historial de ventas</h3>
-        <div id="historialVentas"></div>
-      </div>
-      <p><strong>Ganancia hoy: <span id="gananciaHoy">$0</span></strong></p>
-      <div class="acciones">
-        <button type="button" class="peligro" onclick="borrarVentasHoy()">Borrar ventas de hoy</button>
-        <button type="button" class="peligro" onclick="reiniciarTodo()">Reiniciar todo</button>
-      </div>
-    </section>
-
-    <!-- ========== PRESUPUESTO ========== -->
-    <section id="presupuesto" class="seccion">
-      <div class="presupuesto-header">
-        <h1>💰 Generar Presupuesto</h1>
-        <div class="presupuesto-numero">
-          <div class="numero-label">Nº Presupuesto</div>
-          <div class="numero-valor" id="numPresupuesto">PRE-1</div>
-        </div>
-      </div>
-      
-      <div class="presupuesto-main">
-        <div class="presupuesto-card">
-          <div class="card-header">
-            <div class="header-icon">👤</div>
-            <div class="header-title">Información del Cliente</div>
-          </div>
-          <div class="card-body">
-            <div class="cliente-tipo-selector-presupuesto">
-              <label class="radio-cliente-presupuesto">
-                <input type="radio" name="clienteTipoPresupuesto" value="existente" checked onchange="toggleClienteTipoPresupuesto('existente')">
-                <span>Cliente Existente</span>
-              </label>
-              <label class="radio-cliente-presupuesto">
-                <input type="radio" name="clienteTipoPresupuesto" value="nuevo" onchange="toggleClienteTipoPresupuesto('nuevo')">
-                <span>Cliente Nuevo (se guardará)</span>
-              </label>
-            </div>
-            
-            <div id="clienteExistentePresupuesto" class="cliente-opcion-presupuesto">
-              <div class="form-group">
-                <label for="presupuestoCliente">Cliente</label>
-                <select id="presupuestoCliente" class="form-input">
-                  <option value="">Seleccionar cliente...</option>
-                </select>
-              </div>
-            </div>
-            
-            <div id="clienteNuevoPresupuesto" class="cliente-opcion-presupuesto oculto">
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Nombre completo</label>
-                  <input type="text" id="presupuestoClienteNombre" class="form-input" placeholder="Ej. Juan Pérez">
-                </div>
-                <div class="form-group">
-                  <label>Teléfono</label>
-                  <input type="tel" id="presupuestoClienteTel" class="form-input" placeholder="Ej. 555-123-4567">
-                </div>
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label for="presupuestoValidez">Válido hasta</label>
-              <input type="date" id="presupuestoValidez" class="form-input">
-            </div>
-          </div>
-        </div>
-
-        <div class="presupuesto-card">
-          <div class="card-header">
-            <div class="header-icon">🚗</div>
-            <div class="header-title">Información del Vehículo</div>
-          </div>
-          <div class="card-body">
-            <div class="form-row">
-              <div class="form-group">
-                <label>Marca</label>
-                <input type="text" id="presupuestoVehiculoMarca" class="form-input" placeholder="Ej. Nissan">
-              </div>
-              <div class="form-group">
-                <label>Modelo</label>
-                <input type="text" id="presupuestoVehiculoModelo" class="form-input" placeholder="Ej. Versa">
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Año</label>
-                <input type="number" id="presupuestoVehiculoAno" class="form-input" placeholder="Ej. 2020" min="1900" max="2030">
-              </div>
-              <div class="form-group">
-                <label>Color</label>
-                <input type="text" id="presupuestoVehiculoColor" class="form-input" placeholder="Ej. Rojo">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="presupuesto-card">
-          <div class="card-header">
-            <div class="header-icon">🔧</div>
-            <div class="header-title">Trabajos y Servicios</div>
-          </div>
-          <div class="card-body">
-            <div id="trabajosPresupuesto" class="trabajos-list"></div>
-            <button type="button" class="btn-add-trabajo" onclick="agregarTrabajoPresupuesto()">
-              ➕ Agregar trabajo
-            </button>
-          </div>
-        </div>
-
-        <div class="presupuesto-resumen">
-          <div class="resumen-header">
-            <div class="header-icon">📊</div>
-            <div class="header-title">Resumen del Presupuesto</div>
-          </div>
-          <div class="resumen-body">
-            <div class="resumen-fila">
-              <span class="resumen-label">Subtotal:</span>
-              <span class="resumen-valor" id="presupSubtotal">$0</span>
-            </div>
-            <div class="resumen-fila">
-              <span class="resumen-label">IVA (8%):</span>
-              <span class="resumen-valor" id="presupIVA">$0</span>
-            </div>
-            <div class="resumen-fila total">
-              <span class="resumen-label">Total:</span>
-              <span class="resumen-valor" id="presupTotal">$0</span>
-            </div>
-          </div>
-          <div class="resumen-acciones">
-            <button type="button" class="btn-pdf" onclick="generarPDFPresupuesto()">
-              📄 Generar PDF
-            </button>
-            <button type="button" class="btn-mail" onclick="enviarPresupuestoMail()">
-              📧 Enviar por correo
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ========== ÓRDENES ========== -->
-    <section id="ordenes" class="seccion">
-      <h1>Órdenes de Trabajo</h1>
-      <div class="acciones mb">
-        <button type="button" class="primario" onclick="nuevaOrden()">+ Nueva orden</button>
-      </div>
-      <div id="listaOrdenes"></div>
-      
-      <!-- Nuevo diseño visual para órdenes -->
-      <div id="formOrden" class="caja oculto">
-        <div class="orden-header">
-          <div class="orden-titulo">
-            <h2>🔧 Orden de Trabajo</h2>
-            <div class="orden-numero" id="ordenNumeroDisplay">#ORD-001</div>
-          </div>
-          <div class="orden-fecha">
-            <span id="ordenFechaActual"></span>
-          </div>
-        </div>
-
-        <!-- Información del Cliente -->
-        <div class="orden-seccion">
-          <div class="seccion-icono">👤</div>
-          <div class="seccion-contenido">
-            <h3>Información del Cliente</h3>
-            <div class="cliente-tipo-selector">
-              <label class="radio-cliente">
-                <input type="radio" name="clienteTipo" value="existente" checked onchange="toggleClienteTipo('existente')">
-                <span>Cliente Existente</span>
-              </label>
-              <label class="radio-cliente">
-                <input type="radio" name="clienteTipo" value="nuevo" onchange="toggleClienteTipo('nuevo')">
-                <span>Cliente Nuevo</span>
-              </label>
-              <label class="radio-cliente">
-                <input type="radio" name="clienteTipo" value="manual" onchange="toggleClienteTipo('manual')">
-                <span>Datos Manuales (sin guardar)</span>
-              </label>
-            </div>
-            
-            <!-- Opción Cliente Existente -->
-            <div id="clienteExistente" class="cliente-opcion">
-              <div class="cliente-card">
-                <div class="cliente-foto">
-                  <div class="foto-placeholder">👤</div>
-                </div>
-                <div class="cliente-datos">
-                  <div class="dato-grupo">
-                    <label>Seleccionar cliente</label>
-                    <select id="ordenCliente" class="dato-input">
-                      <option value="">Seleccionar cliente...</option>
-                    </select>
-                  </div>
-                  <div class="dato-grupo">
-                    <label>Teléfono</label>
-                    <div class="dato-readonly" id="ordenClienteTel">—</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Opción Cliente Nuevo -->
-            <div id="clienteNuevo" class="cliente-opcion oculto">
-              <div class="cliente-card">
-                <div class="cliente-foto">
-                  <div class="foto-placeholder">➕</div>
-                </div>
-                <div class="cliente-datos">
-                  <div class="dato-row">
-                    <div class="dato-grupo">
-                      <label>Nombre completo *</label>
-                      <input type="text" id="nuevoClienteNombre" class="dato-input" placeholder="Ej. Juan Pérez">
-                    </div>
-                    <div class="dato-grupo">
-                      <label>Teléfono *</label>
-                      <input type="tel" id="nuevoClienteTel" class="dato-input" placeholder="Ej. 555-123-4567">
-                    </div>
-                  </div>
-                  <div class="checkbox-grupo">
-                    <label>
-                      <input type="checkbox" id="guardarClienteNuevo" checked disabled>
-                      <span>Cliente se guardará automáticamente</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Opción Datos Manuales -->
-            <div id="clienteManual" class="cliente-opcion oculto">
-              <div class="cliente-card">
-                <div class="cliente-foto">
-                  <div class="foto-placeholder">📝</div>
-                </div>
-                <div class="cliente-datos">
-                  <div class="dato-row">
-                    <div class="dato-grupo">
-                      <label>Nombre completo</label>
-                      <input type="text" id="manualClienteNombre" class="dato-input" placeholder="Ej. Cliente Walk-in">
-                    </div>
-                    <div class="dato-grupo">
-                      <label>Teléfono</label>
-                      <input type="tel" id="manualClienteTel" class="dato-input" placeholder="Opcional">
-                    </div>
-                  </div>
-                  <div class="info-manual">
-                    <small>ℹ️ Estos datos solo se usarán para esta orden y no se guardarán</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Información del Vehículo -->
-        <div class="orden-seccion">
-          <div class="seccion-icono">🚗</div>
-          <div class="seccion-contenido">
-            <h3>Información del Vehículo</h3>
-            <div class="vehiculo-card">
-              <div class="vehiculo-imagen">
-                <div class="car-placeholder">🚗</div>
-              </div>
-              <div class="vehiculo-datos">
-                <div id="vehiculoExistente">
-                  <div class="dato-row">
-                    <div class="dato-grupo">
-                      <label>Marca / Modelo</label>
-                      <div class="dato-readonly" id="ordenVehiculoMarca">—</div>
-                    </div>
-                    <div class="dato-grupo">
-                      <label>Año</label>
-                      <div class="dato-readonly" id="ordenVehiculoAno">—</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div id="vehiculoManual" class="oculto">
-                  <div class="dato-row">
-                    <div class="dato-grupo">
-                      <label>Marca</label>
-                      <input type="text" id="manualVehiculoMarca" class="dato-input" placeholder="Ej. Nissan">
-                    </div>
-                    <div class="dato-grupo">
-                      <label>Modelo</label>
-                      <input type="text" id="manualVehiculoModelo" class="dato-input" placeholder="Ej. Versa">
-                    </div>
-                  </div>
-                  <div class="dato-row">
-                    <div class="dato-grupo">
-                      <label>Año</label>
-                      <input type="number" id="manualVehiculoAno" class="dato-input" placeholder="Ej. 2020" min="1900" max="2030">
-                    </div>
-                    <div class="dato-grupo">
-                      <label>Color</label>
-                      <input type="text" id="ordenVehiculoColor" class="dato-input" placeholder="Ej. Rojo">
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Detalles del Servicio -->
-        <div class="orden-seccion">
-          <div class="seccion-icono">🔧</div>
-          <div class="seccion-contenido">
-            <h3>Detalles del Servicio</h3>
-            <div class="servicio-card">
-              <div class="dato-row">
-                <div class="dato-grupo">
-                  <label>Fecha de entrega estimada</label>
-                  <input type="date" id="ordenEntrega" class="dato-input">
-                </div>
-                <div class="dato-grupo">
-                  <label>Estado</label>
-                  <select id="ordenEstado" class="dato-input">
-                    <option value="pendiente">⏳ Pendiente</option>
-                    <option value="proceso">🔧 En proceso</option>
-                    <option value="completada">✅ Completada</option>
-                    <option value="entregada">🚗 Entregada</option>
-                  </select>
-                </div>
-              </div>
-              <div class="dato-grupo">
-                <label>Descripción del problema</label>
-                <textarea id="ordenDescripcion" class="dato-textarea" rows="3" placeholder="Describe lo que necesita el vehículo..."></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Checklist de Trabajos -->
-        <div class="orden-seccion">
-          <div class="seccion-icono">📋</div>
-          <div class="seccion-contenido">
-            <h3>Checklist de Trabajos</h3>
-            <div class="checklist-container">
-              <div id="ordenChecklist"></div>
-              <button type="button" class="btn-add-check" onclick="agregarCheckItem()">➕ Agregar trabajo</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Acciones -->
-        <div class="orden-acciones">
-          <button type="button" class="btn-primario" onclick="guardarOrden()">💾 Guardar Orden</button>
-          <button type="button" class="btn-secundario" onclick="cerrarFormOrden()">❌ Cancelar</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ========== CLIENTES ========== -->
-    <section id="clientes" class="seccion">
-      <div class="clientes-header">
-        <h1>👥 Clientes</h1>
-        <div class="clientes-stats">
-          <div class="stat-card">
-            <div class="stat-number" id="totalClientes">0</div>
-            <div class="stat-label">Total Clientes</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" id="clientesNuevosHoy">0</div>
-            <div class="stat-label">Nuevos Hoy</div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="clientes-controls">
-        <div class="search-container">
-          <div class="search-icon">🔍</div>
-          <input type="text" id="buscarCliente" placeholder="Buscar por nombre, teléfono o vehículo..." oninput="filtrarClientes()">
-        </div>
-        <button type="button" class="btn-add-cliente" onclick="nuevoCliente()">
-          <span class="btn-icon">➕</span>
-          <span>Nuevo Cliente</span>
+      <nav class="nav-menu">
+        <button class="nav-link active" data-section-target="dashboard">
+          <span class="nav-pill">01</span>
+          <span>Resumen</span>
         </button>
-      </div>
-      
-      <div class="clientes-grid" id="listaClientes">
-        <!-- Las cards de clientes se generarán dinámicamente -->
-      </div>
-      
-      <!-- Modal para agregar/editar cliente -->
-      <div id="formCliente" class="modal-cliente oculto">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3 id="modalClienteTitulo">👤 Nuevo Cliente</h3>
-            <button type="button" class="modal-close" onclick="cerrarFormCliente()">❌</button>
-          </div>
-          <div class="modal-body">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="clienteNombre">Nombre completo *</label>
-                <input type="text" id="clienteNombre" class="form-input" placeholder="Ej. Juan Pérez">
-              </div>
-              <div class="form-group">
-                <label for="clienteTel">Teléfono *</label>
-                <input type="tel" id="clienteTel" class="form-input" placeholder="Ej. 555-123-4567">
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="clienteVehiculo">Vehículo</label>
-                <input type="text" id="clienteVehiculo" class="form-input" placeholder="Ej. Nissan Versa 2020">
-              </div>
-              <div class="form-group">
-                <label for="clientePlacas">Placas</label>
-                <input type="text" id="clientePlacas" class="form-input" placeholder="Ej. ABC-123">
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn-primary" onclick="guardarCliente()">💾 Guardar Cliente</button>
-            <button type="button" class="btn-secondary" onclick="cerrarFormCliente()">❌ Cancelar</button>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Modal para ver detalles del cliente -->
-      <div id="detalleCliente" class="modal-cliente oculto">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3 id="modalDetalleTitulo">📋 Detalles del Cliente</h3>
-            <button type="button" class="modal-close" onclick="cerrarDetalleCliente()">❌</button>
-          </div>
-          <div class="modal-body">
-            <div class="cliente-detalles" id="clienteDetallesContent">
-              <!-- Los detalles del cliente se mostrarán aquí -->
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn-edit" onclick="editarClienteDesdeDetalle()">✏️ Editar</button>
-            <button type="button" class="btn-secondary" onclick="cerrarDetalleCliente()">❌ Cerrar</button>
-          </div>
-        </div>
-      </div>
-    </section>
+        <button class="nav-link" data-section-target="ordenes">
+          <span class="nav-pill">02</span>
+          <span>Ordenes de trabajo</span>
+        </button>
+        <button class="nav-link" data-section-target="inventario">
+          <span class="nav-pill">03</span>
+          <span>Inventario</span>
+        </button>
+        <button class="nav-link" data-section-target="clientes">
+          <span class="nav-pill">04</span>
+          <span>Clientes</span>
+        </button>
+        <button class="nav-link" data-section-target="agenda">
+          <span class="nav-pill">05</span>
+          <span>Agenda y control</span>
+        </button>
+        <button class="nav-link" data-section-target="configuracion">
+          <span class="nav-pill">06</span>
+          <span>Configuracion</span>
+        </button>
+      </nav>
 
-    <footer class="pie-pagina">Taller Borjón · Almacén de Aceites · Versión 1.0</footer>
-  </main>
+      <div class="sidebar-note panel-inset">
+        <p class="eyebrow">Enfoque del sistema</p>
+        <strong>Recepcion, diagnostico, reparacion y entrega.</strong>
+        <span>Todo se guarda en este navegador para que puedas trabajar de forma sencilla y rapida.</span>
+      </div>
+    </aside>
 
-  <!-- Modal: Agregar producto (aceites, frenos, power, filtros, etc.) -->
-  <div id="modalAgregarProducto" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalAgregarTitulo" onclick="if(event.target===this)cerrarModalAgregar()">
-    <div class="modal-caja" onclick="event.stopPropagation()">
-      <h2 id="modalAgregarTitulo">Agregar producto</h2>
-      <p class="caja-desc">Elige el tipo de producto y completa los datos. Todos usan el mismo inventario y movimientos.</p>
-      <div class="form-fila">
-        <label for="modalTipoProducto">Tipo de producto</label>
-        <select id="modalTipoProducto">
-          <option value="Aceites">Aceites (motor, transmisión)</option>
-          <option value="Aceite de frenos">Aceite de frenos</option>
-          <option value="Aceite de power">Aceite de power steering</option>
-          <option value="Refrigerante">Refrigerante / Anticongelante</option>
-          <option value="Filtros">Filtros</option>
-          <option value="Grasas">Grasas y lubricantes</option>
-          <option value="Otros">Otros</option>
-        </select>
-      </div>
-      <div class="form-fila">
-        <label for="modalNombreProducto">Nombre del producto</label>
-        <input type="text" id="modalNombreProducto" placeholder="Ej. 5W-30 Valvoline Sintético Galón o DOT 3 Castrol">
-      </div>
-      <div class="form-fila">
-        <label for="modalCategoriaProducto">Categoría o referencia (opcional)</label>
-        <input type="text" id="modalCategoriaProducto" placeholder="Ej. 5W-30, DOT 3, etc.">
-      </div>
-      <div class="form-grid form-grid-2">
-        <div class="form-fila">
-          <label for="modalCantidadProducto">Cantidad inicial</label>
-          <input type="number" id="modalCantidadProducto" class="input-num" value="0" min="0">
+    <div class="main-shell">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menuToggle" type="button">Menu</button>
+          <div>
+            <p class="eyebrow">Panel maestro</p>
+            <h2 id="sectionTitle">Resumen general</h2>
+          </div>
         </div>
-        <div class="form-fila">
-          <label for="modalUmbralProducto">Aviso cuando quede menos de</label>
-          <input type="number" id="modalUmbralProducto" class="input-num" value="5" min="1">
+
+        <div class="topbar-actions">
+          <button class="ghost-btn" id="themeToggle" type="button">Modo claro</button>
+          <button class="accent-btn" type="button" data-section-target="ordenes">Nueva OT</button>
         </div>
-      </div>
-      <div class="acciones">
-        <button type="button" class="primario" onclick="guardarProductoModal()">➕ Agregar producto</button>
-        <button type="button" onclick="cerrarModalAgregar()">Cancelar</button>
-      </div>
+      </header>
+
+      <main class="content">
+        <section class="page-section active" id="dashboard">
+          <article class="hero panel">
+            <div class="hero-copy">
+              <p class="eyebrow">Administracion inteligente del taller</p>
+              <h3>Una operacion clara para mecanica, recepcion y control interno.</h3>
+              <p>
+                Registra ordenes de trabajo, controla inventario, organiza clientes y sigue la
+                operacion diaria desde un solo panel con estilo profesional.
+              </p>
+              <div class="hero-actions">
+                <button class="accent-btn" type="button" data-section-target="ordenes">Ir a ordenes</button>
+                <button class="ghost-btn" type="button" data-section-target="inventario">Revisar inventario</button>
+              </div>
+            </div>
+
+            <div class="hero-side">
+              <div class="hero-stat">
+                <span>OT activas</span>
+                <strong id="heroOrders">0</strong>
+              </div>
+              <div class="hero-stat">
+                <span>Piezas con alerta</span>
+                <strong id="heroAlerts">0</strong>
+              </div>
+              <div class="hero-stat">
+                <span>Ingresos estimados</span>
+                <strong id="heroRevenue">$0</strong>
+              </div>
+            </div>
+          </article>
+
+          <div class="metric-grid">
+            <article class="stat-card panel">
+              <p>Ordenes abiertas</p>
+              <strong id="metricOpenOrders">0</strong>
+              <span>Seguimiento de vehiculos en proceso</span>
+            </article>
+            <article class="stat-card panel">
+              <p>Entregas de hoy</p>
+              <strong id="metricDeliveredToday">0</strong>
+              <span>Vehiculos listos o ya entregados</span>
+            </article>
+            <article class="stat-card panel">
+              <p>Stock bajo</p>
+              <strong id="metricLowStock">0</strong>
+              <span>Refacciones o insumos por surtir</span>
+            </article>
+            <article class="stat-card panel">
+              <p>Ingreso potencial</p>
+              <strong id="metricRevenue">$0</strong>
+              <span>Basado en ordenes registradas</span>
+            </article>
+          </div>
+
+          <div class="content-grid dashboard-grid">
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Prioridad del dia</p>
+                  <h3>Ordenes urgentes</h3>
+                </div>
+              </div>
+              <div class="list-stack" id="dashboardOrders"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Control de almacen</p>
+                  <h3>Alertas de inventario</h3>
+                </div>
+              </div>
+              <div class="list-stack" id="dashboardInventory"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Planeacion</p>
+                  <h3>Agenda proxima</h3>
+                </div>
+              </div>
+              <div class="list-stack" id="dashboardAgenda"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="page-section" id="ordenes">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Modulo principal</p>
+              <h3>Ordenes de trabajo</h3>
+              <p>Alta, seguimiento y avance operativo de cada vehiculo del taller.</p>
+            </div>
+          </div>
+
+          <div class="content-grid form-layout">
+            <form class="panel form-panel" id="orderForm">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Nueva orden</p>
+                  <h3>Registrar vehiculo</h3>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <label>
+                  <span>Fecha</span>
+                  <input type="date" id="orderDate" required>
+                </label>
+                <label>
+                  <span>Entrega estimada</span>
+                  <input type="date" id="orderDueDate" required>
+                </label>
+                <label>
+                  <span>Cliente</span>
+                  <input type="text" id="orderClient" placeholder="Nombre del cliente" required>
+                </label>
+                <label>
+                  <span>Telefono</span>
+                  <input type="tel" id="orderPhone" placeholder="664 000 0000" required>
+                </label>
+                <label>
+                  <span>Vehiculo</span>
+                  <input type="text" id="orderVehicle" placeholder="Marca, modelo y anio" required>
+                </label>
+                <label>
+                  <span>Placas</span>
+                  <input type="text" id="orderPlate" placeholder="ABC-123-A" required>
+                </label>
+                <label>
+                  <span>Servicio</span>
+                  <input type="text" id="orderService" placeholder="Cambio de frenos, afinacion, etc." required>
+                </label>
+                <label>
+                  <span>Tecnico asignado</span>
+                  <input type="text" id="orderMechanic" placeholder="Nombre del tecnico" required>
+                </label>
+                <label>
+                  <span>Prioridad</span>
+                  <select id="orderPriority" required>
+                    <option value="Alta">Alta</option>
+                    <option value="Media" selected>Media</option>
+                    <option value="Baja">Baja</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Costo estimado</span>
+                  <input type="number" id="orderEstimate" min="0" step="100" placeholder="0" required>
+                </label>
+                <label class="full">
+                  <span>Diagnostico inicial</span>
+                  <textarea id="orderDiagnosis" rows="3" placeholder="Describe la falla reportada o el diagnostico inicial" required></textarea>
+                </label>
+                <label class="full">
+                  <span>Notas internas</span>
+                  <textarea id="orderNotes" rows="3" placeholder="Piezas necesarias, observaciones o detalles de seguimiento"></textarea>
+                </label>
+              </div>
+
+              <button class="accent-btn full-btn" type="submit">Guardar orden de trabajo</button>
+            </form>
+
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Vista operativa</p>
+                  <h3>Estado del taller</h3>
+                </div>
+              </div>
+
+              <div class="status-strip" id="orderStatusStrip"></div>
+
+              <div class="spotlight-card" id="orderSpotlight"></div>
+            </article>
+          </div>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Seguimiento</p>
+                <h3>Listado general</h3>
+              </div>
+            </div>
+
+            <div class="table-toolbar">
+              <input type="search" id="orderSearch" placeholder="Buscar por cliente, folio, vehiculo o servicio">
+              <select id="orderStatusFilter">
+                <option value="Todos">Todos los estados</option>
+                <option value="Recepcion">Recepcion</option>
+                <option value="Diagnostico">Diagnostico</option>
+                <option value="Reparacion">Reparacion</option>
+                <option value="Control final">Control final</option>
+                <option value="Listo">Listo</option>
+                <option value="Entregado">Entregado</option>
+              </select>
+              <select id="orderPriorityFilter">
+                <option value="Todas">Todas las prioridades</option>
+                <option value="Alta">Alta</option>
+                <option value="Media">Media</option>
+                <option value="Baja">Baja</option>
+              </select>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Folio</th>
+                    <th>Cliente y vehiculo</th>
+                    <th>Servicio</th>
+                    <th>Prioridad</th>
+                    <th>Estado</th>
+                    <th>Entrega</th>
+                    <th>Costo</th>
+                    <th>Accion</th>
+                  </tr>
+                </thead>
+                <tbody id="ordersTableBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section class="page-section" id="inventario">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Modulo clave</p>
+              <h3>Inventario</h3>
+              <p>Controla refacciones, aceites, consumibles y stock minimo del taller.</p>
+            </div>
+          </div>
+
+          <div class="content-grid form-layout">
+            <form class="panel form-panel" id="inventoryForm">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Nuevo producto</p>
+                  <h3>Registrar inventario</h3>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <label>
+                  <span>Producto</span>
+                  <input type="text" id="inventoryName" placeholder="Nombre del producto" required>
+                </label>
+                <label>
+                  <span>Categoria</span>
+                  <input type="text" id="inventoryCategory" placeholder="Filtros, lubricantes, frenos" required>
+                </label>
+                <label>
+                  <span>Proveedor</span>
+                  <input type="text" id="inventorySupplier" placeholder="Proveedor principal" required>
+                </label>
+                <label>
+                  <span>Ubicacion</span>
+                  <input type="text" id="inventoryLocation" placeholder="Rack A1, bodega, mostrador" required>
+                </label>
+                <label>
+                  <span>Existencia actual</span>
+                  <input type="number" id="inventoryStock" min="0" step="1" required>
+                </label>
+                <label>
+                  <span>Stock minimo</span>
+                  <input type="number" id="inventoryMinStock" min="0" step="1" required>
+                </label>
+                <label class="full">
+                  <span>Costo unitario</span>
+                  <input type="number" id="inventoryCost" min="0" step="1" required>
+                </label>
+              </div>
+
+              <button class="accent-btn full-btn" type="submit">Guardar producto</button>
+            </form>
+
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Control de almacen</p>
+                  <h3>Resumen rapido</h3>
+                </div>
+              </div>
+
+              <div class="mini-metrics" id="inventoryMetrics"></div>
+
+              <div class="movement-feed">
+                <div class="feed-head">
+                  <h4>Movimientos recientes</h4>
+                  <span>Entradas y salidas</span>
+                </div>
+                <div class="list-stack" id="movementFeed"></div>
+              </div>
+            </article>
+          </div>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Existencias</p>
+                <h3>Control general</h3>
+              </div>
+            </div>
+
+            <div class="table-toolbar">
+              <input type="search" id="inventorySearch" placeholder="Buscar producto, categoria o proveedor">
+              <select id="inventoryStatusFilter">
+                <option value="Todos">Todos los niveles</option>
+                <option value="Optimo">Optimo</option>
+                <option value="Bajo">Bajo</option>
+                <option value="Critico">Critico</option>
+              </select>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Categoria</th>
+                    <th>Proveedor</th>
+                    <th>Ubicacion</th>
+                    <th>Stock</th>
+                    <th>Minimo</th>
+                    <th>Nivel</th>
+                    <th>Costo</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="inventoryTableBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section class="page-section" id="clientes">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Relacion comercial</p>
+              <h3>Clientes</h3>
+              <p>Base administrativa para seguimiento, contacto y ultimos servicios.</p>
+            </div>
+          </div>
+
+          <div class="content-grid form-layout">
+            <form class="panel form-panel" id="clientForm">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Nuevo cliente</p>
+                  <h3>Registro rapido</h3>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <label>
+                  <span>Nombre</span>
+                  <input type="text" id="clientName" placeholder="Nombre completo" required>
+                </label>
+                <label>
+                  <span>Telefono</span>
+                  <input type="tel" id="clientPhone" placeholder="664 000 0000" required>
+                </label>
+                <label>
+                  <span>Correo</span>
+                  <input type="email" id="clientEmail" placeholder="correo@ejemplo.com">
+                </label>
+                <label>
+                  <span>Vehiculo principal</span>
+                  <input type="text" id="clientVehicle" placeholder="Vehiculo del cliente" required>
+                </label>
+                <label class="full">
+                  <span>Notas</span>
+                  <textarea id="clientNotes" rows="3" placeholder="Preferencias, garantias, historial o comentarios"></textarea>
+                </label>
+              </div>
+
+              <button class="accent-btn full-btn" type="submit">Guardar cliente</button>
+            </form>
+
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Cartera activa</p>
+                  <h3>Resumen comercial</h3>
+                </div>
+              </div>
+
+              <div class="mini-metrics" id="clientMetrics"></div>
+
+              <div class="spotlight-card" id="clientSpotlight"></div>
+            </article>
+          </div>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Directorio</p>
+                <h3>Listado de clientes</h3>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>Contacto</th>
+                    <th>Vehiculo</th>
+                    <th>Ultimo servicio</th>
+                    <th>Ultima visita</th>
+                    <th>Notas</th>
+                  </tr>
+                </thead>
+                <tbody id="clientsTableBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section class="page-section" id="agenda">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Operacion diaria</p>
+              <h3>Agenda y control</h3>
+              <p>Programa citas, vigila carga operativa y revisa el pulso administrativo del dia.</p>
+            </div>
+          </div>
+
+          <div class="content-grid form-layout">
+            <form class="panel form-panel" id="appointmentForm">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Nueva cita</p>
+                  <h3>Agenda de recepcion</h3>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <label>
+                  <span>Cliente</span>
+                  <input type="text" id="appointmentClient" placeholder="Nombre del cliente" required>
+                </label>
+                <label>
+                  <span>Servicio</span>
+                  <input type="text" id="appointmentService" placeholder="Servicio programado" required>
+                </label>
+                <label>
+                  <span>Fecha</span>
+                  <input type="date" id="appointmentDate" required>
+                </label>
+                <label>
+                  <span>Hora</span>
+                  <input type="time" id="appointmentTime" required>
+                </label>
+                <label class="full">
+                  <span>Tecnico o area</span>
+                  <input type="text" id="appointmentTechnician" placeholder="Recepcion, mecanico o tecnico responsable" required>
+                </label>
+              </div>
+
+              <button class="accent-btn full-btn" type="submit">Guardar cita</button>
+            </form>
+
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Control administrativo</p>
+                  <h3>Indicadores del dia</h3>
+                </div>
+              </div>
+
+              <div class="mini-metrics" id="agendaMetrics"></div>
+
+              <div class="spotlight-card" id="agendaSpotlight"></div>
+            </article>
+          </div>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Programacion</p>
+                <h3>Proximas citas</h3>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Cliente</th>
+                    <th>Servicio</th>
+                    <th>Responsable</th>
+                  </tr>
+                </thead>
+                <tbody id="appointmentsTableBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section class="page-section" id="configuracion">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Personalizacion</p>
+              <h3>Configuracion</h3>
+              <p>Define los datos del taller y cambia entre modo oscuro y modo claro.</p>
+            </div>
+          </div>
+
+          <div class="content-grid form-layout">
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Apariencia</p>
+                  <h3>Modos visuales</h3>
+                </div>
+              </div>
+
+              <div class="theme-options">
+                <button class="theme-choice active" type="button" data-theme-choice="dark">
+                  <span class="theme-preview theme-dark"></span>
+                  <strong>Modo oscuro</strong>
+                  <small>Negro profundo con acentos naranja.</small>
+                </button>
+                <button class="theme-choice" type="button" data-theme-choice="light">
+                  <span class="theme-preview theme-light"></span>
+                  <strong>Modo claro</strong>
+                  <small>Base clara, contraste fuerte y color clave preservado.</small>
+                </button>
+              </div>
+            </article>
+
+            <form class="panel form-panel" id="settingsForm">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Datos del negocio</p>
+                  <h3>Identidad del taller</h3>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <label>
+                  <span>Nombre del taller</span>
+                  <input type="text" id="settingsBusinessName" required>
+                </label>
+                <label>
+                  <span>Responsable</span>
+                  <input type="text" id="settingsManager" required>
+                </label>
+                <label>
+                  <span>Telefono</span>
+                  <input type="tel" id="settingsPhone" required>
+                </label>
+                <label>
+                  <span>Correo</span>
+                  <input type="email" id="settingsEmail" required>
+                </label>
+                <label class="full">
+                  <span>Ubicacion</span>
+                  <input type="text" id="settingsLocation" required>
+                </label>
+              </div>
+
+              <button class="accent-btn full-btn" type="submit">Guardar configuracion</button>
+            </form>
+          </div>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Estado del sistema</p>
+                <h3>Resumen final</h3>
+              </div>
+            </div>
+
+            <div class="summary-grid" id="systemSummary"></div>
+          </article>
+        </section>
+      </main>
     </div>
   </div>
 
-  <script>
-    const BREADCRUMBS = { inicio: 'Inicio', inventario: 'Inventario', ventas: 'Ventas', presupuesto: 'Presupuesto', ordenes: 'Órdenes de Trabajo', clientes: 'Clientes' };
-    const IVA = 0.08;
+  <div class="toast-stack" id="toastStack"></div>
 
-    function escapeHtml(str) {
-      if (str == null) return '';
-      var s = String(str);
-      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-    const STORAGE = { inv: 'tb_inventario', mov: 'tb_movimientos', ventas: 'tb_ventas', clientes: 'tb_clientes', ordenes: 'tb_ordenes', presupuestos: 'tb_presupuestos', contadorPresup: 'tb_contador_presup', contadorOrden: 'tb_contador_orden' };
-
-    let inventario = [];
-    let movimientos = [];
-    let ventas = [];
-    let clientes = [];
-    let ordenes = [];
-    let presupuestos = [];
-    let lineasVentaActual = [];
-    let trabajosPresupuesto = [];
-    let ordenActual = null;
-    let clienteActual = null;
-    let presupuestoActual = { trabajos: [] };
-
-    function ir(id) {
-      document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
-      document.getElementById(id).classList.add('activa');
-      document.querySelectorAll('.sidebar-nav button').forEach(b => b.classList.remove('activo'));
-      var btn = document.getElementById('btn' + id.charAt(0).toUpperCase() + id.slice(1));
-      if (btn) btn.classList.add('activo');
-      document.getElementById('breadcrumb').innerHTML = '<a href="#" onclick="ir(\'inicio\')">Inicio</a> <span>/</span> ' + (BREADCRUMBS[id] || id);
-      if (id === 'inventario') {
-        cargarInventarioDOM();
-        listarMovimientos();
-      }
-      if (id === 'inicio') actualizarDashboard();
-      if (id === 'ventas') { llenarSelectProductos(); listarVentas(); actualizarGananciaHoy(); }
-      if (id === 'presupuesto') {
-        llenarSelectClientes('presupuestoCliente');
-        actualizarNumPresupuesto();
-        if (!presupuestoActual.trabajos || presupuestoActual.trabajos.length === 0) presupuestoActual.trabajos = [{ descripcion: '', monto: 0 }];
-        dibujarTrabajosPresupuesto();
-        var val = document.getElementById('presupuestoValidez');
-        if (val && !val.value) { var d = new Date(); d.setDate(d.getDate() + 7); val.value = d.toISOString().slice(0, 10); }
-      }
-      if (id === 'ordenes') { listarOrdenes(); llenarSelectClientes('ordenCliente'); }
-      if (id === 'clientes') { listarClientes(); }
-    }
-
-    function msg(txt, type = 'info') { 
-      showNotification(txt, type, 3000);
-      var m = document.getElementById('msgGlobal'); 
-      m.textContent = txt; 
-      m.classList.add('visible'); 
-      setTimeout(function() { m.classList.remove('visible'); }, 3000); 
-    }
-
-    function abrirModalAgregar() {
-      ir('inventario');
-      document.getElementById('modalAgregarProducto').classList.add('visible');
-      document.getElementById('modalNombreProducto').value = '';
-      document.getElementById('modalCategoriaProducto').value = '';
-      document.getElementById('modalCantidadProducto').value = '0';
-      document.getElementById('modalUmbralProducto').value = '5';
-      setTimeout(function() { document.getElementById('modalNombreProducto').focus(); }, 100);
-    }
-    function irYAgregarProducto() {
-      abrirModalAgregar();
-    }
-    function cerrarModalAgregar() {
-      document.getElementById('modalAgregarProducto').classList.remove('visible');
-    }
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && document.getElementById('modalAgregarProducto').classList.contains('visible')) cerrarModalAgregar();
-    });
-    function guardarProductoModal() {
-      var tipo = document.getElementById('modalTipoProducto').value;
-      var nombre = (document.getElementById('modalNombreProducto').value || '').trim();
-      if (!nombre) { msg('Escribe el nombre del producto'); return; }
-      var cat = (document.getElementById('modalCategoriaProducto').value || '').trim() || nombre.split(' ')[0];
-      var cant = parseInt(document.getElementById('modalCantidadProducto').value, 10) || 0;
-      var umbral = parseInt(document.getElementById('modalUmbralProducto').value, 10) || 5;
-      inventario = getInv();
-      var id = inventario.length ? Math.max.apply(null, inventario.map(function(p) { return p.id; })) + 1 : 1;
-      inventario.push({ id: id, tipo: tipo, nombre: nombre, categoria: cat, cantidad: cant, umbral: umbral });
-      setInv(inventario);
-      cerrarModalAgregar();
-      cargarInventarioDOM();
-      pintarFormMovimiento();
-      llenarSelectProductos();
-      actualizarDashboard();
-      msg('Producto agregado: ' + nombre);
-    }
-
-    // ----- INVENTARIO -----
-    function getInv() { try { return JSON.parse(localStorage.getItem(STORAGE.inv) || '[]'); } catch(e) { return []; } }
-    function getMov() { try { return JSON.parse(localStorage.getItem(STORAGE.mov) || '[]'); } catch(e) { return []; } }
-    function setInv(arr) { inventario = arr; localStorage.setItem(STORAGE.inv, JSON.stringify(arr)); }
-    function setMov(arr) { movimientos = arr; localStorage.setItem(STORAGE.mov, JSON.stringify(arr)); }
-
-    function initInventario() {
-      inventario = getInv();
-      if (inventario.length === 0) {
-        // No agregar productos predeterminados
-      } else {
-        inventario.forEach(function(p) {
-          if (!p.tipo) p.tipo = 'Aceites';
-        });
-        setInv(inventario);
-      }
-    }
-
-    function eliminarAceite(id) {
-      inventario = getInv();
-      inventario = inventario.filter(function(p) { return p.id !== id; });
-      setInv(inventario);
-      cargarInventarioDOM();
-      pintarFormMovimiento();
-      msg('Producto eliminado');
-    }
-
-    function cargarInventarioDOM() {
-      inventario = getInv();
-      var html = '';
-      inventario.forEach(function(p) {
-        var baja = (p.cantidad || 0) <= (p.umbral || 5);
-        var tipo = p.tipo || 'Aceites';
-        html += '<div class="fila-inv' + (baja ? ' alerta-baja' : '') + '"><span><span class="badge-tipo">' + escapeHtml(tipo) + '</span> ' + escapeHtml(p.nombre) + '</span><span class="cant" data-id="' + p.id + '">' + (p.cantidad || 0) + '</span><button type="button" onclick="editarUmbral(' + p.id + ')">Umbral</button><button type="button" class="peligro" onclick="eliminarAceite(' + p.id + ')">Eliminar</button></div>';
-      });
-      document.getElementById('listaInventario').innerHTML = html || '<p class="sin-datos">No hay productos. Haz clic en «Agregar producto» (menú o botón arriba).</p>';
-      pintarFormMovimiento();
-    }
-
-    function pintarFormMovimiento() {
-      inventario = getInv();
-      var sel = '<option value="">-- Seleccionar producto --</option>';
-      inventario.forEach(function(p) { sel += '<option value="' + p.id + '">[' + escapeHtml(p.tipo || 'Aceites') + '] ' + escapeHtml(p.nombre) + ' (' + (p.cantidad || 0) + ')</option>'; });
-      document.getElementById('formMovimiento').innerHTML = '<div class="form-grid form-grid-3"><div class="form-fila"><label for="selMovProd">Producto</label><select id="selMovProd">' + sel + '</select></div><div class="form-fila"><label for="movCant">Cantidad</label><input type="number" id="movCant" class="input-num" value="1" min="1"></div><div class="form-fila form-fila-btn"><button type="button" class="primario" onclick="aplicarMovimiento()">Aplicar movimiento</button></div></div>';
-    }
-
-    function movInv(id, delta) {
-      inventario = getInv();
-      var p = inventario.find(function(x) { return x.id === id; });
-      if (!p) return;
-      p.cantidad = Math.max(0, (p.cantidad || 0) + delta);
-      setInv(inventario);
-      movimientos = getMov();
-      var tipo = delta > 0 ? 'agregar' : 'restar';
-      movimientos.unshift({ fecha: new Date().toISOString(), productoId: id, producto: p.nombre, delta: delta > 0 ? '+' + delta : delta, tipo: tipo });
-      setMov(movimientos);
-      cargarInventarioDOM();
-      listarMovimientos();
-      msg('Inventario actualizado');
-    }
-
-    function aplicarMovimiento() {
-      var id = parseInt(document.getElementById('selMovProd').value, 10);
-      var cant = parseInt(document.getElementById('movCant').value, 10) || 1;
-      if (!id) { msg('Elige un producto'); return; }
-      var agregar = document.querySelector('input[name="tipoMov"]:checked') && document.querySelector('input[name="tipoMov"]:checked').value === 'agregar';
-      movInv(id, agregar ? cant : -cant);
-    }
-
-    function editarUmbral(id) {
-      inventario = getInv();
-      var p = inventario.find(function(x) { return x.id === id; });
-      if (!p) return;
-      var v = prompt('Alerta cuando quede menos de (unidades):', p.umbral || 5);
-      if (v === null) return;
-      p.umbral = Math.max(1, parseInt(v, 10) || 5);
-      setInv(inventario);
-      cargarInventarioDOM();
-    }
-
-    function borrarMovimiento(i) {
-      movimientos = getMov();
-      movimientos.splice(i, 1);
-      setMov(movimientos);
-      listarMovimientos();
-      msg('Movimiento borrado');
-    }
-
-    function borrarMovimientosDelDia(fechaStr) {
-      movimientos = getMov();
-      movimientos = movimientos.filter(function(m) { return (m.fecha || '').slice(0, 10) !== fechaStr; });
-      setMov(movimientos);
-      listarMovimientos();
-      msg('Movimientos del día borrados');
-    }
-
-    function borrarTodoHistorialMov() {
-      setMov([]);
-      listarMovimientos();
-      msg('Historial de movimientos borrado');
-    }
-
-    function listarMovimientos() {
-      movimientos = getMov();
-      var html = '<table class="tabla-movimientos"><thead><tr><th>Fecha</th><th>Producto</th><th>Cambio</th><th></th></tr></thead><tbody>';
-      movimientos.slice(0, 80).forEach(function(m, i) {
-        html += '<tr><td>' + new Date(m.fecha).toLocaleString() + '</td><td>' + escapeHtml(m.producto || '') + '</td><td>' + (m.delta || '') + ' ' + (m.tipo === 'agregar' ? '(agregar)' : '(restar)') + '</td><td><button type="button" onclick="borrarMovimiento(' + i + ')">Borrar</button></td></tr>';
-      });
-      html += '</tbody></table>';
-      document.getElementById('historialMovimientos').innerHTML = html || '<p class="sin-datos">No hay movimientos.</p>';
-    }
-
-    function filtrarInventario() {
-      var q = (document.getElementById('buscarInv').value || '').toLowerCase();
-      document.querySelectorAll('.fila-inv').forEach(function(fil) {
-        fil.style.display = !q || fil.textContent.toLowerCase().includes(q) ? '' : 'none';
-      });
-    }
-
-    // ----- VENTAS -----
-    function getVentas() { try { return JSON.parse(localStorage.getItem(STORAGE.ventas) || '[]'); } catch(e) { return []; } }
-    function setVentas(arr) { ventas = arr; localStorage.setItem(STORAGE.ventas, JSON.stringify(arr)); }
-
-    function llenarSelectProductos() {
-      inventario = getInv();
-      var sel = '<option value="">-- Producto --</option>';
-      inventario.forEach(function(p) { sel += '<option value="' + p.id + '">' + escapeHtml(p.nombre) + '</option>'; });
-      document.getElementById('ventaProducto').innerHTML = sel;
-    }
-
-    function agregarLineaVenta() {
-      var sel = document.getElementById('ventaProducto');
-      var id = parseInt(sel.value);
-      var cant = parseInt(document.getElementById('ventaCantidad').value) || 1;
-      if (!id) { msg('Elige un producto'); return; }
-      var p = inventario.find(x => x.id === id);
-      if (!p) return;
-      var precio = parseFloat(p.precio) || 0;
-      if (precio === 0) precio = parseFloat(prompt('Precio unitario para ' + p.nombre + ':', '0')) || 0;
-      lineasVentaActual.push({ productoId: id, nombre: p.nombre, cantidad: cant, precioUnit: precio, total: cant * precio });
-      renderLineasVenta();
-    }
-
-    function renderLineasVenta() {
-      var tbody = document.getElementById('lineasVenta');
-      tbody.innerHTML = '';
-      lineasVentaActual.forEach((l, i) => {
-        var tr = document.createElement('tr');
-        tr.innerHTML = '<td>' + l.nombre + '</td><td>' + l.cantidad + '</td><td>$' + l.precioUnit + '</td><td>$' + l.total + '</td><td><button onclick="quitarLineaVenta(' + i + ')">Quitar</button></td>';
-        tbody.appendChild(tr);
-      });
-      var subtotal = lineasVentaActual.reduce((s, l) => s + l.total, 0);
-      var desc = (parseFloat(document.getElementById('ventaDescuento').value) || 0) / 100;
-      subtotal = subtotal * (1 - desc);
-      var iva = subtotal * IVA;
-      var total = subtotal + iva;
-      document.getElementById('ventaSubtotal').textContent = '$' + subtotal.toFixed(2);
-      document.getElementById('ventaIVA').textContent = '$' + iva.toFixed(2);
-      document.getElementById('ventaTotal').textContent = '$' + total.toFixed(2);
-    }
-
-    document.getElementById('ventaDescuento').addEventListener('input', renderLineasVenta);
-
-    function quitarLineaVenta(i) { lineasVentaActual.splice(i, 1); renderLineasVenta(); }
-
-    function confirmarVenta() {
-      if (lineasVentaActual.length === 0) { msg('Agrega al menos un producto'); return; }
-      inventario = getInv();
-      var subtotal = lineasVentaActual.reduce((s, l) => s + l.total, 0);
-      var desc = (parseFloat(document.getElementById('ventaDescuento').value) || 0) / 100;
-      subtotal = subtotal * (1 - desc);
-      var total = subtotal + (subtotal * IVA);
-      ventas = getVentas();
-      ventas.push({ fecha: new Date().toISOString(), lineas: JSON.parse(JSON.stringify(lineasVentaActual)), subtotal, total });
-      setVentas(ventas);
-      lineasVentaActual.forEach(l => {
-        var p = inventario.find(x => x.id === l.productoId);
-        if (p) p.cantidad = Math.max(0, (p.cantidad || 0) - l.cantidad);
-      });
-      setInv(inventario);
-      lineasVentaActual = [];
-      renderLineasVenta();
-      listarVentas();
-      actualizarGananciaHoy();
-      msg('Venta registrada');
-    }
-
-    function cancelarVenta() { lineasVentaActual = []; renderLineasVenta(); msg('Venta cancelada'); }
-
-    function imprimirTicket() {
-      if (lineasVentaActual.length === 0) { msg('No hay líneas para imprimir'); return; }
-      var w = window.open('', '_blank');
-      var sub = lineasVentaActual.reduce((s, l) => s + l.total, 0);
-      var desc = (parseFloat(document.getElementById('ventaDescuento').value) || 0) / 100;
-      sub = sub * (1 - desc);
-      var tot = sub + sub * IVA;
-      w.document.write('<pre style="font-family:monospace">TALLER BORJON - TICKET\n' + new Date().toLocaleString() + '\n\n' + lineasVentaActual.map(l => l.nombre + ' x' + l.cantidad + ' $' + l.total).join('\n') + '\n\nSubtotal: $' + sub.toFixed(2) + '\nTotal: $' + tot.toFixed(2) + '</pre>');
-      w.print();
-      w.close();
-    }
-
-    function listarVentas() {
-      ventas = getVentas();
-      var html = '<table><thead><tr><th>Fecha</th><th>Total</th></tr></thead><tbody>';
-      ventas.slice(-30).reverse().forEach(v => { html += '<tr><td>' + new Date(v.fecha).toLocaleString() + '</td><td>$' + (v.total || 0).toFixed(2) + '</td></tr>'; });
-      html += '</tbody></table>';
-      document.getElementById('historialVentas').innerHTML = html;
-    }
-
-    function actualizarGananciaHoy() {
-      ventas = getVentas();
-      var hoy = new Date().toDateString();
-      var total = ventas.filter(v => new Date(v.fecha).toDateString() === hoy).reduce((s, v) => s + (v.total || 0), 0);
-      document.getElementById('gananciaHoy').textContent = '$' + total.toFixed(2);
-    }
-
-    function borrarVentasHoy() {
-      ventas = getVentas();
-      var hoy = new Date().toDateString();
-      ventas = ventas.filter(v => new Date(v.fecha).toDateString() !== hoy);
-      setVentas(ventas);
-      listarVentas();
-      actualizarGananciaHoy();
-      msg('Ventas de hoy borradas');
-    }
-
-    function reiniciarTodo() {
-      setVentas([]);
-      lineasVentaActual = [];
-      renderLineasVenta();
-      listarVentas();
-      actualizarGananciaHoy();
-      msg('Ventas reiniciadas');
-    }
-
-    // ----- PRESUPUESTO -----
-    function getPresupuestos() { try { return JSON.parse(localStorage.getItem(STORAGE.presupuestos) || '[]'); } catch(e) { return []; } }
-    function getContadorPresup() { return parseInt(localStorage.getItem(STORAGE.contadorPresup) || '0'); }
-    function setContadorPresup(n) { localStorage.setItem(STORAGE.contadorPresup, String(n)); }
-
-    function actualizarNumPresupuesto() {
-      var n = getContadorPresup() + 1;
-      document.getElementById('numPresupuesto').textContent = 'PRE-' + new Date().getFullYear() + '-' + String(n).padStart(3, '0');
-    }
-
-    function nuevoPresupuesto() {
-      presupuestoActual = { cliente: null, clienteDatos: null, vehiculo: {}, trabajos: [], validez: '' };
-      document.getElementById('formPresupuesto').classList.remove('oculto');
-      
-      // Resetear selector de cliente
-      document.querySelector('input[name="clienteTipoPresupuesto"][value="existente"]').checked = true;
-      toggleClienteTipoPresupuesto('existente');
-      
-      // Limpiar campos
-      document.getElementById('presupuestoCliente').value = '';
-      document.getElementById('presupuestoClienteNombre').value = '';
-      document.getElementById('presupuestoClienteTel').value = '';
-      document.getElementById('presupuestoVehiculoMarca').value = '';
-      document.getElementById('presupuestoVehiculoModelo').value = '';
-      document.getElementById('presupuestoVehiculoAno').value = '';
-      document.getElementById('presupuestoVehiculoColor').value = '';
-      document.getElementById('presupuestoValidez').value = '';
-      
-      presupuestoActual.trabajos = [];
-      dibujarTrabajosPresupuesto();
-      actualizarResumenPresupuesto();
-      
-      // Llenar select de clientes
-      llenarSelectClientes('presupuestoCliente');
-    }
-
-    function agregarTrabajoPresupuesto() {
-      presupuestoActual.trabajos = presupuestoActual.trabajos || [];
-      presupuestoActual.trabajos.push({ descripcion: '', monto: 0 });
-      dibujarTrabajosPresupuesto();
-    }
-
-    function dibujarTrabajosPresupuesto() {
-      var div = document.getElementById('trabajosPresupuesto');
-      div.innerHTML = '';
-      (presupuestoActual.trabajos || []).forEach((t, i) => {
-        var p = document.createElement('p');
-        p.innerHTML = '<div class="form-grid form-grid-3"><div class="form-fila"><label>Descripción</label><input type="text" id="trabDesc' + i + '" value="' + escapeHtml(t.descripcion || '') + '" onchange="actualizarResumenPresupuesto()"></div><div class="form-fila"><label>Monto</label><input type="number" id="trabMonto' + i + '" class="input-num" value="' + (t.monto || 0) + '" onchange="actualizarResumenPresupuesto()"></div><div class="form-fila form-fila-btn"><button type="button" onclick="quitarTrabajoPresupuesto(' + i + ')">Quitar</button></div></div>';
-        div.appendChild(p);
-      });
-      actualizarResumenPresupuesto();
-    }
-
-    function quitarTrabajoPresupuesto(i) {
-      presupuestoActual.trabajos.splice(i, 1);
-      dibujarTrabajosPresupuesto();
-    }
-
-    function actualizarResumenPresupuesto() {
-      var subtotal = 0;
-      (presupuestoActual.trabajos || []).forEach((t, i) => {
-        var desc = document.getElementById('trabDesc' + i);
-        var monto = document.getElementById('trabMonto' + i);
-        if (desc) t.descripcion = desc.value;
-        if (monto) { t.monto = parseFloat(monto.value) || 0; subtotal += t.monto; }
-      });
-      var iva = subtotal * IVA;
-      document.getElementById('presupSubtotal').textContent = '$' + subtotal.toFixed(2);
-      document.getElementById('presupIVA').textContent = '$' + iva.toFixed(2);
-      document.getElementById('presupTotal').textContent = '$' + (subtotal + iva).toFixed(2);
-    }
-
-    function generarPDFPresupuesto() {
-      // Guardar cliente nuevo si aplica
-      const clienteTipo = document.querySelector('input[name="clienteTipoPresupuesto"]:checked').value;
-      if (clienteTipo === 'nuevo') {
-        const nombre = document.getElementById('presupuestoClienteNombre').value.trim();
-        const telefono = document.getElementById('presupuestoClienteTel').value.trim();
-        
-        if (nombre && telefono) {
-          const clientes = getClientes();
-          const nuevoCliente = {
-            id: clientes.length ? Math.max(...clientes.map(c => c.id)) + 1 : 1,
-            nombre: nombre,
-            telefono: telefono,
-            vehiculo: `${document.getElementById('presupuestoVehiculoMarca').value || ''} ${document.getElementById('presupuestoVehiculoModelo').value || ''} ${document.getElementById('presupuestoVehiculoAno').value || ''}`.trim(),
-            placas: ''
-          };
-          clientes.push(nuevoCliente);
-          setClientes(clientes);
-          showNotification('Cliente guardado en la base de datos ✅', 'success');
-        }
-      }
-      
-      var num = document.getElementById('numPresupuesto').textContent;
-      var validez = document.getElementById('presupuestoValidez').value || new Date(Date.now() + 7*24*60*60*1000).toISOString().slice(0, 10);
-      
-      // Obtener información del cliente
-      var clienteNombre = '';
-      var clienteTelefono = '';
-      
-      if (clienteTipo === 'existente') {
-        const clienteId = document.getElementById('presupuestoCliente').value;
-        if (clienteId) {
-          const cliente = clientes.find(c => c.id === parseInt(clienteId));
-          if (cliente) {
-            clienteNombre = cliente.nombre;
-            clienteTelefono = cliente.telefono || '';
-          }
-        }
-      } else {
-        clienteNombre = document.getElementById('presupuestoClienteNombre').value.trim();
-        clienteTelefono = document.getElementById('presupuestoClienteTel').value.trim();
-      }
-      
-      // Información del vehículo
-      var vehiculoInfo = '';
-      var marca = document.getElementById('presupuestoVehiculoMarca').value.trim();
-      var modelo = document.getElementById('presupuestoVehiculoModelo').value.trim();
-      var ano = document.getElementById('presupuestoVehiculoAno').value.trim();
-      var color = document.getElementById('presupuestoVehiculoColor').value.trim();
-      
-      if (marca || modelo || ano || color) {
-        vehiculoInfo = `${marca} ${modelo} ${ano} ${color}`.trim();
-      }
-      
-      var subtotal = 0;
-      var trabajosHTML = '';
-      
-      (presupuestoActual.trabajos || []).forEach((t, i) => {
-        var desc = document.getElementById('trabDesc' + i);
-        var monto = document.getElementById('trabMonto' + i);
-        if (desc && desc.value.trim()) {
-          var montoVal = parseFloat(monto ? monto.value : 0) || 0;
-          subtotal += montoVal;
-          trabajosHTML += `<tr><td style="padding: 12px; border-bottom: 1px solid #eee;">${escapeHtml(desc.value)}</td><td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; font-weight: 500;">$${montoVal.toFixed(2)}</td></tr>`;
-        }
-      });
-      
-      var iva = subtotal * IVA;
-      var total = subtotal + iva;
-      var fecha = new Date().toLocaleDateString('es-MX');
-      
-      var html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Presupuesto - Taller Borjón</title>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #f8f9fa; padding: 20px; }
-            .receipt { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; }
-            .header { background: linear-gradient(135deg, #ff8c1a 0%, #6f42c1 100%); color: white; padding: 30px; text-align: center; }
-            .header h1 { font-size: 28px; margin-bottom: 8px; font-weight: 700; }
-            .header p { font-size: 14px; opacity: 0.9; }
-            .receipt-body { padding: 30px; }
-            .receipt-info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; }
-            .info-group h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 6px; font-weight: 600; }
-            .info-group p { font-size: 14px; color: #333; font-weight: 500; }
-            .vehiculo-section { margin-bottom: 25px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #ff8c1a; }
-            .vehiculo-section h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 6px; font-weight: 600; }
-            .vehiculo-section p { font-size: 16px; color: #333; font-weight: 500; }
-            .trabajos-title { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 15px; font-weight: 600; }
-            .trabajos-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
-            .trabajos-table th { background: #f8f9fa; padding: 12px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; border-bottom: 2px solid #e0e0e0; font-weight: 600; }
-            .trabajos-table td { padding: 12px; border-bottom: 1px solid #eee; }
-            .trabajos-table tr:last-child td { border-bottom: none; }
-            .totals { background: #f8f9fa; border-radius: 8px; padding: 20px; }
-            .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-            .total-row:last-child { margin-bottom: 0; padding-top: 15px; border-top: 2px solid #e0e0e0; }
-            .total-label { font-size: 14px; color: #666; }
-            .total-value { font-size: 16px; color: #333; font-weight: 600; }
-            .grand-total { font-size: 20px; color: #ff8c1a; font-weight: 700; }
-            .validity { margin-top: 25px; padding: 15px; background: #fff3e0; border-radius: 8px; border-left: 4px solid #ff8c1a; }
-            .validity p { font-size: 14px; color: #e65100; font-weight: 500; }
-            .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #f0f0f0; }
-            .footer p { font-size: 12px; color: #999; margin-bottom: 5px; }
-            .footer .phone { color: #ff8c1a; font-weight: 600; font-size: 14px; }
-            @media print { body { background: white; } .receipt { box-shadow: none; max-width: 100%; } }
-          </style>
-        </head>
-        <body>
-          <div class="receipt">
-            <div class="header">
-              <h1>🔧 TALLER BORJÓN</h1>
-              <p>Almacén de Aceites y Servicio Automotriz</p>
-              <p style="margin-top: 10px; font-size: 18px; font-weight: 600;">PRESUPUESTO ${num}</p>
-            </div>
-            <div class="receipt-body">
-              <div class="receipt-info">
-                <div class="info-group">
-                  <h3>📅 Fecha de emisión</h3>
-                  <p>${fecha}</p>
-                </div>
-                <div class="info-group">
-                  <h3>📞 Cliente</h3>
-                  <p>${clienteNombre || 'Cliente sin nombre'}<br>${clienteTelefono || ''}</p>
-                </div>
-              </div>
-              
-              ${vehiculoInfo ? `
-              <div class="vehiculo-section">
-                <h3>🚗 Vehículo</h3>
-                <p>${vehiculoInfo}</p>
-              </div>
-              ` : ''}
-              
-              <div class="trabajos-title">🔧 Trabajos a realizar</div>
-              <table class="trabajos-table">
-                <thead>
-                  <tr>
-                    <th>Descripción del trabajo</th>
-                    <th style="text-align: right;">Monto</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${trabajosHTML || '<tr><td colspan="2" style="text-align: center; color: #999; padding: 20px;">Sin trabajos registrados</td></tr>'}
-                </tbody>
-              </table>
-              
-              <div class="totals">
-                <div class="total-row">
-                  <span class="total-label">Subtotal:</span>
-                  <span class="total-value">$${subtotal.toFixed(2)}</span>
-                </div>
-                <div class="total-row">
-                  <span class="total-label">IVA (16%):</span>
-                  <span class="total-value">$${iva.toFixed(2)}</span>
-                </div>
-                <div class="total-row">
-                  <span class="total-label" style="font-size: 16px; font-weight: 700;">TOTAL:</span>
-                  <span class="grand-total">$${total.toFixed(2)} MXN</span>
-                </div>
-              </div>
-              
-              <div class="validity">
-                <p>📅 Este presupuesto es válido hasta el ${validez}</p>
-              </div>
-              
-              <div class="footer">
-                <p style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 10px;">¡Gracias por su preferencia!</p>
-                <p>Para cualquier duda o aclaración, comuníquese con nosotros</p>
-                <p class="phone">📞 Tel: (686) 123-4567</p>
-              </div>
-            </div>
-          </div>
-        </body>
-        </html>
-      `;
-      
-      var w = window.open('', '_blank');
-      w.document.write(html);
-      w.document.close();
-      w.focus();
-      setTimeout(function() { w.print(); }, 500);
-    }
-
-    function enviarPresupuestoMail() {
-      var num = document.getElementById('numPresupuesto').textContent;
-      window.location.href = 'mailto:?subject=Presupuesto%20' + encodeURIComponent(num) + '&body=Adjunto%20presupuesto%20' + encodeURIComponent(num);
-    }
-
-    // Función para cambiar entre tipos de cliente en presupuesto
-    function toggleClienteTipoPresupuesto(tipo) {
-      // Ocultar todas las opciones
-      document.getElementById('clienteExistentePresupuesto').classList.add('oculto');
-      document.getElementById('clienteNuevoPresupuesto').classList.add('oculto');
-      
-      // Mostrar la opción seleccionada
-      if (tipo === 'existente') {
-        document.getElementById('clienteExistentePresupuesto').classList.remove('oculto');
-      } else {
-        document.getElementById('clienteNuevoPresupuesto').classList.remove('oculto');
-      }
-    }
-
-    // ----- ÓRDENES -----
-    function getOrdenes() { try { return JSON.parse(localStorage.getItem(STORAGE.ordenes) || '[]'); } catch(e) { return []; } }
-    function setOrdenes(arr) { ordenes = arr; localStorage.setItem(STORAGE.ordenes, JSON.stringify(arr)); }
-    function getContadorOrden() { return parseInt(localStorage.getItem(STORAGE.contadorOrden) || '0'); }
-    function setContadorOrden(n) { localStorage.setItem(STORAGE.contadorOrden, String(n)); }
-
-    // Función para cambiar entre tipos de cliente
-    function toggleClienteTipo(tipo) {
-      // Ocultar todas las opciones
-      document.getElementById('clienteExistente').classList.add('oculto');
-      document.getElementById('clienteNuevo').classList.add('oculto');
-      document.getElementById('clienteManual').classList.add('oculto');
-      
-      // Mostrar la opción seleccionada
-      document.getElementById('cliente' + tipo.charAt(0).toUpperCase() + tipo.slice(1)).classList.remove('oculto');
-      
-      // Manejar sección de vehículo
-      if (tipo === 'existente') {
-        document.getElementById('vehiculoExistente').classList.remove('oculto');
-        document.getElementById('vehiculoManual').classList.add('oculto');
-      } else {
-        document.getElementById('vehiculoExistente').classList.add('oculto');
-        document.getElementById('vehiculoManual').classList.remove('oculto');
-      }
-      
-      // Limpiar datos del vehículo al cambiar tipo
-      document.getElementById('ordenVehiculoMarca').textContent = '—';
-      document.getElementById('ordenVehiculoAno').textContent = '—';
-      document.getElementById('ordenVehiculoPlacas').textContent = '—';
-    }
-
-    function nuevaOrden() {
-      ordenActual = { 
-        id: getContadorOrden() + 1, 
-        clienteId: null, 
-        presupuestoId: null, 
-        entrega: '', 
-        estado: 'pendiente', 
-        checklist: [],
-        descripcion: '',
-        vehiculoColor: '',
-        vehiculoKm: '',
-        clienteTipo: 'existente',
-        clienteDatos: null
-      };
-      
-      document.getElementById('formOrden').classList.remove('oculto');
-      
-      // Mostrar número de orden y fecha actual
-      document.getElementById('ordenNumeroDisplay').textContent = '#ORD-' + ordenActual.id;
-      document.getElementById('ordenFechaActual').textContent = new Date().toLocaleDateString('es', {
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric'
-      });
-      
-      // Resetear selector de tipo de cliente
-      document.querySelector('input[name="clienteTipo"][value="existente"]').checked = true;
-      toggleClienteTipo('existente');
-      
-      // Limpiar campos
-      document.getElementById('ordenCliente').value = '';
-      document.getElementById('ordenEntrega').value = '';
-      document.getElementById('ordenEstado').value = 'pendiente';
-      document.getElementById('ordenDescripcion').value = '';
-      document.getElementById('ordenVehiculoColor').value = '';
-      document.getElementById('ordenVehiculoKm').value = '';
-      
-      // Limpiar campos de cliente y vehículo
-      document.getElementById('ordenClienteTel').textContent = '—';
-      document.getElementById('ordenVehiculoMarca').textContent = '—';
-      document.getElementById('ordenVehiculoAno').textContent = '—';
-      
-      // Limpiar campos de cliente nuevo
-      document.getElementById('nuevoClienteNombre').value = '';
-      document.getElementById('nuevoClienteTel').value = '';
-      document.getElementById('guardarClienteNuevo').checked = true;
-      
-      // Limpiar campos de cliente manual
-      document.getElementById('manualClienteNombre').value = '';
-      document.getElementById('manualClienteTel').value = '';
-      
-      // Limpiar campos de vehículo manual
-      document.getElementById('manualVehiculoMarca').value = '';
-      document.getElementById('manualVehiculoModelo').value = '';
-      document.getElementById('manualVehiculoAno').value = '';
-      document.getElementById('ordenVehiculoColor').value = '';
-      
-      // Agregar evento change para actualizar datos del cliente existente
-      document.getElementById('ordenCliente').addEventListener('change', function() {
-        const clienteId = parseInt(this.value);
-        if (clienteId) {
-          const clientes = getClientes();
-          const cliente = clientes.find(c => c.id === clienteId);
-          if (cliente) {
-            document.getElementById('ordenClienteTel').textContent = cliente.telefono || '—';
-            document.getElementById('ordenVehiculoMarca').textContent = cliente.vehiculo || '—';
-            
-            // Extraer año del vehículo si está en el formato "Marca Modelo Año"
-            const vehiculoParts = (cliente.vehiculo || '').split(' ');
-            const año = vehiculoParts[vehiculoParts.length - 1];
-            document.getElementById('ordenVehiculoAno').textContent = (año && /^\d{4}$/.test(año)) ? año : '—';
-          }
-        } else {
-          document.getElementById('ordenClienteTel').textContent = '—';
-          document.getElementById('ordenVehiculoMarca').textContent = '—';
-          document.getElementById('ordenVehiculoAno').textContent = '—';
-        }
-      });
-      
-      ordenActual.checklist = [];
-      dibujarChecklist();
-      
-      // Llenar select de clientes
-      llenarSelectClientes('ordenCliente');
-    }
-
-    function agregarCheckItem() {
-      if (!ordenActual) return;
-      ordenActual.checklist.push({ texto: '', hecho: false });
-      dibujarChecklist();
-    }
-
-    function dibujarChecklist() {
-      var div = document.getElementById('ordenChecklist');
-      div.innerHTML = '';
-      (ordenActual && ordenActual.checklist || []).forEach((c, i) => {
-        var p = document.createElement('div');
-        p.className = 'checklist-item';
-        p.innerHTML = '<input type="checkbox" id="chk' + i + '" ' + (c.hecho ? 'checked' : '') + ' onchange="marcarCheck(' + i + ', this.checked)"><input type="text" id="chkTxt' + i + '" value="' + escapeHtml(c.texto || '') + '">';
-        div.appendChild(p);
-      });
-    }
-
-    function marcarCheck(i, checked) { if (ordenActual && ordenActual.checklist[i]) ordenActual.checklist[i].hecho = checked; }
-
-    function guardarOrden() {
-      if (!ordenActual) return;
-      
-      // Obtener tipo de cliente seleccionado
-      const clienteTipo = document.querySelector('input[name="clienteTipo"]:checked').value;
-      ordenActual.clienteTipo = clienteTipo;
-      
-      // Guardar datos según el tipo de cliente
-      if (clienteTipo === 'existente') {
-        ordenActual.clienteId = document.getElementById('ordenCliente').value ? parseInt(document.getElementById('ordenCliente').value) : null;
-        ordenActual.clienteDatos = null;
-      } else if (clienteTipo === 'nuevo') {
-        const nombre = document.getElementById('nuevoClienteNombre').value.trim();
-        const telefono = document.getElementById('nuevoClienteTel').value.trim();
-        
-        if (!nombre || !telefono) {
-          showNotification('Nombre y teléfono son requeridos para cliente nuevo ⚠️', 'warning');
-          return;
-        }
-        
-        ordenActual.clienteDatos = {
-          nombre: nombre,
-          telefono: telefono,
-          tipo: 'nuevo'
-        };
-        
-        // Guardar cliente en la base de datos siempre
-        const clientes = getClientes();
-        const nuevoCliente = {
-          id: clientes.length ? Math.max(...clientes.map(c => c.id)) + 1 : 1,
-          nombre: nombre,
-          telefono: telefono,
-          vehiculo: '',
-          placas: ''
-        };
-        clientes.push(nuevoCliente);
-        setClientes(clientes);
-        ordenActual.clienteId = nuevoCliente.id;
-        showNotification('Cliente guardado en la base de datos ✅', 'success');
-      } else if (clienteTipo === 'manual') {
-        ordenActual.clienteDatos = {
-          nombre: document.getElementById('manualClienteNombre').value.trim() || 'Cliente Manual',
-          telefono: document.getElementById('manualClienteTel').value.trim(),
-          tipo: 'manual'
-        };
-        ordenActual.clienteId = null;
-      }
-      
-      ordenActual.entrega = document.getElementById('ordenEntrega').value;
-      ordenActual.estado = document.getElementById('ordenEstado').value;
-      ordenActual.descripcion = document.getElementById('ordenDescripcion').value;
-      ordenActual.vehiculoColor = document.getElementById('ordenVehiculoColor').value;
-      
-      // Guardar datos del vehículo manual si aplica
-      if (clienteTipo !== 'existente') {
-        ordenActual.vehiculoManual = {
-          marca: document.getElementById('manualVehiculoMarca').value.trim(),
-          modelo: document.getElementById('manualVehiculoModelo').value.trim(),
-          año: document.getElementById('manualVehiculoAno').value.trim(),
-          color: document.getElementById('ordenVehiculoColor').value.trim()
-        };
-      }
-      
-      // Guardar checklist
-      (ordenActual.checklist || []).forEach((c, i) => {
-        var txt = document.getElementById('chkTxt' + i);
-        var chk = document.getElementById('chk' + i);
-        if (txt) c.texto = txt.value;
-        if (chk) c.hecho = chk.checked;
-      });
-      
-      ordenes = getOrdenes();
-      var idx = ordenes.findIndex(o => o.id === ordenActual.id);
-      if (idx >= 0) {
-        ordenes[idx] = ordenActual; 
-      } else { 
-        ordenes.push(ordenActual); 
-        setContadorOrden(ordenActual.id); 
-      }
-      
-      setOrdenes(ordenes);
-      cerrarFormOrden();
-      listarOrdenes();
-      
-      showNotification('Orden #' + ordenActual.id + ' guardada exitosamente 🎯', 'success');
-    }
-
-    function cerrarFormOrden() { document.getElementById('formOrden').classList.add('oculto'); ordenActual = null; }
-
-    function listarOrdenes() {
-      ordenes = getOrdenes();
-      clientes = getClientes();
-      var html = '<div class="ordenes-grid">';
-      
-      ordenes.forEach(o => {
-        let clienteNombre = '—';
-        let clienteInfo = '';
-        let clienteIcono = '👤';
-        
-        if (o.clienteId) {
-          const cli = clientes.find(c => c.id === o.clienteId);
-          if (cli) {
-            clienteNombre = cli.nombre;
-            clienteInfo = `${cli.telefono || ''} • ${cli.vehiculo || ''}`;
-          }
-        } else if (o.clienteDatos) {
-          clienteNombre = o.clienteDatos.nombre;
-          clienteInfo = `${o.clienteDatos.telefono || ''}`;
-          
-          if (o.clienteDatos.tipo === 'nuevo') {
-            clienteIcono = '➕';
-          } else if (o.clienteDatos.tipo === 'manual') {
-            clienteIcono = '📝';
-          }
-        }
-        
-        var est = { 
-          pendiente: { text: 'Pendiente', color: 'var(--amarillo)', icon: '⏳' }, 
-          proceso: { text: 'En proceso', color: 'var(--azul)', icon: '🔧' }, 
-          completada: { text: 'Completada', color: 'var(--verde)', icon: '✅' }, 
-          entregada: { text: 'Entregada', color: 'var(--cian)', icon: '🚗' } 
-        }[o.estado] || { text: o.estado, color: 'var(--gris)', icon: '📋' };
-        
-        html += `
-          <div class="orden-card">
-            <div class="orden-card-header">
-              <div class="orden-numero-mini">#${o.id}</div>
-              <div class="orden-estado" style="background: ${est.color};">
-                ${est.icon} ${est.text}
-              </div>
-            </div>
-            <div class="orden-card-body">
-              <div class="cliente-info">
-                <div class="cliente-avatar">${clienteIcono}</div>
-                <div class="cliente-datos-mini">
-                  <div class="cliente-nombre">${escapeHtml(clienteNombre)}</div>
-                  <div class="cliente-detalle">${escapeHtml(clienteInfo)}</div>
-                </div>
-              </div>
-              ${o.entrega ? `<div class="orden-entrega">📅 ${o.entrega}</div>` : ''}
-              ${o.descripcion ? `<div class="orden-descripcion">🔧 ${escapeHtml(o.descripcion)}</div>` : ''}
-            </div>
-            <div class="orden-card-footer">
-              <button class="btn-editar-mini" onclick="editarOrden(${o.id})">
-                ✏️ Editar
-              </button>
-            </div>
-          </div>
-        `;
-      });
-      
-      html += '</div>';
-      document.getElementById('listaOrdenes').innerHTML = html;
-      
-      var selC = '<option value="">-- Cliente --</option>';
-      clientes.forEach(c => selC += '<option value="' + c.id + '">' + c.nombre + '</option>');
-      document.getElementById('ordenCliente').innerHTML = selC;
-      document.getElementById('ordenPresupuesto').innerHTML = '<option value="">-- Presupuesto --</option>';
-    }
-
-    function editarOrden(id) {
-      ordenActual = ordenes.find(o => o.id === id);
-      if (!ordenActual) return;
-      
-      document.getElementById('formOrden').classList.remove('oculto');
-      
-      // Mostrar número de orden y fecha
-      document.getElementById('ordenNumeroDisplay').textContent = '#ORD-' + ordenActual.id;
-      document.getElementById('ordenFechaActual').textContent = new Date().toLocaleDateString('es', {
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric'
-      });
-      
-      // Cargar datos existentes
-      document.getElementById('ordenCliente').value = ordenActual.clienteId || '';
-      document.getElementById('ordenEntrega').value = ordenActual.entrega || '';
-      document.getElementById('ordenEstado').value = ordenActual.estado || 'pendiente';
-      document.getElementById('ordenDescripcion').value = ordenActual.descripcion || '';
-      document.getElementById('ordenVehiculoColor').value = ordenActual.vehiculoColor || '';
-      document.getElementById('ordenVehiculoKm').value = ordenActual.vehiculoKm || '';
-      
-      // Cargar datos del cliente si existe
-      if (ordenActual.clienteId) {
-        const clientes = getClientes();
-        const cliente = clientes.find(c => c.id === ordenActual.clienteId);
-        if (cliente) {
-          document.getElementById('ordenClienteTel').textContent = cliente.telefono || '—';
-          document.getElementById('ordenVehiculoMarca').textContent = cliente.vehiculo || '—';
-          
-          // Extraer año del vehículo
-          const vehiculoParts = (cliente.vehiculo || '').split(' ');
-          const año = vehiculoParts[vehiculoParts.length - 1];
-          document.getElementById('ordenVehiculoAno').textContent = (año && /^\d{4}$/.test(año)) ? año : '—';
-        }
-      } else {
-        document.getElementById('ordenClienteTel').textContent = '—';
-        document.getElementById('ordenVehiculoMarca').textContent = '—';
-        document.getElementById('ordenVehiculoAno').textContent = '—';
-      }
-      
-      ordenActual.checklist = ordenActual.checklist || [];
-      dibujarChecklist();
-      
-      // Llenar select de clientes
-      llenarSelectClientes('ordenCliente');
-    }
-
-    // ----- CLIENTES -----
-    function getClientes() { try { return JSON.parse(localStorage.getItem(STORAGE.clientes) || '[]'); } catch(e) { return []; } }
-    function setClientes(arr) { clientes = arr; localStorage.setItem(STORAGE.clientes, JSON.stringify(arr)); }
-
-    function listarClientes() {
-      clientes = getClientes();
-      var query = (document.getElementById('buscarCliente') || {}).value.toLowerCase() || '';
-      
-      // Actualizar estadísticas
-      document.getElementById('totalClientes').textContent = clientes.length;
-      
-      var hoy = new Date().toDateString();
-      var clientesHoy = clientes.filter(c => {
-        // Para clientes nuevos, verificamos si fueron agregados hoy
-        return c.fecha && new Date(c.fecha).toDateString() === hoy;
-      });
-      document.getElementById('clientesNuevosHoy').textContent = clientesHoy.length;
-      
-      var html = '';
-      clientes.filter(c => !query || 
-        (c.nombre && c.nombre.toLowerCase().includes(query)) ||
-        (c.telefono && c.telefono.toLowerCase().includes(query)) ||
-        (c.vehiculo && c.vehiculo.toLowerCase().includes(query)) ||
-        (c.placas && c.placas.toLowerCase().includes(query))
-      ).forEach(c => {
-        const iniciales = c.nombre ? c.nombre.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '??';
-        
-        html += `
-          <div class="cliente-card" onclick="verCliente(${c.id})">
-            <div class="cliente-card-header">
-              <div class="cliente-avatar">${iniciales}</div>
-              <div class="cliente-info">
-                <div class="cliente-nombre">${escapeHtml(c.nombre || 'Sin nombre')}</div>
-                <div class="cliente-telefono">
-                  📱 ${escapeHtml(c.telefono || 'Sin teléfono')}
-                </div>
-              </div>
-            </div>
-            <div class="cliente-detalles-grid">
-              ${c.vehiculo ? `
-                <div class="detalle-item">
-                  <strong>🚗</strong>
-                  <span>${escapeHtml(c.vehiculo)}</span>
-                </div>
-              ` : ''}
-              ${c.placas ? `
-                <div class="detalle-item">
-                  <strong>🏷️</strong>
-                  <span>${escapeHtml(c.placas)}</span>
-                </div>
-              ` : ''}
-            </div>
-            <div class="cliente-card-actions">
-              <button class="btn-action btn-view" onclick="event.stopPropagation(); verCliente(${c.id})">
-                👁️ Ver
-              </button>
-              <button class="btn-action btn-edit" onclick="event.stopPropagation(); editarCliente(${c.id})">
-                ✏️ Editar
-              </button>
-              <button class="btn-action btn-delete" onclick="event.stopPropagation(); borrarCliente(${c.id})">
-                🗑️ Borrar
-              </button>
-            </div>
-          </div>
-        `;
-      });
-      
-      document.getElementById('listaClientes').innerHTML = html || '<div style="text-align: center; color: var(--text-secondary); padding: 60px 20px; background: var(--bg-tertiary); border-radius: 12px; border: 2px dashed var(--border-color);"><div style="font-size: 48px; margin-bottom: 16px;">👥</div><h3 style="margin: 0 0 8px 0; color: var(--text-primary);">No hay clientes registrados</h3><p style="margin: 0; opacity: 0.8;">Haz clic en "Nuevo Cliente" para agregar tu primer cliente</p></div>';
-    }
-
-    function filtrarClientes() {
-      listarClientes();
-    }
-
-    function nuevoCliente() {
-      clienteActual = null;
-      document.getElementById('modalClienteTitulo').textContent = '👤 Nuevo Cliente';
-      document.getElementById('clienteNombre').value = '';
-      document.getElementById('clienteTel').value = '';
-      document.getElementById('clienteVehiculo').value = '';
-      document.getElementById('clientePlacas').value = '';
-      document.getElementById('formCliente').classList.remove('oculto');
-    }
-
-    function editarCliente(id) {
-      clienteActual = clientes.find(c => c.id === id);
-      if (!clienteActual) return;
-      
-      document.getElementById('modalClienteTitulo').textContent = '✏️ Editar Cliente';
-      document.getElementById('clienteNombre').value = clienteActual.nombre || '';
-      document.getElementById('clienteTel').value = clienteActual.telefono || '';
-      document.getElementById('clienteVehiculo').value = clienteActual.vehiculo || '';
-      document.getElementById('clientePlacas').value = clienteActual.placas || '';
-      document.getElementById('formCliente').classList.remove('oculto');
-    }
-
-    function guardarCliente() {
-      var nombre = document.getElementById('clienteNombre').value.trim();
-      var tel = document.getElementById('clienteTel').value.trim();
-      var veh = document.getElementById('clienteVehiculo').value.trim();
-      var plac = document.getElementById('clientePlacas').value.trim();
-      
-      if (!nombre || !tel) {
-        showNotification('Nombre y teléfono son requeridos ⚠️', 'warning');
-        return;
-      }
-      
-      if (clienteActual) {
-        // Editar cliente existente
-        clienteActual.nombre = nombre;
-        clienteActual.telefono = tel;
-        clienteActual.vehiculo = veh;
-        clienteActual.placas = plac;
-        showNotification('Cliente actualizado correctamente ✅', 'success');
-      } else {
-        // Nuevo cliente
-        var nuevo = {
-          id: clientes.length ? Math.max(...clientes.map(c => c.id)) + 1 : 1,
-          nombre: nombre,
-          telefono: tel,
-          vehiculo: veh,
-          placas: plac,
-          fecha: new Date().toISOString()
-        };
-        clientes.push(nuevo);
-        showNotification('Cliente agregado correctamente ✅', 'success');
-      }
-      
-      setClientes(clientes);
-      listarClientes();
-      cerrarFormCliente();
-    }
-
-    function cerrarFormCliente() {
-      document.getElementById('formCliente').classList.add('oculto');
-      clienteActual = null;
-    }
-
-    function borrarCliente(id) {
-      var cliente = clientes.find(c => c.id === id);
-      if (!cliente) return;
-      
-      if (confirm(`¿Estás seguro de que quieres eliminar al cliente "${cliente.nombre}"?\n\nEsta acción no se puede deshacer.`)) {
-        clientes = clientes.filter(c => c.id !== id);
-        setClientes(clientes);
-        listarClientes();
-        showNotification(`Cliente "${cliente.nombre}" eliminado correctamente 🗑️`, 'success');
-      }
-    }
-
-    function verCliente(id) {
-      var cliente = clientes.find(c => c.id === id);
-      if (!cliente) return;
-      
-      clienteActual = cliente;
-      
-      // Generar historial de órdenes y presupuestos
-      var ordenesCliente = ordenes.filter(o => o.clienteId === id);
-      var presupuestosCliente = presupuestos.filter(p => p.clienteId === id);
-      
-      var html = `
-        <div class="detalle-section">
-          <h4>📋 Información Personal</h4>
-          <div class="detalle-grid">
-            <div class="detalle-grid-item">
-              <span class="detalle-label">Nombre:</span>
-              <span class="detalle-valor">${escapeHtml(cliente.nombre || '—')}</span>
-            </div>
-            <div class="detalle-grid-item">
-              <span class="detalle-label">Teléfono:</span>
-              <span class="detalle-valor">${escapeHtml(cliente.telefono || '—')}</span>
-            </div>
-            <div class="detalle-grid-item">
-              <span class="detalle-label">Fecha de registro:</span>
-              <span class="detalle-valor">${cliente.fecha ? new Date(cliente.fecha).toLocaleDateString() : '—'}</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="detalle-section">
-          <h4>🚗 Información del Vehículo</h4>
-          <div class="detalle-grid">
-            <div class="detalle-grid-item">
-              <span class="detalle-label">Vehículo:</span>
-              <span class="detalle-valor">${escapeHtml(cliente.vehiculo || '—')}</span>
-            </div>
-            <div class="detalle-grid-item">
-              <span class="detalle-label">Placas:</span>
-              <span class="detalle-valor">${escapeHtml(cliente.placas || '—')}</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="detalle-section">
-          <h4>📊 Historial de Servicios</h4>
-          <div class="detalle-grid">
-            <div class="detalle-grid-item">
-              <span class="detalle-label">Órdenes de trabajo:</span>
-              <span class="detalle-valor">${ordenesCliente.length} órdenes</span>
-            </div>
-            <div class="detalle-grid-item">
-              <span class="detalle-label">Presupuestos:</span>
-              <span class="detalle-valor">${presupuestosCliente.length} presupuestos</span>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      document.getElementById('clienteDetallesContent').innerHTML = html;
-      document.getElementById('modalDetalleTitulo').textContent = '📋 Detalles del Cliente';
-      document.getElementById('detalleCliente').classList.remove('oculto');
-    }
-
-    function cerrarDetalleCliente() {
-      document.getElementById('detalleCliente').classList.add('oculto');
-      clienteActual = null;
-    }
-
-    function editarClienteDesdeDetalle() {
-      if (clienteActual) {
-        cerrarDetalleCliente();
-        editarCliente(clienteActual.id);
-      }
-    }
-
-    function llenarSelectClientes(idSelect) {
-      clientes = getClientes();
-      var sel = '<option value="">-- Cliente --</option>';
-      clientes.forEach(c => sel += '<option value="' + c.id + '">' + c.nombre + '</option>');
-      var el = document.getElementById(idSelect);
-      if (el) el.innerHTML = sel;
-    }
-
-    // ----- DASHBOARD -----
-    function actualizarDashboard() {
-      inventario = getInv();
-      ventas = getVentas();
-      ordenes = getOrdenes();
-      var hoy = new Date().toDateString();
-      var ganancia = ventas.filter(v => new Date(v.fecha).toDateString() === hoy).reduce((s, v) => s + (v.total || 0), 0);
-      var pendientes = ordenes.filter(o => (o.estado === 'pendiente' || o.estado === 'proceso')).length;
-      var umbralEl = document.getElementById('umbralAceites');
-      var umbral = (umbralEl && parseInt(umbralEl.value, 10)) || 5;
-      var bajos = inventario.filter(function(p) { return (p.cantidad || 0) <= (p.umbral || umbral); });
-      var ventasHoy = ventas.filter(function(v) { return new Date(v.fecha).toDateString() === hoy; }).length;
-      document.getElementById('dashGananciaHoy').textContent = '$' + ganancia.toFixed(2);
-      document.getElementById('dashOrdenesPend').textContent = pendientes;
-      document.getElementById('dashAceitesBajo').textContent = bajos.length;
-      document.getElementById('dashVentasHoy').textContent = ventasHoy;
-      var htmlBajo = '';
-      bajos.forEach(function(p) { htmlBajo += '<div class="alerta-baja">' + escapeHtml(p.nombre) + ': ' + (p.cantidad || 0) + ' unidades</div>'; });
-      document.getElementById('listaAceitesBajo').innerHTML = htmlBajo || '<p class="sin-datos">Ninguno</p>';
-      var ultimas = ventas.slice(-5).reverse();
-      var htmlV = '<table><tr><th>Fecha</th><th>Total</th></tr>';
-      ultimas.forEach(v => htmlV += '<tr><td>' + new Date(v.fecha).toLocaleString() + '</td><td>$' + (v.total || 0).toFixed(2) + '</td></tr>');
-      htmlV += '</table>';
-      document.getElementById('ultimasVentas').innerHTML = htmlV;
-      
-      // Dibujar gráficos
-      drawSalesChart();
-      drawProductsChart();
-    }
-    
-    // Función para dibujar gráfico de ventas
-    function drawSalesChart() {
-      const canvas = document.getElementById('salesChart');
-      const ctx = canvas.getContext('2d');
-      const ventas = getVentas();
-      
-      // Últimos 7 días
-      const days = 7;
-      const data = [];
-      const labels = [];
-      
-      for (let i = days - 1; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        const dateStr = date.toDateString();
-        
-        const daySales = ventas.filter(v => new Date(v.fecha).toDateString() === dateStr)
-                              .reduce((sum, v) => sum + (v.total || 0), 0);
-        
-        data.push(daySales);
-        labels.push(date.toLocaleDateString('es', { weekday: 'short', day: 'numeric' }));
-      }
-      
-      // Limpiar canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Configuración del gráfico
-      const padding = 40;
-      const chartWidth = canvas.width - padding * 2;
-      const chartHeight = canvas.height - padding * 2;
-      const maxValue = Math.max(...data, 100);
-      
-      // Dibujar ejes
-      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary');
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(padding, padding);
-      ctx.lineTo(padding, canvas.height - padding);
-      ctx.lineTo(canvas.width - padding, canvas.height - padding);
-      ctx.stroke();
-      
-      // Dibujar barras
-      const barWidth = chartWidth / data.length * 0.6;
-      const barSpacing = chartWidth / data.length;
-      
-      data.forEach((value, index) => {
-        const barHeight = (value / maxValue) * chartHeight;
-        const x = padding + barSpacing * index + (barSpacing - barWidth) / 2;
-        const y = canvas.height - padding - barHeight;
-        
-        // Gradiente para las barras
-        const gradient = ctx.createLinearGradient(0, y, 0, canvas.height - padding);
-        gradient.addColorStop(0, getComputedStyle(document.documentElement).getPropertyValue('--naranja'));
-        gradient.addColorStop(1, getComputedStyle(document.documentElement).getPropertyValue('--naranja') + '40');
-        
-        ctx.fillStyle = gradient;
-        ctx.fillRect(x, y, barWidth, barHeight);
-        
-        // Etiquetas
-        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-primary');
-        ctx.font = '10px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(labels[index], x + barWidth / 2, canvas.height - padding + 20);
-        
-        // Valores
-        if (value > 0) {
-          ctx.fillText('$' + value.toFixed(0), x + barWidth / 2, y - 5);
-        }
-      });
-    }
-    
-    // Función para dibujar gráfico de productos
-    function drawProductsChart() {
-      const canvas = document.getElementById('productsChart');
-      const ctx = canvas.getContext('2d');
-      const inventario = getInv();
-      
-      // Agrupar por tipo
-      const tipos = {};
-      inventario.forEach(p => {
-        const tipo = p.tipo || 'Otros';
-        tipos[tipo] = (tipos[tipo] || 0) + (p.cantidad || 0);
-      });
-      
-      const data = Object.values(tipos);
-      const labels = Object.keys(tipos);
-      const colors = [
-        '#ff8c1a', '#28a745', '#007bff', '#dc3545', '#ffc107', '#6f42c1', '#17a2b8'
-      ];
-      
-      // Limpiar canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Configuración del gráfico circular
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-      const radius = Math.min(centerX, centerY) - 40;
-      
-      const total = data.reduce((sum, val) => sum + val, 0);
-      let currentAngle = -Math.PI / 2;
-      
-      // Dibujar sectores
-      data.forEach((value, index) => {
-        const sliceAngle = (value / total) * 2 * Math.PI;
-        
-        // Dibujar sector
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
-        ctx.lineTo(centerX, centerY);
-        ctx.fillStyle = colors[index % colors.length];
-        ctx.fill();
-        
-        // Etiqueta
-        const labelAngle = currentAngle + sliceAngle / 2;
-        const labelX = centerX + Math.cos(labelAngle) * (radius * 0.7);
-        const labelY = centerY + Math.sin(labelAngle) * (radius * 0.7);
-        
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 12px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        const percentage = ((value / total) * 100).toFixed(1);
-        if (percentage > 5) { // Solo mostrar etiquetas si el sector es lo suficientemente grande
-          ctx.fillText(percentage + '%', labelX, labelY);
-        }
-        
-        currentAngle += sliceAngle;
-      });
-      
-      // Leyenda
-      let legendY = 20;
-      labels.forEach((label, index) => {
-        ctx.fillStyle = colors[index % colors.length];
-        ctx.fillRect(10, legendY, 15, 15);
-        
-        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-primary');
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText(label + ' (' + data[index] + ')', 30, legendY + 12);
-        
-        legendY += 20;
-      });
-    }
-
-    // ----- SISTEMA DE TEMA, NOTIFICACIONES Y BÚSQUEDA GLOBAL -----
-    
-    // Sistema de Tema
-    function initTheme() {
-      const savedTheme = localStorage.getItem('theme') || 'dark';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    }
-    
-    function toggleTheme() {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
-      
-      showNotification('Tema cambiado a ' + (newTheme === 'light' ? 'claro ☀️' : 'oscuro 🌙'), 'success');
-    }
-    
-    // Sistema de Notificaciones Inteligentes
-    function showNotification(message, type = 'info', duration = 4000) {
-      const container = document.getElementById('notificationContainer');
-      const notification = document.createElement('div');
-      
-      const colors = {
-        success: 'var(--verde)',
-        error: 'var(--rojo)',
-        warning: 'var(--amarillo)',
-        info: 'var(--azul)'
-      };
-      
-      const icons = {
-        success: '✅',
-        error: '❌',
-        warning: '⚠️',
-        info: 'ℹ️'
-      };
-      
-      notification.style.cssText = `
-        background: var(--bg-secondary);
-        border: 2px solid ${colors[type]};
-        border-radius: 8px;
-        padding: 12px 16px;
-        margin-bottom: 8px;
-        box-shadow: 0 4px 12px var(--shadow);
-        animation: slideIn 0.3s ease;
-        cursor: pointer;
-        transition: all 0.3s ease;
-      `;
-      
-      notification.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 18px;">${icons[type]}</span>
-          <span style="color: var(--text-primary); flex: 1;">${message}</span>
-        </div>
-      `;
-      
-      notification.onclick = () => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
-      };
-      
-      container.appendChild(notification);
-      
-      setTimeout(() => {
-        if (notification.parentNode) {
-          notification.style.animation = 'slideOut 0.3s ease';
-          setTimeout(() => notification.remove(), 300);
-        }
-      }, duration);
-    }
-    
-    // Sistema de Búsqueda Global
-    function openGlobalSearch() {
-      document.getElementById('globalSearchModal').style.display = 'flex';
-      document.getElementById('globalSearchInput').focus();
-      document.getElementById('globalSearchInput').value = '';
-      document.getElementById('globalSearchResults').innerHTML = '';
-    }
-    
-    function closeGlobalSearch() {
-      document.getElementById('globalSearchModal').style.display = 'none';
-    }
-    
-    function performGlobalSearch(query) {
-      if (!query || query.length < 2) {
-        document.getElementById('globalSearchResults').innerHTML = '<p style="color: var(--text-secondary);">Escribe al menos 2 caracteres...</p>';
-        return;
-      }
-      
-      const q = query.toLowerCase();
-      const results = [];
-      
-      // Buscar en clientes
-      const clientes = getClientes();
-      clientes.forEach(c => {
-        if (c.nombre?.toLowerCase().includes(q) || 
-            c.telefono?.includes(q) || 
-            c.placas?.toLowerCase().includes(q)) {
-          results.push({
-            type: 'cliente',
-            title: c.nombre,
-            subtitle: `${c.telefono || ''} • ${c.vehiculo || ''}`,
-            action: () => {
-              closeGlobalSearch();
-              ir('clientes');
-              setTimeout(() => verHistorialCliente(c.id), 100);
-            }
-          });
-        }
-      });
-      
-      // Buscar en inventario
-      const inventario = getInv();
-      inventario.forEach(p => {
-        if (p.nombre?.toLowerCase().includes(q) || 
-            p.tipo?.toLowerCase().includes(q)) {
-          results.push({
-            type: 'producto',
-            title: p.nombre,
-            subtitle: `Stock: ${p.cantidad || 0} • ${p.tipo || ''}`,
-            action: () => {
-              closeGlobalSearch();
-              ir('inventario');
-            }
-          });
-        }
-      });
-      
-      // Buscar en órdenes
-      const ordenes = getOrdenes();
-      ordenes.forEach(o => {
-        if (o.id.toString().includes(q)) {
-          results.push({
-            type: 'orden',
-            title: `Orden #${o.id}`,
-            subtitle: `Estado: ${o.estado || 'pendiente'} • ${o.entrega || ''}`,
-            action: () => {
-              closeGlobalSearch();
-              ir('ordenes');
-            }
-          });
-        }
-      });
-      
-      // Mostrar resultados
-      const resultsDiv = document.getElementById('globalSearchResults');
-      if (results.length === 0) {
-        resultsDiv.innerHTML = '<p style="color: var(--text-secondary);">No se encontraron resultados...</p>';
-        return;
-      }
-      
-      resultsDiv.innerHTML = results.map(r => `
-        <div onclick="(${r.action})()" style="
-          padding: 12px;
-          border: 1px solid var(--border-color);
-          border-radius: 8px;
-          margin-bottom: 8px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          background: var(--bg-secondary);
-        " onmouseover="this.style.background='var(--bg-tertiary)'" 
-           onmouseout="this.style.background='var(--bg-secondary)'">
-          <div style="font-weight: bold; color: var(--text-primary);">
-            ${r.type === 'cliente' ? '👤' : r.type === 'producto' ? '🛢️' : '📋'} ${r.title}
-          </div>
-          <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">
-            ${r.subtitle}
-          </div>
-        </div>
-      `).join('');
-    }
-    
-    // Atajos de teclado
-    document.addEventListener('keydown', function(e) {
-      // Ctrl/Cmd + K para búsqueda global
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        openGlobalSearch();
-      }
-      
-      // ESC para cerrar búsqueda
-      if (e.key === 'Escape') {
-        closeGlobalSearch();
-      }
-      
-      // Ctrl/Cmd + / para mostrar atajos
-      if ((e.ctrlKey || e.metaKey) && e.key === '/') {
-        e.preventDefault();
-        showNotification('Atajos: Ctrl+K (búsqueda) • Ctrl+/ (ayuda) • ESC (cerrar)', 'info');
-      }
-    });
-    
-    // Event listener para búsqueda en tiempo real
-    document.addEventListener('DOMContentLoaded', function() {
-      const searchInput = document.getElementById('globalSearchInput');
-      if (searchInput) {
-        searchInput.addEventListener('input', function() {
-          performGlobalSearch(this.value);
-        });
-      }
-    });
-    
-    // Sistema de respaldo automático
-    function autoBackup() {
-      const data = {
-        inventario: getInv(),
-        movimientos: getMov(),
-        ventas: getVentas(),
-        clientes: getClientes(),
-        ordenes: getOrdenes(),
-        presupuestos: getPresupuestos(),
-        timestamp: new Date().toISOString()
-      };
-      
-      localStorage.setItem('backup_' + new Date().toISOString().slice(0, 10), JSON.stringify(data));
-      
-      // Mantener solo últimos 7 días de respaldos
-      const keys = Object.keys(localStorage).filter(k => k.startsWith('backup_'));
-      if (keys.length > 7) {
-        keys.sort().slice(0, -7).forEach(k => localStorage.removeItem(k));
-      }
-    }
-    
-    // Respaldo automático cada hora
-    setInterval(autoBackup, 3600000);
-    
-    // Animaciones CSS
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-      }
-      @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-      }
-    `;
-    document.head.appendChild(style);
-
-    // ----- SISTEMA DE EXPORTACIÓN -----
-    
-    // Exportar a PDF usando window.print()
-    function exportarVentasPDF() {
-      const ventas = getVentas();
-      let html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Reporte de Ventas - Taller Borjón</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            h1 { color: #ff8c1a; }
-            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
-            .total { font-weight: bold; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .footer { margin-top: 30px; text-align: center; font-size: 12px; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>Taller Borjón - Reporte de Ventas</h1>
-            <p>Fecha de generación: ${new Date().toLocaleDateString('es')}</p>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Fecha</th>
-                <th>Cliente</th>
-                <th>Productos</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-      
-      let total = 0;
-      ventas.forEach((venta, index) => {
-        total += venta.total || 0;
-        html += `
-          <tr>
-            <td>${index + 1}</td>
-            <td>${new Date(venta.fecha).toLocaleDateString('es')}</td>
-            <td>${venta.cliente || 'N/A'}</td>
-            <td>${(venta.productos || []).map(p => `${p.nombre} x${p.cantidad}`).join(', ')}</td>
-            <td>$${(venta.total || 0).toFixed(2)}</td>
-          </tr>
-        `;
-      });
-      
-      html += `
-            </tbody>
-            <tfoot>
-              <tr class="total">
-                <td colspan="4">TOTAL</td>
-                <td>$${total.toFixed(2)}</td>
-              </tr>
-            </tfoot>
-          </table>
-          <div class="footer">
-            <p>Generado por Taller Borjón - Sistema de Almacén de Aceites</p>
-          </div>
-        </body>
-        </html>
-      `;
-      
-      const w = window.open('', '_blank');
-      w.document.write(html);
-      w.document.title = 'Reporte de Ventas - Taller Borjón';
-      w.print();
-      w.close();
-      
-      showNotification('Reporte de ventas generado para impresión 🖨️', 'success');
-    }
-    
-    // Exportar a Excel (CSV)
-    function exportarVentasExcel() {
-      const ventas = getVentas();
-      let csv = 'ID,Fecha,Cliente,Productos,Total\n';
-      
-      ventas.forEach((venta, index) => {
-        const productos = (venta.productos || []).map(p => `${p.nombre} x${p.cantidad}`).join(';');
-        csv += `${index + 1},"${new Date(venta.fecha).toLocaleDateString('es')}","${venta.cliente || 'N/A'}","${productos}","${(venta.total || 0).toFixed(2)}"\n`;
-      });
-      
-      downloadCSV(csv, 'ventas_taller_borjon.csv');
-      showNotification('Archivo CSV de ventas descargado 📊', 'success');
-    }
-    
-    function exportarInventarioPDF() {
-      const inventario = getInv();
-      let html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Reporte de Inventario - Taller Borjón</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            h1 { color: #ff8c1a; }
-            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
-            .low-stock { background-color: #ffebee; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .footer { margin-top: 30px; text-align: center; font-size: 12px; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>Taller Borjón - Reporte de Inventario</h1>
-            <p>Fecha de generación: ${new Date().toLocaleDateString('es')}</p>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Tipo</th>
-                <th>Nombre</th>
-                <th>Categoría</th>
-                <th>Cantidad</th>
-                <th>Umbral</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-      
-      inventario.forEach(producto => {
-        const bajoStock = (producto.cantidad || 0) <= (producto.umbral || 5);
-        html += `
-          <tr class="${bajoStock ? 'low-stock' : ''}">
-            <td>${producto.id}</td>
-            <td>${producto.tipo || 'N/A'}</td>
-            <td>${producto.nombre}</td>
-            <td>${producto.categoria || 'N/A'}</td>
-            <td>${producto.cantidad || 0}</td>
-            <td>${producto.umbral || 5}</td>
-            <td>${bajoStock ? '⚠️ Stock bajo' : '✅ OK'}</td>
-          </tr>
-        `;
-      });
-      
-      html += `
-            </tbody>
-          </table>
-          <div class="footer">
-            <p>Generado por Taller Borjón - Sistema de Almacén de Aceites</p>
-          </div>
-        </body>
-        </html>
-      `;
-      
-      const w = window.open('', '_blank');
-      w.document.write(html);
-      w.document.title = 'Reporte de Inventario - Taller Borjón';
-      w.print();
-      w.close();
-      
-      showNotification('Reporte de inventario generado para impresión 🖨️', 'success');
-    }
-    
-    function exportarInventarioExcel() {
-      const inventario = getInv();
-      let csv = 'ID,Tipo,Nombre,Categoría,Cantidad,Umbral,Estado\n';
-      
-      inventario.forEach(producto => {
-        const bajoStock = (producto.cantidad || 0) <= (producto.umbral || 5);
-        const estado = bajoStock ? 'Stock bajo' : 'OK';
-        csv += `${producto.id},"${producto.tipo || 'N/A'}","${producto.nombre}","${producto.categoria || 'N/A'}",${producto.cantidad || 0},${producto.umbral || 5},"${estado}"\n`;
-      });
-      
-      downloadCSV(csv, 'inventario_taller_borjon.csv');
-      showNotification('Archivo CSV de inventario descargado 📊', 'success');
-    }
-    
-    // Función helper para descargar CSV
-    function downloadCSV(csv, filename) {
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', filename);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    // ----- INICIO -----
-    initTheme();
-    initInventario();
-    inventario = getInv();
-    movimientos = getMov();
-    ventas = getVentas();
-    clientes = getClientes();
-    ordenes = getOrdenes();
-    presupuestos = getPresupuestos();
-    actualizarDashboard();
-    
-    // Mostrar notificación de bienvenida
-    setTimeout(() => {
-      showNotification('¡Bienvenido a Taller Borjón! 🚗', 'success', 3000);
-      showNotification('Prueba Ctrl+K para búsqueda rápida 🔍', 'info', 5000);
-    }, 1000);
-  </script>
+  <script src="Funciones.js"></script>
 </body>
 </html>
