@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Taller Pro Admin</title>
+  <title>Taller Borjon - Sistema Administrativo</title>
   <link rel="stylesheet" href="EstiloXd.css">
 </head>
 <body>
@@ -12,10 +12,9 @@
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <div class="brand-card">
-        <div class="brand-mark">TM</div>
         <div>
           <p class="eyebrow">Sistema administrativo</p>
-          <h1 id="brandName">Taller Black Orange</h1>
+          <h1 id="brandName">TALLER BORJON</h1>
           <p id="brandSubtitle">Control profesional de recepcion, servicio e inventario.</p>
         </div>
       </div>
@@ -37,12 +36,16 @@
           <span class="nav-pill">04</span>
           <span>Clientes</span>
         </button>
-        <button class="nav-link" data-section-target="agenda">
+        <button class="nav-link" data-section-target="vehiculos">
           <span class="nav-pill">05</span>
-          <span>Agenda y control</span>
+          <span>Vehiculos</span>
+        </button>
+        <button class="nav-link" data-section-target="historial">
+          <span class="nav-pill">06</span>
+          <span>Historial</span>
         </button>
         <button class="nav-link" data-section-target="configuracion">
-          <span class="nav-pill">06</span>
+          <span class="nav-pill">07</span>
           <span>Configuracion</span>
         </button>
       </nav>
@@ -482,6 +485,7 @@
                     <th>Ultimo servicio</th>
                     <th>Ultima visita</th>
                     <th>Notas</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody id="clientsTableBody"></tbody>
@@ -490,69 +494,98 @@
           </article>
         </section>
 
-        <section class="page-section" id="agenda">
+        <section class="page-section" id="vehiculos">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">Operacion diaria</p>
-              <h3>Agenda y control</h3>
-              <p>Programa citas, vigila carga operativa y revisa el pulso administrativo del dia.</p>
+              <p class="eyebrow">Control de flota</p>
+              <h3>Vehiculos</h3>
+              <p>Registra y gestiona todos los vehiculos del taller con su historial completo.</p>
             </div>
           </div>
 
           <div class="content-grid form-layout">
-            <form class="panel form-panel" id="appointmentForm">
+            <form class="panel form-panel" id="vehicleForm">
               <div class="panel-head">
                 <div>
-                  <p class="eyebrow">Nueva cita</p>
-                  <h3>Agenda de recepcion</h3>
+                  <p class="eyebrow">Nuevo vehiculo</p>
+                  <h3>Registro de unidad</h3>
                 </div>
               </div>
 
               <div class="form-grid">
                 <label>
-                  <span>Cliente</span>
-                  <input type="text" id="appointmentClient" placeholder="Nombre del cliente" required>
+                  <span>Propietario</span>
+                  <select id="vehicleClient" required>
+                    <option value="">Seleccionar cliente</option>
+                    <option value="new-client">+ Crear nuevo cliente</option>
+                  </select>
+                </label>
+                <div id="newClientForm" style="display: none; grid-column: 1 / -1;">
+                  <div style="background: var(--surface-soft); padding: 16px; border-radius: 16px; margin-bottom: 16px;">
+                    <p style="margin: 0 0 12px 0; font-weight: bold; color: var(--brand-strong);">📝 Nuevo Cliente</p>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                      <input type="text" id="newClientName" placeholder="Nombre completo" style="grid-column: 1 / -1;">
+                      <input type="text" id="newClientPhone" placeholder="Teléfono">
+                      <input type="email" id="newClientEmail" placeholder="Correo (opcional)">
+                    </div>
+                  </div>
+                </div>
+                <label>
+                  <span>Placa</span>
+                  <input type="text" id="vehiclePlate" placeholder="ABC-123" required>
                 </label>
                 <label>
-                  <span>Servicio</span>
-                  <input type="text" id="appointmentService" placeholder="Servicio programado" required>
+                  <span>Marca</span>
+                  <input type="text" id="vehicleMake" placeholder="Nissan, Toyota, etc." required>
                 </label>
                 <label>
-                  <span>Fecha</span>
-                  <input type="date" id="appointmentDate" required>
+                  <span>Modelo</span>
+                  <input type="text" id="vehicleModel" placeholder="Sentra, Corolla, etc." required>
                 </label>
                 <label>
-                  <span>Hora</span>
-                  <input type="time" id="appointmentTime" required>
+                  <span>Año</span>
+                  <input type="number" id="vehicleYear" placeholder="2020" min="1900" max="2025" required>
+                </label>
+                <label>
+                  <span>Color</span>
+                  <input type="text" id="vehicleColor" placeholder="Rojo, Azul, etc." required>
+                </label>
+                <label>
+                  <span>Kilometraje</span>
+                  <input type="number" id="vehicleMileage" placeholder="50000" min="0">
+                </label>
+                <label>
+                  <span>Motor</span>
+                  <input type="text" id="vehicleEngine" placeholder="2.0L, 1.6L, etc.">
                 </label>
                 <label class="full">
-                  <span>Tecnico o area</span>
-                  <input type="text" id="appointmentTechnician" placeholder="Recepcion, mecanico o tecnico responsable" required>
+                  <span>Notas</span>
+                  <textarea id="vehicleNotes" placeholder="Observaciones importantes del vehiculo" rows="3"></textarea>
                 </label>
               </div>
 
-              <button class="accent-btn full-btn" type="submit">Guardar cita</button>
+              <button class="accent-btn full-btn" type="submit">Guardar vehiculo</button>
             </form>
 
             <article class="panel">
               <div class="panel-head">
                 <div>
-                  <p class="eyebrow">Control administrativo</p>
-                  <h3>Indicadores del dia</h3>
+                  <p class="eyebrow">Estadisticas</p>
+                  <h3>Resumen de vehiculos</h3>
                 </div>
               </div>
 
-              <div class="mini-metrics" id="agendaMetrics"></div>
+              <div class="mini-metrics" id="vehicleMetrics"></div>
 
-              <div class="spotlight-card" id="agendaSpotlight"></div>
+              <div class="spotlight-card" id="vehicleSpotlight"></div>
             </article>
           </div>
 
           <article class="panel">
             <div class="panel-head">
               <div>
-                <p class="eyebrow">Programacion</p>
-                <h3>Proximas citas</h3>
+                <p class="eyebrow">Inventario</p>
+                <h3>Todos los vehiculos</h3>
               </div>
             </div>
 
@@ -560,14 +593,76 @@
               <table>
                 <thead>
                   <tr>
-                    <th>Fecha</th>
-                    <th>Hora</th>
-                    <th>Cliente</th>
-                    <th>Servicio</th>
-                    <th>Responsable</th>
+                    <th>Placa</th>
+                    <th>Propietario</th>
+                    <th>Vehiculo</th>
+                    <th>Año</th>
+                    <th>Kilometraje</th>
+                    <th>Ultima visita</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
-                <tbody id="appointmentsTableBody"></tbody>
+                <tbody id="vehiclesTableBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section class="page-section" id="historial">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Registros completos</p>
+              <h3>Historial de trabajos</h3>
+              <p>Revisa todas las ordenes completadas y el historial de vehiculos atendidos.</p>
+            </div>
+          </div>
+
+          <div class="content-grid">
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Estadisticas historicas</p>
+                  <h3>Resumen de operaciones</h3>
+                </div>
+              </div>
+
+              <div class="mini-metrics" id="historyMetrics"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">Actividad reciente</p>
+                  <h3>Trabajos completados</h3>
+                </div>
+              </div>
+
+              <div class="list-stack" id="historyFeed"></div>
+            </article>
+          </div>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Archivo completo</p>
+                <h3>Todas las ordenes finalizadas</h3>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>OT</th>
+                    <th>Cliente</th>
+                    <th>Vehiculo</th>
+                    <th>Servicio</th>
+                    <th>Fecha completado</th>
+                    <th>Costo</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="historyTableBody"></tbody>
               </table>
             </div>
           </article>

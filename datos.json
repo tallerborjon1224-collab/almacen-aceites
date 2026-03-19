@@ -1,3 +1,243 @@
 {
-  "almacen": []
+  "theme": "dark",
+  "settings": {
+    "businessName": "Taller Black Orange",
+    "manager": "Jefe de operaciones",
+    "phone": "664 555 0101",
+    "email": "recepcion@tallerblackorange.mx",
+    "location": "Zona industrial"
+  },
+  "orders": [
+    {
+      "id": "OT-973111",
+      "createdAt": "2026-03-17",
+      "dueDate": "2026-03-19",
+      "client": "Juan",
+      "phone": "6467251747",
+      "vehicle": "Versa",
+      "plate": "KJH6542158",
+      "service": "CAMBIO DE ACEITE",
+      "mechanic": "SAKA",
+      "priority": "Alta",
+      "estimate": 2000,
+      "diagnosis": "ASKVIOFNASIDJV",
+      "notes": "KJADSNLVJANEFLDIUV",
+      "status": "Recepcion"
+    },
+    {
+      "id": "OT-1001",
+      "createdAt": "2026-03-17",
+      "dueDate": "2026-03-18",
+      "client": "Carlos Mendez",
+      "phone": "664 111 2233",
+      "vehicle": "Nissan Versa 2020",
+      "plate": "ABC-123-A",
+      "service": "Cambio de clutch",
+      "mechanic": "Luis Gomez",
+      "priority": "Alta",
+      "estimate": 6800,
+      "diagnosis": "El clutch patina y vibra al arrancar.",
+      "notes": "Revisar volante y kit completo.",
+      "status": "Reparacion"
+    },
+    {
+      "id": "OT-1002",
+      "createdAt": "2026-03-17",
+      "dueDate": "2026-03-19",
+      "client": "Mariana Soto",
+      "phone": "664 222 3344",
+      "vehicle": "Chevrolet Spark 2018",
+      "plate": "DEF-456-B",
+      "service": "Afinacion mayor",
+      "mechanic": "Pedro Ruiz",
+      "priority": "Media",
+      "estimate": 2400,
+      "diagnosis": "Perdida de potencia y consumo elevado.",
+      "notes": "Cambiar filtros y bujias.",
+      "status": "Diagnostico"
+    },
+    {
+      "id": "OT-1003",
+      "createdAt": "2026-03-16",
+      "dueDate": "2026-03-17",
+      "client": "Jose Ibarra",
+      "phone": "664 333 4455",
+      "vehicle": "Ford Ranger 2019",
+      "plate": "GHI-789-C",
+      "service": "Frenos delanteros",
+      "mechanic": "Adrian Leon",
+      "priority": "Alta",
+      "estimate": 3900,
+      "diagnosis": "Balatas agotadas y discos con desgaste.",
+      "notes": "Cliente espera entrega el mismo dia.",
+      "status": "Listo"
+    }
+  ],
+  "inventory": [
+    {
+      "id": "INV-101",
+      "name": "Aceite sintetico 5W30",
+      "category": "Lubricantes",
+      "supplier": "Mobil",
+      "location": "Rack A1",
+      "stock": 18,
+      "minStock": 10,
+      "cost": 210
+    },
+    {
+      "id": "INV-102",
+      "name": "Balatas delanteras Versa",
+      "category": "Frenos",
+      "supplier": "Bosch",
+      "location": "Rack B2",
+      "stock": 3,
+      "minStock": 4,
+      "cost": 780
+    },
+    {
+      "id": "INV-103",
+      "name": "Filtro de aceite universal",
+      "category": "Filtros",
+      "supplier": "Mann",
+      "location": "Rack A3",
+      "stock": 1,
+      "minStock": 5,
+      "cost": 115
+    },
+    {
+      "id": "INV-104",
+      "name": "Liquido de frenos DOT 4",
+      "category": "Fluidos",
+      "supplier": "ACDelco",
+      "location": "Rack C1",
+      "stock": 9,
+      "minStock": 6,
+      "cost": 160
+    }
+  ],
+  "movements": [
+    {
+      "id": "MOV-1",
+      "itemId": "INV-102",
+      "itemName": "Balatas delanteras Versa",
+      "delta": -1,
+      "reason": "Salida para orden OT-1003",
+      "timestamp": "2026-03-18T00:31:38.697Z"
+    },
+    {
+      "id": "MOV-2",
+      "itemId": "INV-101",
+      "itemName": "Aceite sintetico 5W30",
+      "delta": 6,
+      "reason": "Reabasto",
+      "timestamp": "2026-03-18T00:31:38.697Z"
+    }
+  ],
+  "clients": [
+    {
+      "id": "CLI-565221",
+      "name": "Juan Ramiro Borjon Gomez",
+      "phone": "6461906281",
+      "email": "",
+      "vehicle": "nissan sentra (2000)",
+      "notes": "Creado desde formulario de vehículos",
+      "lastService": "Registro inicial",
+      "lastVisit": "2026-03-18"
+    },
+    {
+      "id": "CLI-973111",
+      "name": "Juan",
+      "phone": "6467251747",
+      "email": "",
+      "vehicle": "Versa",
+      "notes": "KJADSNLVJANEFLDIUV",
+      "lastService": "CAMBIO DE ACEITE",
+      "lastVisit": "2026-03-17"
+    },
+    {
+      "id": "CLI-1",
+      "name": "Carlos Mendez",
+      "phone": "664 111 2233",
+      "email": "carlos@example.com",
+      "vehicle": "Nissan Versa 2020",
+      "notes": "Autoriza trabajos por telefono.",
+      "lastService": "Cambio de clutch",
+      "lastVisit": "2026-03-17"
+    },
+    {
+      "id": "CLI-2",
+      "name": "Mariana Soto",
+      "phone": "664 222 3344",
+      "email": "mariana@example.com",
+      "vehicle": "Chevrolet Spark 2018",
+      "notes": "Prefiere citas por la manana.",
+      "lastService": "Afinacion mayor",
+      "lastVisit": "2026-03-17"
+    }
+  ],
+  "vehicles": [
+    {
+      "id": "VEH-565221",
+      "clientId": "CLI-565221",
+      "plate": "827397293",
+      "make": "nissan",
+      "model": "sentra",
+      "year": "2000",
+      "color": "rojo",
+      "mileage": "9137481983",
+      "engine": "2.0L",
+      "notes": "cambio de frenos",
+      "createdAt": "2026-03-18",
+      "lastVisit": "2026-03-18",
+      "clientName": "Juan Ramiro Borjon Gomez"
+    },
+    {
+      "id": "VEH-1",
+      "clientId": "CLI-1",
+      "clientName": "Carlos Mendez",
+      "plate": "ABC-123-A",
+      "make": "Nissan",
+      "model": "Versa",
+      "year": "2020",
+      "color": "Gris",
+      "mileage": "45000",
+      "engine": "1.6L",
+      "notes": "Vehiculo en buen estado, mantenimiento regular",
+      "createdAt": "2026-03-18",
+      "lastVisit": "2026-03-18"
+    },
+    {
+      "id": "VEH-2",
+      "clientId": "CLI-2",
+      "clientName": "Mariana Soto",
+      "plate": "DEF-456-B",
+      "make": "Chevrolet",
+      "model": "Spark",
+      "year": "2018",
+      "color": "Blanco",
+      "mileage": "32000",
+      "engine": "1.4L",
+      "notes": "Requiere revision de suspension proxima",
+      "createdAt": "2026-02-16",
+      "lastVisit": "2026-03-03"
+    }
+  ],
+  "appointments": [
+    {
+      "id": "CIT-1",
+      "client": "Ramon Lopez",
+      "service": "Revision de suspension",
+      "date": "2026-03-17",
+      "time": "09:00",
+      "technician": "Recepcion"
+    },
+    {
+      "id": "CIT-2",
+      "client": "Lucia Reyes",
+      "service": "Cambio de aceite",
+      "date": "2026-03-18",
+      "time": "11:30",
+      "technician": "Pedro Ruiz"
+    }
+  ]
 }

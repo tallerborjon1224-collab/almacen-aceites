@@ -98,8 +98,14 @@ button {
   border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  overflow-y: auto;
+  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  /* IE y Edge */
   z-index: 20;
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
 }
 
 :root[data-theme="light"] .sidebar {
@@ -107,15 +113,12 @@ button {
 }
 
 .brand-card {
-  display: grid;
-  grid-template-columns: 72px minmax(0, 1fr);
-  gap: 14px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 18px;
-  border-radius: 26px;
-  border: 1px solid var(--line);
-  background: linear-gradient(135deg, rgba(255, 122, 0, 0.2), transparent 60%), var(--panel);
-  box-shadow: var(--shadow);
+  text-align: center;
+  padding: 24px 20px;
+  border-bottom: 1px solid var(--line);
 }
 
 .brand-mark {
@@ -252,12 +255,20 @@ button {
 }
 
 .content {
-  padding: 8px 28px 34px;
+  padding: 20px 32px 40px;
+  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  /* IE y Edge */
+}
+
+.content::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
 }
 
 .page-section {
   display: none;
   animation: fadeIn 0.24s ease;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .page-section.active {
@@ -270,13 +281,14 @@ button {
 .dashboard-grid,
 .theme-options {
   display: grid;
+  gap: 24px;
 }
 
 .hero {
   grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
-  gap: 18px;
-  padding: 28px;
-  margin-bottom: 22px;
+  gap: 24px;
+  padding: 32px;
+  margin-bottom: 28px;
   overflow: hidden;
   position: relative;
 }
@@ -353,17 +365,18 @@ button {
 
 .content-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  gap: 24px;
 }
 
 .dashboard-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
 }
 
 .form-layout {
   grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
-  gap: 18px;
-  margin-bottom: 18px;
+  gap: 28px;
+  margin-bottom: 24px;
 }
 
 .theme-options {
@@ -381,12 +394,20 @@ button {
 }
 
 .panel {
-  padding: 22px;
-  border-radius: 28px;
+  padding: 28px;
+  border-radius: 24px;
   border: 1px solid var(--line);
   background: var(--panel);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(16px);
+}
+
+.theme-options {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.section-heading {
+  margin-bottom: 24px;
 }
 
 .panel-head {
@@ -491,6 +512,22 @@ textarea {
 
 .menu-toggle {
   display: none;
+}
+
+/* Backdrop para cerrar menú en móvil */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+}
+
+body.menu-open .backdrop {
+  display: block;
 }
 
 .status-strip,
@@ -622,6 +659,12 @@ textarea {
 
 .table-wrap {
   overflow: auto;
+  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  /* IE y Edge */
+}
+
+.table-wrap::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
 }
 
 table {
@@ -823,6 +866,60 @@ body.menu-open .backdrop {
   .topbar,
   .topbar-left,
   .topbar-actions,
+  .brand-card,
+  .nav-menu,
+  .page-section,
+  .form-layout,
+  .data-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1rem !important;
+  }
+  
+  .sidebar {
+    position: fixed !important;
+    width: 280px !important;
+    height: 100vh !important;
+    z-index: 1000 !important;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .sidebar.active {
+    transform: translateX(0);
+  }
+  
+  .app-shell {
+    grid-template-columns: 1fr !important;
+    margin-left: 0 !important;
+  }
+  
+  .dashboard-grid,
+  .content-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  
+  .data-table {
+    font-size: 0.875rem;
+  }
+  
+  .data-table th,
+  .data-table td {
+    padding: 0.5rem;
+  }
+  
+  .form-layout {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .modal-content {
+    margin: 1rem;
+    max-width: calc(100% - 2rem);
+  }
+}
+
+@media (max-width: 720px) {
   .table-toolbar,
   .hero-actions {
     flex-wrap: wrap;

@@ -1,4 +1,5 @@
 const STORAGE_KEY = "taller-pro-admin-v1";
+const API_BASE = "http://localhost:3000";
 const ORDER_FLOW = ["Recepcion", "Diagnostico", "Reparacion", "Control final", "Listo", "Entregado"];
 const PRIORITY_WEIGHT = { Alta: 0, Media: 1, Baja: 2 };
 const SECTION_TITLES = {
@@ -6,12 +7,51 @@ const SECTION_TITLES = {
   ordenes: "Ordenes de trabajo",
   inventario: "Inventario",
   clientes: "Clientes",
-  agenda: "Agenda y control",
+  vehiculos: "Vehiculos",
+  historial: "Historial",
   configuracion: "Configuracion"
 };
 
 let state = loadState();
 const refs = {};
+
+// Funciones de sincronización con backend
+async function saveToBackend() {
+  try {
+    const response = await fetch(`${API_BASE}/guardar`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(state)
+    });
+    
+    if (response.ok) {
+      showToast('Datos guardados en servidor', 'success');
+    } else {
+      showToast('Error al guardar en servidor', 'danger');
+    }
+  } catch (error) {
+    console.error('Error guardando en backend:', error);
+    showToast('Error de conexión con servidor', 'warning');
+  }
+}
+
+async function loadFromBackend() {
+  try {
+    const response = await fetch(`${API_BASE}/`);
+    const data = await response.json();
+    
+    if (data.almacen && Object.keys(data.almacen).length > 0) {
+      state = { ...state, ...data.almacen };
+      saveState();
+      renderAll();
+      showToast('Datos sincronizados desde servidor', 'info');
+    }
+  } catch (error) {
+    console.error('Error cargando desde backend:', error);
+  }
+}
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -22,7 +62,9 @@ function init() {
   applyTheme(state.theme || "dark");
   fillSettingsForm();
   updateBrand();
+  updateVehicleClientOptions();
   switchSection("dashboard");
+  loadFromBackend(); // Cargar datos del servidor al iniciar
   renderAll();
 }
 
@@ -68,11 +110,19 @@ function cacheDom() {
   refs.clientSpotlight = document.getElementById("clientSpotlight");
   refs.clientsTableBody = document.getElementById("clientsTableBody");
 
-  refs.appointmentForm = document.getElementById("appointmentForm");
-  refs.appointmentDate = document.getElementById("appointmentDate");
-  refs.agendaMetrics = document.getElementById("agendaMetrics");
-  refs.agendaSpotlight = document.getElementById("agendaSpotlight");
-  refs.appointmentsTableBody = document.getElementById("appointmentsTableBody");
+  refs.vehicleForm = document.getElementById("vehicleForm");
+  refs.vehicleClient = document.getElementById("vehicleClient");
+  refs.newClientForm = document.getElementById("newClientForm");
+  refs.newClientName = document.getElementById("newClientName");
+  refs.newClientPhone = document.getElementById("newClientPhone");
+  refs.newClientEmail = document.getElementById("newClientEmail");
+  refs.vehicleMetrics = document.getElementById("vehicleMetrics");
+  refs.vehicleSpotlight = document.getElementById("vehicleSpotlight");
+  refs.vehiclesTableBody = document.getElementById("vehiclesTableBody");
+
+  refs.historyMetrics = document.getElementById("historyMetrics");
+  refs.historyFeed = document.getElementById("historyFeed");
+  refs.historyTableBody = document.getElementById("historyTableBody");
 
   refs.settingsForm = document.getElementById("settingsForm");
   refs.settingsBusinessName = document.getElementById("settingsBusinessName");
@@ -92,13 +142,14 @@ function bindEvents() {
   refs.orderForm.addEventListener("submit", handleOrderSubmit);
   refs.inventoryForm.addEventListener("submit", handleInventorySubmit);
   refs.clientForm.addEventListener("submit", handleClientSubmit);
-  refs.appointmentForm.addEventListener("submit", handleAppointmentSubmit);
+  refs.vehicleForm.addEventListener("submit", handleVehicleSubmit);
   refs.settingsForm.addEventListener("submit", handleSettingsSubmit);
   refs.orderSearch.addEventListener("input", renderOrders);
   refs.orderStatusFilter.addEventListener("change", renderOrders);
   refs.orderPriorityFilter.addEventListener("change", renderOrders);
   refs.inventorySearch.addEventListener("input", renderInventory);
   refs.inventoryStatusFilter.addEventListener("change", renderInventory);
+  refs.vehicleClient.addEventListener("change", handleVehicleClientChange);
   refs.themeToggle.addEventListener("click", toggleTheme);
   refs.menuToggle.addEventListener("click", toggleMenu);
 }
@@ -108,6 +159,14 @@ function handleDocumentClick(event) {
   if (sectionButton) {
     switchSection(sectionButton.dataset.sectionTarget);
     return;
+  }
+
+  // Cerrar menú al hacer clic fuera de él
+  const sidebar = event.target.closest(".sidebar");
+  const menuToggle = event.target.closest("#menuToggle");
+  
+  if (!sidebar && !menuToggle) {
+    closeMenu();
   }
 
   const themeButton = event.target.closest("[data-theme-choice]");
@@ -158,6 +217,7 @@ function handleOrderSubmit(event) {
 
   state.orders.unshift(order);
   syncClientFromOrder(order);
+  syncVehicleFromOrder(order);
   persistState();
   renderAll();
   refs.orderForm.reset();
@@ -217,7 +277,207 @@ function handleClientSubmit(event) {
   persistState();
   renderAll();
   refs.clientForm.reset();
+  updateVehicleClientOptions();
   showToast("Cliente guardado.");
+}
+
+function updateVehicleClientOptions() {
+  if (!refs.vehicleClient) return;
+  
+  const currentValue = refs.vehicleClient.value;
+  refs.vehicleClient.innerHTML = '<option value="">Seleccionar cliente</option>' +
+    state.clients.map(client => 
+      `<option value="${client.id}">${safe(client.name)} - ${safe(client.phone)}</option>`
+    ).join('');
+  
+  if (currentValue) {
+    refs.vehicleClient.value = currentValue;
+  }
+}
+
+function editVehicle(vehicleId) {
+  const vehicle = state.vehicles.find(v => v.id === vehicleId);
+  if (!vehicle) return;
+  
+  refs.vehicleClient.value = vehicle.clientId;
+  document.getElementById("vehiclePlate").value = vehicle.plate;
+  document.getElementById("vehicleMake").value = vehicle.make;
+  document.getElementById("vehicleModel").value = vehicle.model;
+  document.getElementById("vehicleYear").value = vehicle.year;
+  document.getElementById("vehicleColor").value = vehicle.color;
+  document.getElementById("vehicleMileage").value = vehicle.mileage;
+  document.getElementById("vehicleEngine").value = vehicle.engine;
+  document.getElementById("vehicleNotes").value = vehicle.notes;
+  
+  switchSection("vehiculos");
+  showToast("Editando vehiculo. Modifica los datos y guarda.");
+}
+
+function deleteVehicle(vehicleId) {
+  if (!confirm("¿Estas seguro de eliminar este vehiculo? Esta accion no se puede deshacer.")) {
+    return;
+  }
+  
+  state.vehicles = state.vehicles.filter(v => v.id !== vehicleId);
+  persistState();
+  renderAll();
+  showToast("Vehiculo eliminado.");
+}
+
+function editClient(clientId) {
+  const client = state.clients.find(c => c.id === clientId);
+  if (!client) return;
+  
+  document.getElementById("clientName").value = client.name;
+  document.getElementById("clientPhone").value = client.phone;
+  document.getElementById("clientEmail").value = client.email || "";
+  document.getElementById("clientVehicle").value = client.vehicle || "";
+  document.getElementById("clientNotes").value = client.notes || "";
+  
+  switchSection("clientes");
+  showToast("Editando cliente. Modifica los datos y guarda.");
+}
+
+function deleteClient(clientId) {
+  const client = state.clients.find(c => c.id === clientId);
+  if (!client) return;
+  
+  // Verificar si tiene vehículos asociados
+  const clientVehicles = state.vehicles.filter(v => v.clientId === clientId);
+  if (clientVehicles.length > 0) {
+    showToast(`No se puede eliminar. Tiene ${clientVehicles.length} vehículo(s) asociado(s).`, "danger");
+    return;
+  }
+  
+  if (!confirm(`¿Estas seguro de eliminar al cliente "${client.name}"? Esta accion no se puede deshacer.`)) {
+    return;
+  }
+  
+  state.clients = state.clients.filter(c => c.id !== clientId);
+  persistState();
+  renderAll();
+  updateVehicleClientOptions();
+  showToast("Cliente eliminado.");
+}
+
+function viewOrderDetails(orderId) {
+  const order = state.orders.find(o => o.id === orderId);
+  if (!order) return;
+  
+  showToast(`Orden ${orderId}: ${order.client} - ${order.vehicle} - ${formatCurrency(order.estimate)}`);
+}
+
+function handleVehicleClientChange() {
+  const isCreatingNew = refs.vehicleClient.value === "new-client";
+  refs.newClientForm.style.display = isCreatingNew ? "block" : "none";
+  
+  if (isCreatingNew) {
+    refs.newClientName.focus();
+  }
+}
+
+function createNewClientFromVehicle() {
+  const name = refs.newClientName.value.trim();
+  const phone = refs.newClientPhone.value.trim();
+  const email = refs.newClientEmail.value.trim();
+  
+  if (!name || !phone) {
+    showToast("Nombre y teléfono son requeridos para el nuevo cliente", "danger");
+    return null;
+  }
+  
+  // Verificar si ya existe
+  const existing = state.clients.find(c => 
+    sameText(c.phone, phone) || sameText(c.name, name)
+  );
+  
+  if (existing) {
+    showToast("Este cliente ya existe", "warning");
+    return existing.id;
+  }
+  
+  // Crear nuevo cliente
+  const newClient = {
+    id: createId("CLI"),
+    name: name,
+    phone: phone,
+    email: email || "",
+    vehicle: "",
+    notes: "Creado desde formulario de vehículos",
+    lastService: "Registro inicial",
+    lastVisit: todayISO()
+  };
+  
+  state.clients.unshift(newClient);
+  showToast(`Cliente "${name}" creado correctamente`, "success");
+  
+  return newClient.id;
+}
+
+function handleVehicleSubmit(event) {
+  event.preventDefault();
+
+  let clientId = refs.vehicleClient.value;
+  
+  // Si seleccionó crear nuevo cliente
+  if (clientId === "new-client") {
+    clientId = createNewClientFromVehicle();
+    if (!clientId) return; // Si falló la creación del cliente
+  }
+  
+  if (!clientId) {
+    showToast("Selecciona un cliente o crea uno nuevo", "danger");
+    return;
+  }
+
+  const vehicle = {
+    id: createId("VEH"),
+    clientId: clientId,
+    plate: document.getElementById("vehiclePlate").value.trim().toUpperCase(),
+    make: document.getElementById("vehicleMake").value.trim(),
+    model: document.getElementById("vehicleModel").value.trim(),
+    year: document.getElementById("vehicleYear").value,
+    color: document.getElementById("vehicleColor").value.trim(),
+    mileage: document.getElementById("vehicleMileage").value,
+    engine: document.getElementById("vehicleEngine").value.trim(),
+    notes: document.getElementById("vehicleNotes").value.trim(),
+    createdAt: todayISO(),
+    lastVisit: todayISO()
+  };
+
+  // Buscar cliente para obtener nombre
+  const client = state.clients.find(c => c.id === vehicle.clientId);
+  vehicle.clientName = client ? client.name : "Cliente no encontrado";
+
+  // Actualizar vehículo del cliente
+  if (client) {
+    client.vehicle = `${vehicle.make} ${vehicle.model} (${vehicle.year})`;
+    client.lastVisit = vehicle.lastVisit;
+  }
+
+  const existing = state.vehicles.find((entry) => sameText(entry.plate, vehicle.plate));
+  if (existing) {
+    existing.clientId = vehicle.clientId;
+    existing.clientName = vehicle.clientName;
+    existing.make = vehicle.make;
+    existing.model = vehicle.model;
+    existing.year = vehicle.year;
+    existing.color = vehicle.color;
+    existing.mileage = vehicle.mileage;
+    existing.engine = vehicle.engine;
+    existing.notes = vehicle.notes;
+    existing.lastVisit = vehicle.lastVisit;
+    showToast("Vehiculo actualizado correctamente");
+  } else {
+    state.vehicles.unshift(vehicle);
+    showToast("Vehiculo guardado correctamente");
+  }
+
+  persistState();
+  renderAll();
+  refs.vehicleForm.reset();
+  refs.newClientForm.style.display = "none";
+  updateVehicleClientOptions();
 }
 
 function handleAppointmentSubmit(event) {
@@ -305,7 +565,8 @@ function renderAll() {
   renderOrders();
   renderInventory();
   renderClients();
-  renderAgenda();
+  renderVehicles();
+  renderHistory();
   renderSettings();
 }
 
@@ -597,52 +858,96 @@ function renderClients() {
             <td>${safe(client.lastService || "Sin historial")}</td>
             <td>${formatDate(client.lastVisit)}</td>
             <td>${safe(client.notes || "Sin notas")}</td>
+            <td>
+              <button class="ghost-btn" onclick="editClient('${client.id}')">Editar</button>
+              <button class="ghost-btn danger" onclick="deleteClient('${client.id}')">Eliminar</button>
+            </td>
           </tr>
         `)
         .join("")
-    : `<tr><td colspan="6"><div class="empty-state">No hay clientes registrados.</div></td></tr>`;
+    : `<tr><td colspan="7"><div class="empty-state">No hay clientes registrados.</div></td></tr>`;
 }
 
-function renderAgenda() {
-  const readyOrders = state.orders.filter((order) => order.status === "Listo").length;
-  const ticketAverage = state.orders.length
-    ? state.orders.reduce((sum, order) => sum + order.estimate, 0) / state.orders.length
-    : 0;
-  const pendingLoad = state.orders.filter((order) => order.status !== "Entregado").length;
-  const inventoryValue = state.inventory.reduce((sum, item) => sum + item.stock * item.cost, 0);
+function renderVehicles() {
+  const totalVehicles = state.vehicles.length;
+  const lastVehicle = state.vehicles.length > 0 ? state.vehicles[0] : null;
 
-  refs.agendaMetrics.innerHTML = [
-    metricCard("Citas", String(state.appointments.length)),
-    metricCard("Ordenes listas", String(readyOrders)),
-    metricCard("Carga activa", String(pendingLoad)),
-    metricCard("Ticket promedio", formatCurrency(ticketAverage))
+  refs.vehicleMetrics.innerHTML = [
+    metricCard("Total vehiculos", String(totalVehicles))
   ].join("");
 
-  refs.agendaSpotlight.innerHTML = `
-    <p class="eyebrow">Pulso administrativo</p>
-    <strong>${safe(state.settings.businessName)}</strong>
-    <p>Responsable: ${safe(state.settings.manager)}</p>
+  refs.vehicleSpotlight.innerHTML = lastVehicle ? `
+    <p class="eyebrow">Ultimo registrado</p>
+    <strong>${lastVehicle.make} ${lastVehicle.model}</strong>
+    <p>Placa: ${lastVehicle.plate} • ${lastVehicle.clientName}</p>
     <div class="spotlight-meta">
-      ${badgeHtml(`${state.appointments.filter((item) => item.date === todayISO()).length} citas hoy`, "badge--brand")}
-      ${badgeHtml(`Inventario ${formatCurrency(inventoryValue)}`, "badge--info")}
+      ${badgeHtml(`${lastVehicle.year} • ${lastVehicle.color}`, "badge--brand")}
     </div>
-    <small>Control diario de recepcion, seguimiento de vehiculos y planeacion operativa.</small>
-  `;
+    <small>Kilometraje: ${formatNumber(lastVehicle.mileage || 0)} km</small>
+  ` : '<div class="empty-state">No hay vehiculos registrados.</div>';
 
-  const appointments = upcomingAppointments();
-  refs.appointmentsTableBody.innerHTML = appointments.length
-    ? appointments
-        .map((appointment) => `
+  refs.vehiclesTableBody.innerHTML = state.vehicles.length
+    ? state.vehicles
+        .map((vehicle) => `
           <tr>
-            <td>${formatDate(appointment.date)}</td>
-            <td>${safe(appointment.time)}</td>
-            <td>${safe(appointment.client)}</td>
-            <td>${safe(appointment.service)}</td>
-            <td>${safe(appointment.technician)}</td>
+            <td><strong>${safe(vehicle.plate)}</strong></td>
+            <td>${safe(vehicle.clientName)}</td>
+            <td>${safe(vehicle.make)} ${safe(vehicle.model)}</td>
+            <td>${safe(vehicle.year)}</td>
+            <td>${formatNumber(vehicle.mileage || 0)} km</td>
+            <td>${formatDate(vehicle.lastVisit)}</td>
+            <td>
+              <button class="ghost-btn" onclick="editVehicle('${vehicle.id}')">Editar</button>
+              <button class="ghost-btn danger" onclick="deleteVehicle('${vehicle.id}')">Eliminar</button>
+            </td>
           </tr>
         `)
         .join("")
-    : `<tr><td colspan="5"><div class="empty-state">No hay citas programadas.</div></td></tr>`;
+    : `<tr><td colspan="7"><div class="empty-state">No hay vehiculos registrados.</div></td></tr>`;
+}
+
+function renderHistory() {
+  const completedOrders = state.orders.filter(order => order.status === "Entregado");
+  const totalRevenue = completedOrders.reduce((sum, order) => sum + Number(order.estimate || 0), 0);
+  const avgOrderValue = completedOrders.length ? totalRevenue / completedOrders.length : 0;
+  const thisMonth = completedOrders.filter(order => order.createdAt.startsWith(new Date().toISOString().slice(0,7))).length;
+
+  refs.historyMetrics.innerHTML = [
+    metricCard("Ordenes completadas", String(completedOrders.length)),
+    metricCard("Ingresos totales", formatCurrency(totalRevenue)),
+    metricCard("Ticket promedio", formatCurrency(avgOrderValue)),
+    metricCard("Este mes", String(thisMonth))
+  ].join("");
+
+  refs.historyFeed.innerHTML = completedOrders.slice(0, 5)
+    .map(order => `
+      <div class="feed-item">
+        <div class="feed-header">
+          <strong>${safe(order.client)}</strong>
+          <span class="feed-date">${formatDate(order.deliveredAt || order.createdAt)}</span>
+        </div>
+        <p>${safe(order.vehicle)} - ${safe(order.service)}</p>
+        <div class="feed-meta">${badgeHtml(formatCurrency(order.estimate), "badge--success")}</div>
+      </div>
+    `).join("") || '<div class="empty-state">No hay trabajos completados.</div>';
+
+  refs.historyTableBody.innerHTML = completedOrders.length
+    ? completedOrders
+        .map((order) => `
+          <tr>
+            <td><strong>${safe(order.id)}</strong></td>
+            <td>${safe(order.client)}</td>
+            <td>${safe(order.vehicle)}</td>
+            <td>${safe(order.service)}</td>
+            <td>${formatDate(order.deliveredAt || order.createdAt)}</td>
+            <td>${formatCurrency(order.estimate)}</td>
+            <td>
+              <button class="ghost-btn" onclick="viewOrderDetails('${order.id}')">Ver</button>
+            </td>
+          </tr>
+        `)
+        .join("")
+    : `<tr><td colspan="7"><div class="empty-state">No hay ordenes completadas.</div></td></tr>`;
 }
 
 function renderSettings() {
@@ -725,16 +1030,58 @@ function syncClientFromOrder(order) {
     return;
   }
 
+  // Crear cliente automáticamente desde orden si no existe
   state.clients.unshift({
     id: createId("CLI"),
     name: order.client,
     phone: order.phone,
     email: "",
     vehicle: order.vehicle,
-    notes: order.notes,
+    notes: order.notes || "Creado automáticamente desde orden de trabajo",
     lastService: order.service,
     lastVisit: order.createdAt
   });
+}
+
+function syncVehicleFromOrder(order) {
+  // Buscar si ya existe un vehículo con esa placa
+  const existingVehicle = state.vehicles.find(v => 
+    sameText(v.plate, order.plate) || 
+    (v.clientName === order.client && v.make && order.vehicle.includes(v.make))
+  );
+
+  if (existingVehicle) {
+    existingVehicle.lastVisit = order.createdAt;
+    return;
+  }
+
+  // Si no existe el vehículo, intentar crear uno básico
+  const client = state.clients.find(c => 
+    sameText(c.name, order.client) || sameText(c.phone, order.phone)
+  );
+
+  if (client) {
+    // Extraer información básica del vehículo
+    const vehicleInfo = order.vehicle.split(' ');
+    const make = vehicleInfo[0] || "Desconocido";
+    const model = vehicleInfo.slice(1).join(' ') || "Desconocido";
+    
+    state.vehicles.unshift({
+      id: createId("VEH"),
+      clientId: client.id,
+      clientName: client.name,
+      plate: order.plate || "SIN-PLACA",
+      make: make,
+      model: model,
+      year: "2020",
+      color: "No especificado",
+      mileage: "0",
+      engine: "No especificado",
+      notes: "Creado automáticamente desde orden de trabajo",
+      createdAt: order.createdAt,
+      lastVisit: order.createdAt
+    });
+  }
 }
 
 function addMovement(item, delta, reason) {
@@ -850,6 +1197,12 @@ function upcomingAppointments() {
 
 function persistState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  // Auto-guardar en backend después de cambios locales
+  saveToBackend();
+}
+
+function saveState() {
+  persistState();
 }
 
 function loadState() {
@@ -881,10 +1234,10 @@ function createInitialState() {
   return {
     theme: "dark",
     settings: {
-      businessName: "Taller Black Orange",
+      businessName: "Taller Borjon",
       manager: "Jefe de operaciones",
       phone: "664 555 0101",
-      email: "recepcion@tallerblackorange.mx",
+      email: "recepcion@tallerborjon.mx",
       location: "Zona industrial"
     },
     orders: [
@@ -1019,22 +1372,36 @@ function createInitialState() {
         lastVisit: todayISO()
       }
     ],
-    appointments: [
+    vehicles: [
       {
-        id: "CIT-1",
-        client: "Ramon Lopez",
-        service: "Revision de suspension",
-        date: todayISO(),
-        time: "09:00",
-        technician: "Recepcion"
+        id: "VEH-1",
+        clientId: "CLI-1",
+        clientName: "Carlos Mendez",
+        plate: "ABC-123-A",
+        make: "Nissan",
+        model: "Versa",
+        year: "2020",
+        color: "Gris",
+        mileage: "45000",
+        engine: "1.6L",
+        notes: "Vehiculo en buen estado, mantenimiento regular",
+        createdAt: todayISO(),
+        lastVisit: todayISO()
       },
       {
-        id: "CIT-2",
-        client: "Lucia Reyes",
-        service: "Cambio de aceite",
-        date: datePlus(1),
-        time: "11:30",
-        technician: "Pedro Ruiz"
+        id: "VEH-2",
+        clientId: "CLI-2",
+        clientName: "Mariana Soto",
+        plate: "DEF-456-B",
+        make: "Chevrolet",
+        model: "Spark",
+        year: "2018",
+        color: "Blanco",
+        mileage: "32000",
+        engine: "1.4L",
+        notes: "Requiere revision de suspension proxima",
+        createdAt: datePlus(-30),
+        lastVisit: datePlus(-15)
       }
     ]
   };
