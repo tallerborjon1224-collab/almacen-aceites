@@ -14,7 +14,7 @@ const SECTION_TITLES = {
 
 // Configuración GitHub
 const GITHUB_CONFIG = {
-  token: "AQUI_VA_TU_TOKEN", // ← Pega tu token aquí
+  token: "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", // ← Pega tu token aquí 
   owner: "tallerborjon1224-collab", // ← Tu usuario de GitHub
   repo: "almacen-aceites", // ← Tu repositorio
   branch: "main",
