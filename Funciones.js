@@ -12,10 +12,91 @@ const SECTION_TITLES = {
   configuracion: "Configuracion"
 };
 
+// Configuración GitHub
+const GITHUB_CONFIG = {
+  token: "AQUI_VA_TU_TOKEN", // ← Pega tu token aquí
+  owner: "tallerborjon1224-collab", // ← Tu usuario de GitHub
+  repo: "almacen-aceites", // ← Tu repositorio
+  branch: "main",
+  path: "datos.json"
+};
+
 let state = loadState();
 const refs = {};
 
-// Funciones de sincronización con backend
+// Funciones de sincronización con GitHub
+async function saveToGitHub(data) {
+  try {
+    const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
+    
+    // Primero obtener el archivo actual para saber su SHA
+    const currentFile = await fetch(url, {
+      headers: {
+        'Authorization': `token ${GITHUB_CONFIG.token}`
+      }
+    });
+    
+    let sha = null;
+    if (currentFile.ok) {
+      const fileData = await currentFile.json();
+      sha = fileData.sha;
+    }
+    
+    // Actualizar o crear el archivo
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_CONFIG.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: `Actualizar datos del taller - ${new Date().toLocaleString()}`,
+        content: btoa(JSON.stringify(data, null, 2)),
+        sha: sha,
+        branch: GITHUB_CONFIG.branch
+      })
+    });
+    
+    if (response.ok) {
+      showToast('Datos sincronizados con GitHub', 'success');
+      return true;
+    } else {
+      console.error('Error guardando en GitHub:', await response.text());
+      return false;
+    }
+  } catch (error) {
+    console.error('Error en saveToGitHub:', error);
+    showToast('Error al sincronizar con GitHub', 'danger');
+    return false;
+  }
+}
+
+async function loadFromGitHub() {
+  try {
+    const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
+    
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `token ${GITHUB_CONFIG.token}`
+      }
+    });
+    
+    if (response.ok) {
+      const fileData = await response.json();
+      const content = JSON.parse(atob(fileData.content));
+      showToast('Datos cargados desde GitHub', 'info');
+      return content;
+    } else {
+      console.log('No hay datos en GitHub, usando estado inicial');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error cargando desde GitHub:', error);
+    return null;
+  }
+}
+
+// Funciones de sincronización con backend (mantenemos como respaldo)
 async function saveToBackend() {
   try {
     const response = await fetch(`${API_BASE}/guardar`, {
@@ -53,19 +134,46 @@ async function loadFromBackend() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", init);
+// Funciones de estado principales
+function loadState() {
+  // Primero intentar cargar desde GitHub
+  loadFromGitHub().then(githubData => {
+    if (githubData) {
+      state = githubData;
+      renderAll();
+      return;
+    }
+    
+    // Si no hay datos en GitHub, cargar desde localStorage
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        state = JSON.parse(saved);
+      } else {
+        state = createInitialState();
+      }
+    } catch (error) {
+      console.error('Error cargando estado:', error);
+      state = createInitialState();
+    }
+  });
+  
+  // Retornar estado inicial mientras carga
+  return createInitialState();
+}
 
-function init() {
-  cacheDom();
-  bindEvents();
-  seedFormDates();
-  applyTheme(state.theme || "dark");
-  fillSettingsForm();
-  updateBrand();
-  updateVehicleClientOptions();
-  switchSection("dashboard");
-  loadFromBackend(); // Cargar datos del servidor al iniciar
-  renderAll();
+function persistState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+async function saveState() {
+  persistState();
+  
+  // Guardar en GitHub
+  await saveToGitHub(state);
+  
+  // También guardar en backend como respaldo
+  await saveToBackend();
 }
 
 function cacheDom() {
@@ -137,7 +245,20 @@ function cacheDom() {
   refs.toastStack = document.getElementById("toastStack");
 }
 
-function bindEvents() {
+document.addEventListener("DOMContentLoaded", init);
+
+function init() {
+  cacheDom();
+  bindEvents();
+  seedFormDates();
+  applyTheme(state.theme || "dark");
+  fillSettingsForm();
+  updateBrand();
+  updateVehicleClientOptions();
+  switchSection("dashboard");
+  renderAll();
+}
+  function bindEvents() {
   document.addEventListener("click", handleDocumentClick);
   refs.orderForm.addEventListener("submit", handleOrderSubmit);
   refs.inventoryForm.addEventListener("submit", handleInventorySubmit);
@@ -153,8 +274,7 @@ function bindEvents() {
   refs.themeToggle.addEventListener("click", toggleTheme);
   refs.menuToggle.addEventListener("click", toggleMenu);
 }
-
-function handleDocumentClick(event) {
+  function handleDocumentClick(event) {
   const sectionButton = event.target.closest("[data-section-target]");
   if (sectionButton) {
     switchSection(sectionButton.dataset.sectionTarget);
@@ -194,8 +314,7 @@ function handleDocumentClick(event) {
     closeMenu();
   }
 }
-
-function handleOrderSubmit(event) {
+  function handleOrderSubmit(event) {
   event.preventDefault();
 
   const order = {
@@ -218,7 +337,7 @@ function handleOrderSubmit(event) {
   state.orders.unshift(order);
   syncClientFromOrder(order);
   syncVehicleFromOrder(order);
-  persistState();
+  saveState();
   renderAll();
   refs.orderForm.reset();
   seedFormDates();
@@ -242,7 +361,7 @@ function handleInventorySubmit(event) {
 
   state.inventory.unshift(item);
   addMovement(item, item.stock, "Entrada inicial");
-  persistState();
+  saveState();
   renderAll();
   refs.inventoryForm.reset();
   showToast("Producto agregado al inventario.");
@@ -274,7 +393,7 @@ function handleClientSubmit(event) {
     state.clients.unshift(client);
   }
 
-  persistState();
+  saveState();
   renderAll();
   refs.clientForm.reset();
   updateVehicleClientOptions();
@@ -319,7 +438,7 @@ function deleteVehicle(vehicleId) {
   }
   
   state.vehicles = state.vehicles.filter(v => v.id !== vehicleId);
-  persistState();
+  saveState();
   renderAll();
   showToast("Vehiculo eliminado.");
 }
@@ -354,7 +473,7 @@ function deleteClient(clientId) {
   }
   
   state.clients = state.clients.filter(c => c.id !== clientId);
-  persistState();
+  saveState();
   renderAll();
   updateVehicleClientOptions();
   showToast("Cliente eliminado.");
@@ -414,70 +533,57 @@ function createNewClientFromVehicle() {
   return newClient.id;
 }
 
-function handleVehicleSubmit(event) {
+async function handleVehicleSubmit(event) {
   event.preventDefault();
 
-  let clientId = refs.vehicleClient.value;
-  
-  // Si seleccionó crear nuevo cliente
+  const clientId = refs.vehicleClient.value;
+  let actualClientId = clientId;
+
+  // Si se seleccionó "crear nuevo cliente"
   if (clientId === "new-client") {
-    clientId = createNewClientFromVehicle();
-    if (!clientId) return; // Si falló la creación del cliente
-  }
-  
-  if (!clientId) {
-    showToast("Selecciona un cliente o crea uno nuevo", "danger");
-    return;
+    actualClientId = await createNewClientFromVehicle();
+    if (!actualClientId) {
+      showToast("Error al crear el cliente", "danger");
+      return;
+    }
   }
 
   const vehicle = {
     id: createId("VEH"),
-    clientId: clientId,
+    clientId: actualClientId,
     plate: document.getElementById("vehiclePlate").value.trim().toUpperCase(),
     make: document.getElementById("vehicleMake").value.trim(),
     model: document.getElementById("vehicleModel").value.trim(),
-    year: document.getElementById("vehicleYear").value,
+    year: document.getElementById("vehicleYear").value.trim(),
     color: document.getElementById("vehicleColor").value.trim(),
-    mileage: document.getElementById("vehicleMileage").value,
+    mileage: document.getElementById("vehicleMileage").value.trim(),
     engine: document.getElementById("vehicleEngine").value.trim(),
     notes: document.getElementById("vehicleNotes").value.trim(),
-    createdAt: todayISO(),
-    lastVisit: todayISO()
+    createdAt: todayISO()
   };
 
-  // Buscar cliente para obtener nombre
-  const client = state.clients.find(c => c.id === vehicle.clientId);
-  vehicle.clientName = client ? client.name : "Cliente no encontrado";
-
-  // Actualizar vehículo del cliente
-  if (client) {
-    client.vehicle = `${vehicle.make} ${vehicle.model} (${vehicle.year})`;
-    client.lastVisit = vehicle.lastVisit;
-  }
-
-  const existing = state.vehicles.find((entry) => sameText(entry.plate, vehicle.plate));
-  if (existing) {
-    existing.clientId = vehicle.clientId;
-    existing.clientName = vehicle.clientName;
-    existing.make = vehicle.make;
-    existing.model = vehicle.model;
-    existing.year = vehicle.year;
-    existing.color = vehicle.color;
-    existing.mileage = vehicle.mileage;
-    existing.engine = vehicle.engine;
-    existing.notes = vehicle.notes;
-    existing.lastVisit = vehicle.lastVisit;
+  const existingVehicle = state.vehicles.find((entry) => sameText(entry.plate, vehicle.plate));
+  if (existingVehicle) {
+    existingVehicle.clientId = vehicle.clientId;
+    existingVehicle.make = vehicle.make;
+    existingVehicle.model = vehicle.model;
+    existingVehicle.year = vehicle.year;
+    existingVehicle.color = vehicle.color;
+    existingVehicle.mileage = vehicle.mileage;
+    existingVehicle.engine = vehicle.engine;
+    existingVehicle.notes = vehicle.notes;
     showToast("Vehiculo actualizado correctamente");
   } else {
     state.vehicles.unshift(vehicle);
     showToast("Vehiculo guardado correctamente");
   }
 
-  persistState();
+  saveState();
   renderAll();
   refs.vehicleForm.reset();
   refs.newClientForm.style.display = "none";
   updateVehicleClientOptions();
+  switchSection("vehiculos");
 }
 
 function handleAppointmentSubmit(event) {
