@@ -3,23 +3,84 @@ const API_BASE = "http://localhost:3000";
 const ORDER_FLOW = ["Recepcion", "Diagnostico", "Reparacion", "Control final", "Listo", "Entregado"];
 const PRIORITY_WEIGHT = { Alta: 0, Media: 1, Baja: 2 };
 const SECTION_TITLES = {
-  dashboard: "Resumen general",
+  dashboard: "Panel general",
   ordenes: "Ordenes de trabajo",
   inventario: "Inventario",
   clientes: "Clientes",
   vehiculos: "Vehiculos",
   historial: "Historial",
-  configuracion: "Configuracion"
+  agenda: "Agenda",
+  settings: "Configuracion"
 };
 
-// Configuración GitHub
-const GITHUB_CONFIG = {
-  token: "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", // ← Pega tu token aquí 
-  owner: "tallerborjon1224-collab", // ← Tu usuario de GitHub
-  repo: "almacen-aceites", // ← Tu repositorio
-  branch: "main",
-  path: "datos.json"
-};
+// Función para guardar configuración de GitHub
+function saveGitHubConfig() {
+  const token = document.getElementById("githubToken")?.value.trim();
+  const owner = document.getElementById("githubOwner")?.value.trim();
+  const repo = document.getElementById("githubRepo")?.value.trim();
+  
+  if (!token || !owner || !repo) {
+    showToast("Todos los campos de GitHub son requeridos", "danger");
+    return;
+  }
+  
+  // Actualizar configuración
+  GITHUB_CONFIG.token = token;
+  GITHUB_CONFIG.owner = owner;
+  GITHUB_CONFIG.repo = repo;
+  
+  // Guardar en localStorage
+  localStorage.setItem("github_config", JSON.stringify(GITHUB_CONFIG));
+  
+  // Probar conexión
+  testGitHubConnection();
+}
+
+// Función para cargar configuración de GitHub
+function loadGitHubConfig() {
+  const saved = localStorage.getItem("github_config");
+  if (saved) {
+    try {
+      const config = JSON.parse(saved);
+      Object.assign(GITHUB_CONFIG, config);
+      
+      // Llenar formulario si existe
+      if (document.getElementById("githubToken")) {
+        document.getElementById("githubToken").value = GITHUB_CONFIG.token || "";
+        document.getElementById("githubOwner").value = GITHUB_CONFIG.owner || "";
+        document.getElementById("githubRepo").value = GITHUB_CONFIG.repo || "";
+      }
+    } catch (error) {
+      console.error("Error cargando configuración GitHub:", error);
+    }
+  }
+}
+
+// Función para verificar conexión con GitHub
+async function testGitHubConnection() {
+  try {
+    const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`, {
+      headers: {
+        'Authorization': `token ${GITHUB_CONFIG.token}`
+      }
+    });
+    
+    if (response.ok) {
+      const repoData = await response.json();
+      console.log('✅ Conexión exitosa con GitHub:', repoData.full_name);
+      showToast('Conexión con GitHub verificada', 'success');
+      return true;
+    } else {
+      console.error('❌ Error de autenticación:', response.status);
+      showToast('Error de autenticación con GitHub', 'danger');
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Error de conexión:', error);
+    showToast('Error de conexión con GitHub', 'danger');
+    return false;
+  }
+}
 
 let state = loadState();
 const refs = {};
@@ -136,30 +197,18 @@ async function loadFromBackend() {
 
 // Funciones de estado principales
 function loadState() {
-  // Primero intentar cargar desde GitHub
-  loadFromGitHub().then(githubData => {
-    if (githubData) {
-      state = githubData;
-      renderAll();
-      return;
-    }
-    
-    // Si no hay datos en GitHub, cargar desde localStorage
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        state = JSON.parse(saved);
-      } else {
-        state = createInitialState();
-      }
-    } catch (error) {
-      console.error('Error cargando estado:', error);
+  // Cargar desde localStorage directamente
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      state = JSON.parse(saved);
+    } else {
       state = createInitialState();
     }
-  });
-  
-  // Retornar estado inicial mientras carga
-  return createInitialState();
+  } catch (error) {
+    console.error('Error cargando estado:', error);
+    state = createInitialState();
+  }
 }
 
 function persistState() {
@@ -169,11 +218,48 @@ function persistState() {
 async function saveState() {
   persistState();
   
-  // Guardar en GitHub
-  await saveToGitHub(state);
+  // Intentar guardar en GitHub (sin bloquear)
+  try {
+    await saveToGitHub(state);
+  } catch (error) {
+    console.warn('No se pudo guardar en GitHub:', error);
+  }
   
-  // También guardar en backend como respaldo
-  await saveToBackend();
+  // Intentar guardar en backend como respaldo (sin bloquear)
+  try {
+    await saveToBackend();
+  } catch (error) {
+    console.warn('No se pudo guardar en backend:', error);
+  }
+}
+
+function toggleInventoryForm() {
+  const formPanel = document.getElementById("inventoryFormPanel");
+  const toggleBtn = document.getElementById("toggleInventoryForm");
+  const btnIcon = toggleBtn.querySelector(".btn-icon");
+  const btnText = toggleBtn.querySelector(".btn-text");
+  
+  if (formPanel.style.display === "none" || !formPanel.classList.contains("show")) {
+    // Mostrar formulario
+    formPanel.style.display = "block";
+    setTimeout(() => {
+      formPanel.classList.add("show");
+    }, 10);
+    
+    btnIcon.textContent = "➖";
+    btnText.textContent = "Cerrar Formulario";
+    toggleBtn.style.background = "linear-gradient(135deg, var(--danger), #ff6b6b)";
+  } else {
+    // Ocultar formulario
+    formPanel.classList.remove("show");
+    setTimeout(() => {
+      formPanel.style.display = "none";
+    }, 400);
+    
+    btnIcon.textContent = "➕";
+    btnText.textContent = "Agregar Nuevo Producto";
+    toggleBtn.style.background = "linear-gradient(135deg, var(--brand), var(--brand-strong))";
+  }
 }
 
 function cacheDom() {
@@ -185,37 +271,54 @@ function cacheDom() {
   refs.navLinks = Array.from(document.querySelectorAll(".nav-link"));
   refs.sections = Array.from(document.querySelectorAll(".page-section"));
 
-  refs.heroOrders = document.getElementById("heroOrders");
-  refs.heroAlerts = document.getElementById("heroAlerts");
-  refs.heroRevenue = document.getElementById("heroRevenue");
-  refs.metricOpenOrders = document.getElementById("metricOpenOrders");
-  refs.metricDeliveredToday = document.getElementById("metricDeliveredToday");
-  refs.metricLowStock = document.getElementById("metricLowStock");
-  refs.metricRevenue = document.getElementById("metricRevenue");
   refs.dashboardOrders = document.getElementById("dashboardOrders");
   refs.dashboardInventory = document.getElementById("dashboardInventory");
   refs.dashboardAgenda = document.getElementById("dashboardAgenda");
 
   refs.orderForm = document.getElementById("orderForm");
   refs.orderDate = document.getElementById("orderDate");
-  refs.orderDueDate = document.getElementById("orderDueDate");
-  refs.orderSearch = document.getElementById("orderSearch");
-  refs.orderStatusFilter = document.getElementById("orderStatusFilter");
-  refs.orderPriorityFilter = document.getElementById("orderPriorityFilter");
-  refs.orderStatusStrip = document.getElementById("orderStatusStrip");
-  refs.orderSpotlight = document.getElementById("orderSpotlight");
-  refs.ordersTableBody = document.getElementById("ordersTableBody");
+  refs.orderMechanic = document.getElementById("orderMechanic");
+  refs.orderClientSelect = document.getElementById("orderClientSelect");
+  refs.orderClient = document.getElementById("orderClient");
+  refs.orderPhone = document.getElementById("orderPhone");
+  refs.orderMake = document.getElementById("orderMake");
+  refs.orderModel = document.getElementById("orderModel");
+  refs.orderColor = document.getElementById("orderColor");
+  refs.orderYear = document.getElementById("orderYear");
+  refs.orderPlate = document.getElementById("orderPlate");
+  refs.orderPriority = document.getElementById("orderPriority");
+  refs.orderDiagnosis = document.getElementById("orderDiagnosis");
+  refs.orderNotes = document.getElementById("orderNotes");
+  refs.ordersCards = document.getElementById("ordersCards");
+  refs.newClientFields = document.getElementById("newClientFields");
+  refs.existingClientInfo = document.getElementById("existingClientInfo");
+  refs.selectedClientName = document.getElementById("selectedClientName");
+  refs.selectedClientPhone = document.getElementById("selectedClientPhone");
+  refs.selectedClientVehicle = document.getElementById("selectedClientVehicle");
 
   refs.inventoryForm = document.getElementById("inventoryForm");
-  refs.inventorySearch = document.getElementById("inventorySearch");
-  refs.inventoryStatusFilter = document.getElementById("inventoryStatusFilter");
-  refs.inventoryMetrics = document.getElementById("inventoryMetrics");
-  refs.movementFeed = document.getElementById("movementFeed");
-  refs.inventoryTableBody = document.getElementById("inventoryTableBody");
+  refs.inventoryName = document.getElementById("inventoryName");
+  refs.inventoryBrand = document.getElementById("inventoryBrand");
+  refs.inventorySku = document.getElementById("inventorySku");
+  refs.inventoryCategory = document.getElementById("inventoryCategory");
+  refs.inventoryPresentation = document.getElementById("inventoryPresentation");
+  refs.inventorySupplier = document.getElementById("inventorySupplier");
+  refs.inventoryLocation = document.getElementById("inventoryLocation");
+  refs.inventoryStock = document.getElementById("inventoryStock");
+  refs.inventoryMinStock = document.getElementById("inventoryMinStock");
+  refs.inventoryCost = document.getElementById("inventoryCost");
+  refs.inventoryTax = document.getElementById("inventoryTax");
+  refs.inventoryPrice = document.getElementById("inventoryPrice");
+  refs.inventoryNotes = document.getElementById("inventoryNotes");
+  refs.inventoryCards = document.getElementById("inventoryCards");
+  refs.inventoryAlerts = document.getElementById("inventoryAlerts");
 
   refs.clientForm = document.getElementById("clientForm");
-  refs.clientMetrics = document.getElementById("clientMetrics");
-  refs.clientSpotlight = document.getElementById("clientSpotlight");
+  refs.clientName = document.getElementById("clientName");
+  refs.clientPhone = document.getElementById("clientPhone");
+  refs.clientEmail = document.getElementById("clientEmail");
+  refs.clientVehicle = document.getElementById("clientVehicle");
+  refs.clientNotes = document.getElementById("clientNotes");
   refs.clientsTableBody = document.getElementById("clientsTableBody");
 
   refs.vehicleForm = document.getElementById("vehicleForm");
@@ -224,11 +327,16 @@ function cacheDom() {
   refs.newClientName = document.getElementById("newClientName");
   refs.newClientPhone = document.getElementById("newClientPhone");
   refs.newClientEmail = document.getElementById("newClientEmail");
-  refs.vehicleMetrics = document.getElementById("vehicleMetrics");
-  refs.vehicleSpotlight = document.getElementById("vehicleSpotlight");
+  refs.vehiclePlate = document.getElementById("vehiclePlate");
+  refs.vehicleMake = document.getElementById("vehicleMake");
+  refs.vehicleModel = document.getElementById("vehicleModel");
+  refs.vehicleYear = document.getElementById("vehicleYear");
+  refs.vehicleColor = document.getElementById("vehicleColor");
+  refs.vehicleMileage = document.getElementById("vehicleMileage");
+  refs.vehicleEngine = document.getElementById("vehicleEngine");
+  refs.vehicleNotes = document.getElementById("vehicleNotes");
   refs.vehiclesTableBody = document.getElementById("vehiclesTableBody");
 
-  refs.historyMetrics = document.getElementById("historyMetrics");
   refs.historyFeed = document.getElementById("historyFeed");
   refs.historyTableBody = document.getElementById("historyTableBody");
 
@@ -240,12 +348,11 @@ function cacheDom() {
   refs.settingsLocation = document.getElementById("settingsLocation");
   refs.brandName = document.getElementById("brandName");
   refs.brandSubtitle = document.getElementById("brandSubtitle");
+  refs.themeChoices = Array.from(document.querySelectorAll(".theme-choice"));
   refs.systemSummary = document.getElementById("systemSummary");
-  refs.themeChoices = Array.from(document.querySelectorAll("[data-theme-choice]"));
+
   refs.toastStack = document.getElementById("toastStack");
 }
-
-document.addEventListener("DOMContentLoaded", init);
 
 function init() {
   cacheDom();
@@ -254,27 +361,34 @@ function init() {
   applyTheme(state.theme || "dark");
   fillSettingsForm();
   updateBrand();
-  updateVehicleClientOptions();
+  loadGitHubConfig(); // Cargar configuración de GitHub
   switchSection("dashboard");
   renderAll();
 }
-  function bindEvents() {
+
+function bindEvents() {
   document.addEventListener("click", handleDocumentClick);
   refs.orderForm.addEventListener("submit", handleOrderSubmit);
   refs.inventoryForm.addEventListener("submit", handleInventorySubmit);
   refs.clientForm.addEventListener("submit", handleClientSubmit);
   refs.vehicleForm.addEventListener("submit", handleVehicleSubmit);
   refs.settingsForm.addEventListener("submit", handleSettingsSubmit);
-  refs.orderSearch.addEventListener("input", renderOrders);
-  refs.orderStatusFilter.addEventListener("change", renderOrders);
-  refs.orderPriorityFilter.addEventListener("change", renderOrders);
   refs.inventorySearch.addEventListener("input", renderInventory);
-  refs.inventoryStatusFilter.addEventListener("change", renderInventory);
-  refs.vehicleClient.addEventListener("change", handleVehicleClientChange);
   refs.themeToggle.addEventListener("click", toggleTheme);
   refs.menuToggle.addEventListener("click", toggleMenu);
+  
+  // Event listener para el selector de clientes en formulario de vehículos
+  refs.vehicleClient.addEventListener("change", handleVehicleClientChange);
+  
+  // Event listeners para cálculo automático de margen
+  refs.inventoryCost.addEventListener("input", calculateMargin);
+  refs.inventoryTax.addEventListener("change", calculateMargin);
+  refs.inventoryPrice.addEventListener("input", calculateMargin);
 }
-  function handleDocumentClick(event) {
+
+document.addEventListener("DOMContentLoaded", init);
+
+function handleDocumentClick(event) {
   const sectionButton = event.target.closest("[data-section-target]");
   if (sectionButton) {
     switchSection(sectionButton.dataset.sectionTarget);
@@ -314,35 +428,96 @@ function init() {
     closeMenu();
   }
 }
-  function handleOrderSubmit(event) {
+
+function handleOrderSubmit(event) {
   event.preventDefault();
+  
+  let clientData;
+  if (refs.orderClientSelect.value === "new") {
+    // Crear nuevo cliente automáticamente
+    clientData = {
+      id: createId("CLI"),
+      name: refs.orderClient.value.trim(),
+      phone: refs.orderPhone.value.trim(),
+      email: "",
+      vehicle: `${refs.orderMake.value} ${refs.orderModel.value}`,
+      notes: `Creado automáticamente desde orden de trabajo - Vehículo: ${refs.orderMake.value} ${refs.orderModel.value} (${refs.orderYear.value})`
+    };
+    state.clients.unshift(clientData);
+  } else if (refs.orderClientSelect.value) {
+    // Usar cliente existente
+    clientData = state.clients.find(c => c.id === refs.orderClientSelect.value);
+  }
 
   const order = {
     id: createId("OT"),
     createdAt: refs.orderDate.value,
-    dueDate: refs.orderDueDate.value,
-    client: document.getElementById("orderClient").value.trim(),
-    phone: document.getElementById("orderPhone").value.trim(),
-    vehicle: document.getElementById("orderVehicle").value.trim(),
-    plate: document.getElementById("orderPlate").value.trim().toUpperCase(),
-    service: document.getElementById("orderService").value.trim(),
-    mechanic: document.getElementById("orderMechanic").value.trim(),
-    priority: document.getElementById("orderPriority").value,
-    estimate: Number(document.getElementById("orderEstimate").value),
-    diagnosis: document.getElementById("orderDiagnosis").value.trim(),
-    notes: document.getElementById("orderNotes").value.trim(),
+    dueDate: refs.orderDueDate?.value || "",
+    client: clientData ? clientData.name : refs.orderClient.value.trim(),
+    phone: clientData ? clientData.phone : refs.orderPhone.value.trim(),
+    vehicle: document.getElementById("orderVehicle")?.value.trim() || "",
+    make: refs.orderMake.value.trim(),
+    model: refs.orderModel.value.trim(),
+    color: refs.orderColor.value.trim(),
+    year: refs.orderYear.value,
+    plate: refs.orderPlate.value.trim().toUpperCase(),
+    service: refs.orderService?.value.trim() || "",
+    mechanic: refs.orderMechanic.value.trim(),
+    priority: refs.orderPriority.value,
+    estimate: refs.orderEstimate?.value || "",
+    diagnosis: refs.orderDiagnosis.value.trim(),
+    notes: refs.orderNotes.value.trim(),
     status: "Recepcion"
   };
 
   state.orders.unshift(order);
-  syncClientFromOrder(order);
-  syncVehicleFromOrder(order);
   saveState();
   renderAll();
   refs.orderForm.reset();
   seedFormDates();
-  showToast("Orden de trabajo registrada.");
-  switchSection("ordenes");
+  showToast("Orden registrada correctamente.");
+  
+  // Resetear selección de cliente
+  refs.orderClientSelect.value = "";
+  handleClientSelect();
+}
+
+function calculateMargin() {
+  const cost = parseFloat(refs.inventoryCost.value) || 0;
+  const taxRate = parseFloat(refs.inventoryTax.value) || 0;
+  const salePrice = parseFloat(refs.inventoryPrice.value) || 0;
+  
+  // Calcular costo total con impuesto
+  const totalCost = cost * (1 + taxRate / 100);
+  
+  // Calcular margen en pesos y porcentaje
+  const marginAmount = salePrice - totalCost;
+  const marginPercent = totalCost > 0 ? (marginAmount / totalCost) * 100 : 0;
+  
+  // Actualizar display del margen
+  const marginDisplay = document.querySelector('.margin-display');
+  if (marginDisplay) {
+    const amountElement = marginDisplay.querySelector('.margin-amount');
+    const percentElement = marginDisplay.querySelector('.margin-percent');
+    
+    amountElement.textContent = formatCurrency(marginAmount);
+    percentElement.textContent = `${marginPercent.toFixed(1)}%`;
+    
+    // Cambiar colores según el margen
+    if (marginAmount < 0) {
+      amountElement.style.color = 'var(--danger)';
+      percentElement.style.color = 'var(--danger)';
+      percentElement.style.background = 'rgba(239, 68, 68, 0.1)';
+    } else if (marginPercent < 10) {
+      amountElement.style.color = 'var(--warning)';
+      percentElement.style.color = 'var(--warning)';
+      percentElement.style.background = 'rgba(251, 191, 36, 0.1)';
+    } else {
+      amountElement.style.color = 'var(--success)';
+      percentElement.style.color = 'var(--brand)';
+      percentElement.style.background = 'var(--brand-soft)';
+    }
+  }
 }
 
 function handleInventorySubmit(event) {
@@ -351,12 +526,18 @@ function handleInventorySubmit(event) {
   const item = {
     id: createId("INV"),
     name: document.getElementById("inventoryName").value.trim(),
-    category: document.getElementById("inventoryCategory").value.trim(),
+    brand: document.getElementById("inventoryBrand").value.trim(),
+    sku: document.getElementById("inventorySku").value.trim(),
+    category: document.getElementById("inventoryCategory").value,
+    presentation: document.getElementById("inventoryPresentation").value,
     supplier: document.getElementById("inventorySupplier").value.trim(),
     location: document.getElementById("inventoryLocation").value.trim(),
     stock: Number(document.getElementById("inventoryStock").value),
     minStock: Number(document.getElementById("inventoryMinStock").value),
-    cost: Number(document.getElementById("inventoryCost").value)
+    cost: Number(document.getElementById("inventoryCost").value),
+    tax: Number(document.getElementById("inventoryTax").value),
+    price: Number(document.getElementById("inventoryPrice").value),
+    notes: document.getElementById("inventoryNotes").value.trim()
   };
 
   state.inventory.unshift(item);
@@ -364,7 +545,12 @@ function handleInventorySubmit(event) {
   saveState();
   renderAll();
   refs.inventoryForm.reset();
-  showToast("Producto agregado al inventario.");
+  calculateMargin(); // Resetear el display del margen
+  
+  // Cerrar formulario después de guardar
+  toggleInventoryForm();
+  
+  showToast("Aceite agregado al inventario.");
   switchSection("inventario");
 }
 
@@ -398,20 +584,6 @@ function handleClientSubmit(event) {
   refs.clientForm.reset();
   updateVehicleClientOptions();
   showToast("Cliente guardado.");
-}
-
-function updateVehicleClientOptions() {
-  if (!refs.vehicleClient) return;
-  
-  const currentValue = refs.vehicleClient.value;
-  refs.vehicleClient.innerHTML = '<option value="">Seleccionar cliente</option>' +
-    state.clients.map(client => 
-      `<option value="${client.id}">${safe(client.name)} - ${safe(client.phone)}</option>`
-    ).join('');
-  
-  if (currentValue) {
-    refs.vehicleClient.value = currentValue;
-  }
 }
 
 function editVehicle(vehicleId) {
@@ -666,9 +838,149 @@ function handleInventoryAction(action, itemId) {
   renderAll();
 }
 
+function handleClientSelect() {
+  const selectedValue = refs.orderClientSelect.value;
+  
+  if (selectedValue === "new") {
+    // Mostrar campos para nuevo cliente
+    refs.newClientFields.style.display = "block";
+    refs.existingClientInfo.style.display = "none";
+    refs.orderClient.required = true;
+    refs.orderPhone.required = true;
+  } else if (selectedValue) {
+    // Mostrar información del cliente existente
+    const client = state.clients.find(c => c.id === selectedValue);
+    if (client) {
+      refs.newClientFields.style.display = "none";
+      refs.existingClientInfo.style.display = "block";
+      refs.orderClient.required = false;
+      refs.orderPhone.required = false;
+      
+      // Mostrar datos del cliente
+      refs.selectedClientName.textContent = client.name;
+      refs.selectedClientPhone.textContent = client.phone;
+      refs.selectedClientVehicle.textContent = client.vehicle || "No especificado";
+    }
+  } else {
+    // Ocultar todo si no hay selección
+    refs.newClientFields.style.display = "none";
+    refs.existingClientInfo.style.display = "none";
+    refs.orderClient.required = false;
+    refs.orderPhone.required = false;
+  }
+}
+
+function renderOrders() {
+  const filtered = state.orders;
+
+  // Renderizar como cards en lugar de tabla
+  refs.ordersCards.innerHTML = filtered.length
+    ? filtered.map((order) => {
+        const priorityClass = order.priority === "Alta" ? "badge--danger" : 
+                              order.priority === "Media" ? "badge--warning" : "badge--info";
+        
+        return `
+          <div class="order-card" data-order-id="${safe(order.id)}">
+            <div class="order-header">
+              <div class="order-title">
+                <strong>${safe(order.plate)} - ${safe(order.make)} ${safe(order.model)}</strong>
+                <small>${safe(order.createdAt)} · ${safe(order.mechanic || "Sin asignar")}</small>
+              </div>
+              <div class="order-badges">
+                ${badgeHtml(order.status || "Recepcion", "badge--info")}
+                ${badgeHtml(order.priority, priorityClass)}
+              </div>
+            </div>
+            
+            <div class="order-body">
+              <div class="order-info">
+                <div class="order-info-item">
+                  <span class="order-info-label">Cliente:</span>
+                  <span class="order-info-value">${safe(order.client)}</span>
+                </div>
+                <div class="order-info-item">
+                  <span class="order-info-label">Teléfono:</span>
+                  <span class="order-info-value">${safe(order.phone)}</span>
+                </div>
+                <div class="order-info-item">
+                  <span class="order-info-label">Vehículo:</span>
+                  <span class="order-info-value">${safe(order.make)} ${safe(order.model)} (${order.year})</span>
+                </div>
+                <div class="order-info-item">
+                  <span class="order-info-label">Color:</span>
+                  <span class="order-info-value">${safe(order.color)}</span>
+                </div>
+              </div>
+              
+              ${order.diagnosis ? `
+              <div class="order-diagnosis">
+                <span class="order-diagnosis-label">Diagnóstico:</span>
+                <span class="order-diagnosis-text">${safe(order.diagnosis)}</span>
+              </div>
+              ` : ''}
+            </div>
+            
+            <div class="order-actions">
+              <button class="mini-btn" type="button" onclick="editOrder('${safe(order.id)}')">Editar</button>
+              <button class="mini-btn" type="button" onclick="updateOrderStatus('${safe(order.id)}')">Actualizar</button>
+            </div>
+          </div>
+        `;
+      }).join("")
+    : '<div class="empty-state">No hay ordenes registradas.</div>';
+}
+
+function editOrder(orderId) {
+  const order = state.orders.find(o => o.id === orderId);
+  if (!order) return;
+  
+  // Llenar formulario con datos de la orden
+  refs.orderDate.value = order.createdAt;
+  refs.orderMechanic.value = order.mechanic || "";
+  refs.orderMake.value = order.make;
+  refs.orderModel.value = order.model;
+  refs.orderColor.value = order.color;
+  refs.orderYear.value = order.year;
+  refs.orderPlate.value = order.plate;
+  refs.orderPriority.value = order.priority;
+  refs.orderDiagnosis.value = order.diagnosis || "";
+  refs.orderNotes.value = order.notes || "";
+  
+  // Buscar y seleccionar cliente si existe
+  const client = state.clients.find(c => c.name === order.client && c.phone === order.phone);
+  if (client) {
+    refs.orderClientSelect.value = client.id;
+    handleClientSelect();
+  } else {
+    refs.orderClientSelect.value = "new";
+    refs.orderClient.value = order.client;
+    refs.orderPhone.value = order.phone;
+    handleClientSelect();
+  }
+  
+  switchSection("ordenes");
+  showToast("Editando orden. Modifica los datos y guarda.");
+}
+
+function updateOrderStatus(orderId) {
+  const order = state.orders.find(o => o.id === orderId);
+  if (!order) return;
+  
+  // Ciclo de estados: Recepcion -> Diagnostico -> Reparacion -> Entregado
+  const statusCycle = ["Recepcion", "Diagnostico", "Reparacion", "Entregado"];
+  const currentIndex = statusCycle.indexOf(order.status || "Recepcion");
+  const nextIndex = (currentIndex + 1) % statusCycle.length;
+  order.status = statusCycle[nextIndex];
+  
+  saveState();
+  renderAll();
+  showToast(`Estado actualizado: ${order.status}`);
+}
+
 function renderAll() {
   renderDashboard();
   renderOrders();
+  renderInventoryAlerts();
   renderInventory();
   renderClients();
   renderVehicles();
@@ -679,37 +991,29 @@ function renderAll() {
 function renderDashboard() {
   const openOrders = state.orders.filter((order) => order.status !== "Entregado");
   const lowStockItems = state.inventory.filter((item) => getInventoryLevel(item) !== "Optimo");
-  const deliveredToday = state.orders.filter((order) => order.deliveredAt === todayISO()).length;
-  const revenue = state.orders.reduce((sum, order) => sum + Number(order.estimate || 0), 0);
-
-  refs.heroOrders.textContent = String(openOrders.length);
-  refs.heroAlerts.textContent = String(lowStockItems.length);
-  refs.heroRevenue.textContent = formatCurrency(revenue);
-  refs.metricOpenOrders.textContent = String(openOrders.length);
-  refs.metricDeliveredToday.textContent = String(deliveredToday);
-  refs.metricLowStock.textContent = String(lowStockItems.length);
-  refs.metricRevenue.textContent = formatCurrency(revenue);
 
   refs.dashboardOrders.innerHTML = renderList(
     sortOrders(state.orders)
       .filter((order) => order.status !== "Entregado")
       .slice(0, 4)
-      .map((order) => `
+      .map((order) => {
+        const vehicleInfo = `${order.make} ${order.model} ${order.year}`;
+        return `
         <article class="row-card">
           <div class="row-card-main">
             <strong>${safe(order.id)} · ${safe(order.client)}</strong>
-            <small>${safe(order.vehicle)} · ${safe(order.service)}</small>
+            <small>${safe(vehicleInfo)} · ${safe(order.plate)}</small>
             <div class="row-meta">
               ${badgeHtml(order.priority, badgeClassForPriority(order.priority))}
               ${badgeHtml(order.status, badgeClassForStatus(order.status))}
             </div>
           </div>
           <div class="row-card-side">
-            <strong>${formatDate(order.dueDate)}</strong>
-            <small>${formatCurrency(order.estimate)}</small>
+            <strong>${safe(order.mechanic)}</strong>
+            <small>Tecnico</small>
           </div>
         </article>
-      `),
+      `}),
     "No hay ordenes activas."
   );
 
@@ -726,7 +1030,7 @@ function renderDashboard() {
             <div class="row-meta">${badgeHtml(getInventoryLevel(item), badgeClassForInventory(item))}</div>
           </div>
           <div class="row-card-side">
-            <strong>${item.stock} pzas</strong>
+            <strong>${item.stock} uds</strong>
             <small>Minimo ${item.minStock}</small>
           </div>
         </article>
@@ -735,220 +1039,239 @@ function renderDashboard() {
   );
 
   refs.dashboardAgenda.innerHTML = renderList(
-    upcomingAppointments()
-      .slice(0, 4)
-      .map((appointment) => `
+    sortOrders(state.orders)
+      .filter((order) => order.status !== "Entregado")
+      .slice(0, 5)
+      .map((order) => {
+        const vehicleInfo = `${order.make} ${order.model} ${order.year}`;
+        return `
         <article class="row-card">
           <div class="row-card-main">
-            <strong>${safe(appointment.client)}</strong>
-            <small>${safe(appointment.service)}</small>
+            <strong>${safe(order.id)} · ${safe(order.client)}</strong>
+            <small>${safe(vehicleInfo)} · ${safe(order.color)}</small>
+            <div class="row-meta">
+              ${badgeHtml(order.priority, badgeClassForPriority(order.priority))}
+              ${badgeHtml(order.status, badgeClassForStatus(order.status))}
+            </div>
           </div>
           <div class="row-card-side">
-            <strong>${formatDate(appointment.date)}</strong>
-            <small>${safe(appointment.time)} · ${safe(appointment.technician)}</small>
+            <strong>${safe(order.mechanic)}</strong>
+            <small>Tecnico</small>
           </div>
         </article>
-      `),
+      `}),
     "No hay citas programadas."
   );
 }
 
 function renderOrders() {
-  refs.orderStatusStrip.innerHTML = ORDER_FLOW
-    .map((status) => {
-      const total = state.orders.filter((order) => order.status === status).length;
-      return `
-        <article class="status-card">
-          <span>${safe(status)}</span>
-          <strong>${total}</strong>
-          <small>ordenes</small>
-        </article>
-      `;
-    })
-    .join("");
+  // Mostrar solo historial de ordenes anteriores en lugar de listado general
+  const allOrders = sortOrders(state.orders);
+  const recentOrders = allOrders.slice(0, 10); // Últimas 10 ordenes como historial
 
-  const focusOrder = sortOrders(state.orders).find((order) => order.status !== "Entregado");
-  if (focusOrder) {
-    refs.orderSpotlight.innerHTML = `
-      <p class="eyebrow">Orden destacada</p>
-      <strong>${safe(focusOrder.id)} · ${safe(focusOrder.client)}</strong>
-      <p>${safe(focusOrder.service)} para ${safe(focusOrder.vehicle)}</p>
-      <div class="spotlight-meta">
-        ${badgeHtml(focusOrder.priority, badgeClassForPriority(focusOrder.priority))}
-        ${badgeHtml(focusOrder.status, badgeClassForStatus(focusOrder.status))}
-        ${badgeHtml(formatDate(focusOrder.dueDate), "badge--info")}
-      </div>
-      <small>${safe(focusOrder.diagnosis)}</small>
-    `;
-  } else {
-    refs.orderSpotlight.innerHTML = `<div class="empty-state">No hay ordenes en proceso.</div>`;
+  // Renderizar historial en el panel de ordenes anteriores
+  const orderHistoryElement = document.getElementById("orderHistory");
+  if (orderHistoryElement) {
+    orderHistoryElement.innerHTML = recentOrders.length
+      ? recentOrders.map((order) => {
+        const vehicleInfo = `${order.make} ${order.model} ${order.year}`;
+        return `
+          <article class="row-card">
+            <div class="row-card-main">
+              <strong>${safe(order.id)} · ${safe(order.client)}</strong>
+              <small>${safe(vehicleInfo)} · ${safe(order.plate)}</small>
+              <div class="row-meta">
+                ${badgeHtml(order.priority, badgeClassForPriority(order.priority))}
+                ${badgeHtml(order.status, badgeClassForStatus(order.status))}
+              </div>
+            </div>
+            <div class="row-card-side">
+              <strong>${formatDate(order.createdAt)}</strong>
+              <small>${safe(order.mechanic || "Sin asignar")}</small>
+            </div>
+          </article>
+        `;
+      }).join("")
+      : '<div class="empty-state">No hay ordenes registradas.</div>';
+  }
+}
+
+function renderInventoryAlerts() {
+  const lowStockItems = state.inventory.filter(item => 
+    item.stock <= item.minStock && item.stock > 0
+  );
+  
+  const criticalStockItems = state.inventory.filter(item => 
+    item.stock === 0
+  );
+
+  if (lowStockItems.length === 0 && criticalStockItems.length === 0) {
+    refs.inventoryAlerts.innerHTML = '';
+    return;
   }
 
-  const search = refs.orderSearch.value.trim().toLowerCase();
-  const statusFilter = refs.orderStatusFilter.value;
-  const priorityFilter = refs.orderPriorityFilter.value;
+  let alertsHTML = '';
 
-  const filtered = sortOrders(state.orders).filter((order) => {
-    const matchesSearch =
-      !search ||
-      [order.id, order.client, order.vehicle, order.service, order.plate].some((value) =>
-        String(value).toLowerCase().includes(search)
-      );
-    const matchesStatus = statusFilter === "Todos" || order.status === statusFilter;
-    const matchesPriority = priorityFilter === "Todas" || order.priority === priorityFilter;
-    return matchesSearch && matchesStatus && matchesPriority;
-  });
+  // Alerta de stock crítico (sin existencia)
+  if (criticalStockItems.length > 0) {
+    alertsHTML += `
+      <div class="alert-card">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-content">
+          <div class="alert-title">¡Stock Crítico!</div>
+          <div class="alert-message">
+            Los siguientes productos están agotados y necesitan reabastecimiento urgente:
+            ${criticalStockItems.map(item => `
+              <div class="alert-item">
+                <span class="alert-product">${safe(item.name)} (${safe(item.brand)})</span>
+                <span class="alert-stock">AGOTADO</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
 
-  refs.ordersTableBody.innerHTML = filtered.length
-    ? filtered
-        .map((order) => {
-          const canAdvance = order.status !== "Entregado";
-          const actionLabel = order.status === "Listo" ? "Entregar" : "Avanzar";
-          return `
-            <tr>
-              <td>
-                <div class="cell-title">
-                  <strong>${safe(order.id)}</strong>
-                  <small>${formatDate(order.createdAt)}</small>
-                </div>
-              </td>
-              <td>
-                <div class="cell-title">
-                  <strong>${safe(order.client)}</strong>
-                  <small>${safe(order.vehicle)} · ${safe(order.plate)}</small>
-                </div>
-              </td>
-              <td>
-                <div class="cell-title">
-                  <strong>${safe(order.service)}</strong>
-                  <small>${safe(order.mechanic)}</small>
-                </div>
-              </td>
-              <td>${badgeHtml(order.priority, badgeClassForPriority(order.priority))}</td>
-              <td>${badgeHtml(order.status, badgeClassForStatus(order.status))}</td>
-              <td>${formatDate(order.dueDate)}</td>
-              <td>${formatCurrency(order.estimate)}</td>
-              <td>
-                <div class="action-set">
-                  ${
-                    canAdvance
-                      ? `<button class="mini-btn" type="button" data-order-action="advance" data-order-id="${safe(order.id)}">${actionLabel}</button>`
-                      : `<span class="badge badge--success">Cerrada</span>`
-                  }
-                </div>
-              </td>
-            </tr>
-          `;
-        })
-        .join("")
-    : `<tr><td colspan="8"><div class="empty-state">No hay ordenes con ese filtro.</div></td></tr>`;
+  // Alerta de stock bajo
+  if (lowStockItems.length > 0) {
+    alertsHTML += `
+      <div class="alert-card">
+        <div class="alert-icon">📉</div>
+        <div class="alert-content">
+          <div class="alert-title">Stock Bajo</div>
+          <div class="alert-message">
+            Los siguientes productos están por debajo del nivel mínimo:
+            ${lowStockItems.map(item => `
+              <div class="alert-item">
+                <span class="alert-product">${safe(item.name)} (${safe(item.brand)})</span>
+                <span class="alert-stock">${item.stock} uds (mín: ${item.minStock})</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  refs.inventoryAlerts.innerHTML = alertsHTML;
 }
 
 function renderInventory() {
-  const totalUnits = state.inventory.reduce((sum, item) => sum + item.stock, 0);
-  const lowStock = state.inventory.filter((item) => getInventoryLevel(item) === "Bajo").length;
-  const totalValue = state.inventory.reduce((sum, item) => sum + item.stock * item.cost, 0);
-
-  refs.inventoryMetrics.innerHTML = [
-    metricCard("Productos", String(state.inventory.length)),
-    metricCard("Piezas", String(totalUnits)),
-    metricCard("Stock bajo", String(lowStock)),
-    metricCard("Valor", formatCurrency(totalValue))
-  ].join("");
-
-  refs.movementFeed.innerHTML = renderList(
-    state.movements.slice(0, 6).map(
-      (movement) => `
-        <article class="row-card">
-          <div class="row-card-main">
-            <strong>${safe(movement.itemName)}</strong>
-            <small>${safe(movement.reason)}</small>
-          </div>
-          <div class="row-card-side">
-            <strong>${movement.delta > 0 ? "+" : ""}${movement.delta}</strong>
-            <small>${formatDateTime(movement.timestamp)}</small>
-          </div>
-        </article>
-      `
-    ),
-    "Todavia no hay movimientos."
-  );
-
-  const search = refs.inventorySearch.value.trim().toLowerCase();
-  const statusFilter = refs.inventoryStatusFilter.value;
+  const search = refs.inventorySearch?.value?.trim().toLowerCase() || "";
 
   const filtered = state.inventory.filter((item) => {
-    const level = getInventoryLevel(item);
     const matchesSearch =
       !search ||
-      [item.name, item.category, item.supplier, item.location].some((value) =>
+      [item.name, item.brand, item.sku, item.category, item.supplier, item.location].some((value) =>
         String(value).toLowerCase().includes(search)
       );
-    const matchesStatus = statusFilter === "Todos" || level === statusFilter;
-    return matchesSearch && matchesStatus;
+
+    return matchesSearch;
   });
 
-  refs.inventoryTableBody.innerHTML = filtered.length
-    ? filtered
-        .slice()
-        .sort((left, right) => left.stock - right.stock)
-        .map((item) => `
-          <tr>
-            <td>
-              <div class="cell-title">
+  // Renderizar como cards en lugar de tabla
+  refs.inventoryCards.innerHTML = filtered.length
+    ? filtered.map((item) => {
+        const level = getInventoryLevel(item);
+        const levelClass = badgeClassForInventory(item);
+        
+        // Calcular margen para mostrar en el card
+        const totalCost = item.cost * (1 + (item.tax || 0) / 100);
+        const marginAmount = item.price - totalCost;
+        const marginPercent = totalCost > 0 ? (marginAmount / totalCost) * 100 : 0;
+        
+        return `
+          <div class="inventory-card" data-item-id="${safe(item.id)}">
+            <div class="card-header">
+              <div class="card-title">
                 <strong>${safe(item.name)}</strong>
-                <small>${safe(item.id)}</small>
+                <small>${safe(item.brand || "")} · SKU: ${safe(item.sku || "")}</small>
               </div>
-            </td>
-            <td>${safe(item.category)}</td>
-            <td>${safe(item.supplier)}</td>
-            <td>${safe(item.location)}</td>
-            <td>${item.stock}</td>
-            <td>${item.minStock}</td>
-            <td>${badgeHtml(getInventoryLevel(item), badgeClassForInventory(item))}</td>
-            <td>${formatCurrency(item.cost)}</td>
-            <td>
-              <div class="action-set">
-                <button class="mini-btn" type="button" data-item-action="minus" data-item-id="${safe(item.id)}">-1</button>
-                <button class="mini-btn" type="button" data-item-action="plus" data-item-id="${safe(item.id)}">+1</button>
-                <button class="mini-btn" type="button" data-item-action="plus5" data-item-id="${safe(item.id)}">+5</button>
+              <div class="card-badges">
+                ${badgeHtml(item.category || "General", "badge--info")}
+                ${badgeHtml(level, levelClass)}
               </div>
-            </td>
-          </tr>
-        `)
-        .join("")
-    : `<tr><td colspan="9"><div class="empty-state">No hay productos con ese filtro.</div></td></tr>`;
+            </div>
+            
+            <div class="card-body">
+              <div class="card-info">
+                <div class="info-item">
+                  <span class="info-label">Presentación:</span>
+                  <span class="info-value">${safe(item.presentation || "N/A")}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Ubicación:</span>
+                  <span class="info-value">${safe(item.location)}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Stock:</span>
+                  <span class="info-value stock-value ${level.toLowerCase()}">${item.stock} unidades</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Mínimo:</span>
+                  <span class="info-value">${item.minStock} unidades</span>
+                </div>
+              </div>
+              
+              <div class="card-pricing">
+                <div class="price-item">
+                  <span class="price-label">Costo:</span>
+                  <span class="price-value">${formatCurrency(item.cost)}</span>
+                </div>
+                <div class="price-item">
+                  <span class="price-label">Venta:</span>
+                  <span class="price-value">${formatCurrency(item.price)}</span>
+                </div>
+              </div>
+              
+              <div class="card-margin">
+                <div class="margin-item">
+                  <span class="margin-label">Margen:</span>
+                  <span class="margin-value ${marginAmount < 0 ? 'negative' : marginPercent < 10 ? 'low' : 'good'}">
+                    ${formatCurrency(marginAmount)} (${marginPercent.toFixed(1)}%)
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card-info-row">
+              <div class="info-item">
+                <span class="info-label">Proveedor:</span>
+                <span class="info-value">${safe(item.supplier)}</span>
+              </div>
+            </div>
+            
+            ${item.notes ? `
+            <div class="card-notes">
+              <span class="notes-label">Notas:</span>
+              <span class="notes-value">${safe(item.notes)}</span>
+            </div>
+            ` : ''}
+            
+            <div class="card-actions">
+              <button class="mini-btn" type="button" onclick="editInventoryItem('${safe(item.id)}')">Editar</button>
+              <button class="mini-btn" type="button" onclick="adjustStock('${safe(item.id)}', 1)">+</button>
+              <button class="mini-btn" type="button" onclick="adjustStock('${safe(item.id)}', -1)">-</button>
+            </div>
+          </div>
+        `;
+      }).join("")
+    : '<div class="empty-state">No hay aceites registrados.</div>';
 }
 
 function renderClients() {
-  const activeClients = state.clients.filter((client) => differenceInDays(todayISO(), client.lastVisit) <= 30).length;
-  const withEmail = state.clients.filter((client) => client.email).length;
+  const search = refs.clientSearch?.value?.trim().toLowerCase() || "";
 
-  refs.clientMetrics.innerHTML = [
-    metricCard("Clientes", String(state.clients.length)),
-    metricCard("Activos 30 dias", String(activeClients)),
-    metricCard("Con correo", String(withEmail)),
-    metricCard("OT ligadas", String(state.orders.length))
-  ].join("");
+  const filtered = state.clients.filter((client) => {
+    return !search ||
+      [client.name, client.phone, client.email, client.vehicle].some((value) =>
+        String(value).toLowerCase().includes(search)
+      );
+  });
 
-  const spotlightClient = state.clients[0];
-  if (spotlightClient) {
-    refs.clientSpotlight.innerHTML = `
-      <p class="eyebrow">Cliente reciente</p>
-      <strong>${safe(spotlightClient.name)}</strong>
-      <p>${safe(spotlightClient.vehicle)}</p>
-      <div class="spotlight-meta">
-        ${badgeHtml(spotlightClient.phone || "Sin telefono", "badge--info")}
-        ${badgeHtml(spotlightClient.lastService || "Sin servicio", "badge--brand")}
-      </div>
-      <small>${spotlightClient.notes ? safe(spotlightClient.notes) : "Sin notas registradas."}</small>
-    `;
-  } else {
-    refs.clientSpotlight.innerHTML = `<div class="empty-state">Aun no hay clientes registrados.</div>`;
-  }
-
-  refs.clientsTableBody.innerHTML = state.clients.length
-    ? state.clients
+  refs.clientsTableBody.innerHTML = filtered.length
+    ? filtered
         .slice()
         .sort((left, right) => right.lastVisit.localeCompare(left.lastVisit))
         .map((client) => `
@@ -961,99 +1284,86 @@ function renderClients() {
               </div>
             </td>
             <td>${safe(client.vehicle || "Sin vehiculo")}</td>
-            <td>${safe(client.lastService || "Sin historial")}</td>
             <td>${formatDate(client.lastVisit)}</td>
-            <td>${safe(client.notes || "Sin notas")}</td>
             <td>
-              <button class="ghost-btn" onclick="editClient('${client.id}')">Editar</button>
-              <button class="ghost-btn danger" onclick="deleteClient('${client.id}')">Eliminar</button>
+              <div class="action-set">
+                <button class="mini-btn" type="button" onclick="editClient('${safe(client.id)}')">Editar</button>
+                <button class="mini-btn" type="button" onclick="deleteClient('${safe(client.id)}')">Eliminar</button>
+              </div>
             </td>
           </tr>
         `)
         .join("")
-    : `<tr><td colspan="7"><div class="empty-state">No hay clientes registrados.</div></td></tr>`;
+    : `<tr><td colspan="5"><div class="empty-state">No hay clientes registrados.</div></td></tr>`;
 }
 
 function renderVehicles() {
-  const totalVehicles = state.vehicles.length;
-  const lastVehicle = state.vehicles.length > 0 ? state.vehicles[0] : null;
+  // Mostrar vehículos de órdenes activas
+  const activeOrders = state.orders.filter(order => order.status !== "Entregado");
+  const vehiclesFromOrders = activeOrders.map(order => {
+    const client = state.clients.find(c => 
+      sameText(c.name, order.client) || sameText(c.phone, order.phone)
+    );
+    return {
+      plate: order.plate,
+      clientName: order.client,
+      make: order.make,
+      model: order.model,
+      year: order.year,
+      color: order.color,
+      orderId: order.id,
+      status: order.status,
+      mechanic: order.mechanic
+    };
+  });
 
-  refs.vehicleMetrics.innerHTML = [
-    metricCard("Total vehiculos", String(totalVehicles))
-  ].join("");
-
-  refs.vehicleSpotlight.innerHTML = lastVehicle ? `
-    <p class="eyebrow">Ultimo registrado</p>
-    <strong>${lastVehicle.make} ${lastVehicle.model}</strong>
-    <p>Placa: ${lastVehicle.plate} • ${lastVehicle.clientName}</p>
-    <div class="spotlight-meta">
-      ${badgeHtml(`${lastVehicle.year} • ${lastVehicle.color}`, "badge--brand")}
-    </div>
-    <small>Kilometraje: ${formatNumber(lastVehicle.mileage || 0)} km</small>
-  ` : '<div class="empty-state">No hay vehiculos registrados.</div>';
-
-  refs.vehiclesTableBody.innerHTML = state.vehicles.length
-    ? state.vehicles
+  refs.vehiclesTableBody.innerHTML = vehiclesFromOrders.length
+    ? vehiclesFromOrders
         .map((vehicle) => `
           <tr>
             <td><strong>${safe(vehicle.plate)}</strong></td>
             <td>${safe(vehicle.clientName)}</td>
             <td>${safe(vehicle.make)} ${safe(vehicle.model)}</td>
             <td>${safe(vehicle.year)}</td>
-            <td>${formatNumber(vehicle.mileage || 0)} km</td>
-            <td>${formatDate(vehicle.lastVisit)}</td>
+            <td>${badgeHtml(vehicle.status, badgeClassForStatus(vehicle.status))}</td>
+            <td>${safe(vehicle.mechanic || "Sin asignar")}</td>
             <td>
-              <button class="ghost-btn" onclick="editVehicle('${vehicle.id}')">Editar</button>
-              <button class="ghost-btn danger" onclick="deleteVehicle('${vehicle.id}')">Eliminar</button>
+              <div class="action-set">
+                <button class="mini-btn" type="button" onclick="viewOrderDetails('${safe(vehicle.orderId)}')">Ver orden</button>
+              </div>
             </td>
           </tr>
         `)
         .join("")
-    : `<tr><td colspan="7"><div class="empty-state">No hay vehiculos registrados.</div></td></tr>`;
+    : `<tr><td colspan="7"><div class="empty-state">No hay vehiculos en taller actualmente.</div></td></tr>`;
 }
 
 function renderHistory() {
   const completedOrders = state.orders.filter(order => order.status === "Entregado");
-  const totalRevenue = completedOrders.reduce((sum, order) => sum + Number(order.estimate || 0), 0);
-  const avgOrderValue = completedOrders.length ? totalRevenue / completedOrders.length : 0;
-  const thisMonth = completedOrders.filter(order => order.createdAt.startsWith(new Date().toISOString().slice(0,7))).length;
-
-  refs.historyMetrics.innerHTML = [
-    metricCard("Ordenes completadas", String(completedOrders.length)),
-    metricCard("Ingresos totales", formatCurrency(totalRevenue)),
-    metricCard("Ticket promedio", formatCurrency(avgOrderValue)),
-    metricCard("Este mes", String(thisMonth))
-  ].join("");
-
-  refs.historyFeed.innerHTML = completedOrders.slice(0, 5)
-    .map(order => `
-      <div class="feed-item">
-        <div class="feed-header">
-          <strong>${safe(order.client)}</strong>
-          <span class="feed-date">${formatDate(order.deliveredAt || order.createdAt)}</span>
-        </div>
-        <p>${safe(order.vehicle)} - ${safe(order.service)}</p>
-        <div class="feed-meta">${badgeHtml(formatCurrency(order.estimate), "badge--success")}</div>
-      </div>
-    `).join("") || '<div class="empty-state">No hay trabajos completados.</div>';
 
   refs.historyTableBody.innerHTML = completedOrders.length
     ? completedOrders
-        .map((order) => `
+        .map((order) => {
+          const vehicleInfo = `${order.make} ${order.model} ${order.year}`;
+          return `
           <tr>
             <td><strong>${safe(order.id)}</strong></td>
-            <td>${safe(order.client)}</td>
-            <td>${safe(order.vehicle)}</td>
-            <td>${safe(order.service)}</td>
-            <td>${formatDate(order.deliveredAt || order.createdAt)}</td>
-            <td>${formatCurrency(order.estimate)}</td>
             <td>
-              <button class="ghost-btn" onclick="viewOrderDetails('${order.id}')">Ver</button>
+              <div class="cell-title">
+                <strong>${safe(order.client)}</strong>
+                <small>${safe(vehicleInfo)}</small>
+              </div>
+            </td>
+            <td>${safe(order.color || "N/A")}</td>
+            <td>${formatDate(order.deliveredAt || order.createdAt)}</td>
+            <td>
+              <button class="ghost-btn" onclick="viewOrderDetails('${safe(order.id)}')">Ver</button>
             </td>
           </tr>
-        `)
+        `;
+        })
         .join("")
-    : `<tr><td colspan="7"><div class="empty-state">No hay ordenes completadas.</div></td></tr>`;
+    : `<tr><td colspan="5"><div class="empty-state">No hay ordenes completadas.</div></td></tr>`;
 }
 
 function renderSettings() {
@@ -1064,8 +1374,7 @@ function renderSettings() {
   refs.systemSummary.innerHTML = [
     summaryCard("Modo actual", state.theme === "dark" ? "Oscuro" : "Claro"),
     summaryCard("Ordenes registradas", String(state.orders.length)),
-    summaryCard("Productos activos", String(state.inventory.length)),
-    summaryCard("Citas programadas", String(state.appointments.length))
+    summaryCard("Productos activos", String(state.inventory.length))
   ].join("");
 }
 
@@ -1104,7 +1413,6 @@ function closeMenu() {
 
 function seedFormDates() {
   refs.orderDate.value = todayISO();
-  refs.orderDueDate.value = datePlus(2);
   refs.appointmentDate.value = todayISO();
 }
 
@@ -1129,10 +1437,10 @@ function syncClientFromOrder(order) {
   if (existing) {
     existing.name = order.client;
     existing.phone = order.phone;
-    existing.vehicle = order.vehicle;
-    existing.lastService = order.service;
+    existing.vehicle = `${order.make} ${order.model} ${order.year}`;
+    existing.lastService = "Recepción vehículo";
     existing.lastVisit = order.createdAt;
-    existing.notes = existing.notes || order.notes;
+    existing.notes = existing.notes || `Color: ${order.color}`;
     return;
   }
 
@@ -1142,52 +1450,51 @@ function syncClientFromOrder(order) {
     name: order.client,
     phone: order.phone,
     email: "",
-    vehicle: order.vehicle,
-    notes: order.notes || "Creado automáticamente desde orden de trabajo",
-    lastService: order.service,
+    vehicle: `${order.make} ${order.model} ${order.year}`,
+    notes: `Color: ${order.color} - Creado automáticamente desde orden de trabajo`,
+    lastService: "Recepción vehículo",
     lastVisit: order.createdAt
   });
 }
 
-function syncVehicleFromOrder(order) {
-  // Buscar si ya existe un vehículo con esa placa
-  const existingVehicle = state.vehicles.find(v => 
-    sameText(v.plate, order.plate) || 
-    (v.clientName === order.client && v.make && order.vehicle.includes(v.make))
-  );
+function editInventoryItem(itemId) {
+  const item = state.inventory.find(i => i.id === itemId);
+  if (!item) return;
+  
+  // Llenar formulario con datos del aceite
+  document.getElementById("inventoryName").value = item.name;
+  document.getElementById("inventoryBrand").value = item.brand || "";
+  document.getElementById("inventorySku").value = item.sku || "";
+  document.getElementById("inventoryCategory").value = item.category || "";
+  document.getElementById("inventoryPresentation").value = item.presentation || "";
+  document.getElementById("inventorySupplier").value = item.supplier;
+  document.getElementById("inventoryLocation").value = item.location;
+  document.getElementById("inventoryStock").value = item.stock;
+  document.getElementById("inventoryMinStock").value = item.minStock;
+  document.getElementById("inventoryCost").value = item.cost;
+  document.getElementById("inventoryTax").value = item.tax || 0;
+  document.getElementById("inventoryPrice").value = item.price;
+  document.getElementById("inventoryNotes").value = item.notes || "";
+  
+  // Calcular margen al cargar los datos
+  calculateMargin();
+  
+  switchSection("inventario");
+  showToast("Editando aceite. Modifica los datos y guarda.");
+}
 
-  if (existingVehicle) {
-    existingVehicle.lastVisit = order.createdAt;
-    return;
-  }
-
-  // Si no existe el vehículo, intentar crear uno básico
-  const client = state.clients.find(c => 
-    sameText(c.name, order.client) || sameText(c.phone, order.phone)
-  );
-
-  if (client) {
-    // Extraer información básica del vehículo
-    const vehicleInfo = order.vehicle.split(' ');
-    const make = vehicleInfo[0] || "Desconocido";
-    const model = vehicleInfo.slice(1).join(' ') || "Desconocido";
-    
-    state.vehicles.unshift({
-      id: createId("VEH"),
-      clientId: client.id,
-      clientName: client.name,
-      plate: order.plate || "SIN-PLACA",
-      make: make,
-      model: model,
-      year: "2020",
-      color: "No especificado",
-      mileage: "0",
-      engine: "No especificado",
-      notes: "Creado automáticamente desde orden de trabajo",
-      createdAt: order.createdAt,
-      lastVisit: order.createdAt
-    });
-  }
+function adjustStock(itemId, delta) {
+  const item = state.inventory.find(i => i.id === itemId);
+  if (!item) return;
+  
+  const newStock = Math.max(0, item.stock + delta);
+  const reason = delta > 0 ? "Entrada manual" : "Salida manual";
+  
+  item.stock = newStock;
+  addMovement(item, delta, reason);
+  saveState();
+  renderAll();
+  showToast(`Stock ajustado: ${delta > 0 ? '+' : ''}${delta} unidades`);
 }
 
 function addMovement(item, delta, reason) {
@@ -1350,15 +1657,15 @@ function createInitialState() {
       {
         id: "OT-1001",
         createdAt: todayISO(),
-        dueDate: datePlus(1),
         client: "Carlos Mendez",
         phone: "664 111 2233",
-        vehicle: "Nissan Versa 2020",
+        make: "Nissan",
+        model: "Versa",
+        color: "Gris",
+        year: "2020",
         plate: "ABC-123-A",
-        service: "Cambio de clutch",
         mechanic: "Luis Gomez",
         priority: "Alta",
-        estimate: 6800,
         diagnosis: "El clutch patina y vibra al arrancar.",
         notes: "Revisar volante y kit completo.",
         status: "Reparacion"
@@ -1366,15 +1673,15 @@ function createInitialState() {
       {
         id: "OT-1002",
         createdAt: todayISO(),
-        dueDate: datePlus(2),
         client: "Mariana Soto",
         phone: "664 222 3344",
-        vehicle: "Chevrolet Spark 2018",
+        make: "Chevrolet",
+        model: "Spark",
+        color: "Rojo",
+        year: "2018",
         plate: "DEF-456-B",
-        service: "Afinacion mayor",
         mechanic: "Pedro Ruiz",
         priority: "Media",
-        estimate: 2400,
         diagnosis: "Perdida de potencia y consumo elevado.",
         notes: "Cambiar filtros y bujias.",
         status: "Diagnostico"
@@ -1382,15 +1689,15 @@ function createInitialState() {
       {
         id: "OT-1003",
         createdAt: datePlus(-1),
-        dueDate: todayISO(),
         client: "Jose Ibarra",
         phone: "664 333 4455",
-        vehicle: "Ford Ranger 2019",
+        make: "Ford",
+        model: "Ranger",
+        color: "Azul",
+        year: "2019",
         plate: "GHI-789-C",
-        service: "Frenos delanteros",
         mechanic: "Adrian Leon",
         priority: "Alta",
-        estimate: 3900,
         diagnosis: "Balatas agotadas y discos con desgaste.",
         notes: "Cliente espera entrega el mismo dia.",
         status: "Listo"
@@ -1398,64 +1705,37 @@ function createInitialState() {
     ],
     inventory: [
       {
-        id: "INV-101",
-        name: "Aceite sintetico 5W30",
+        id: "INV-001",
+        name: "Aceite 5W30",
         category: "Lubricantes",
-        supplier: "Mobil",
-        location: "Rack A1",
-        stock: 18,
+        supplier: "Shell",
+        location: "Estante A1",
+        stock: 24,
         minStock: 10,
-        cost: 210
+        cost: 280
       },
       {
-        id: "INV-102",
-        name: "Balatas delanteras Versa",
-        category: "Frenos",
-        supplier: "Bosch",
-        location: "Rack B2",
-        stock: 3,
-        minStock: 4,
-        cost: 780
-      },
-      {
-        id: "INV-103",
-        name: "Filtro de aceite universal",
+        id: "INV-002",
+        name: "Filtro de aceite",
         category: "Filtros",
-        supplier: "Mann",
-        location: "Rack A3",
-        stock: 1,
-        minStock: 5,
-        cost: 115
+        supplier: "Bosch",
+        location: "Estante B2",
+        stock: 45,
+        minStock: 20,
+        cost: 85
       },
       {
-        id: "INV-104",
-        name: "Liquido de frenos DOT 4",
-        category: "Fluidos",
-        supplier: "ACDelco",
-        location: "Rack C1",
-        stock: 9,
-        minStock: 6,
-        cost: 160
+        id: "INV-003",
+        name: "Balatas delanteras",
+        category: "Frenos",
+        supplier: "Brembo",
+        location: "Estante C3",
+        stock: 8,
+        minStock: 15,
+        cost: 520
       }
     ],
-    movements: [
-      {
-        id: "MOV-1",
-        itemId: "INV-102",
-        itemName: "Balatas delanteras Versa",
-        delta: -1,
-        reason: "Salida para orden OT-1003",
-        timestamp: new Date().toISOString()
-      },
-      {
-        id: "MOV-2",
-        itemId: "INV-101",
-        itemName: "Aceite sintetico 5W30",
-        delta: 6,
-        reason: "Reabasto",
-        timestamp: new Date().toISOString()
-      }
-    ],
+    movements: [],
     clients: [
       {
         id: "CLI-1",
@@ -1590,3 +1870,6 @@ function safe(value) {
     return map[character];
   });
 }
+
+// Inicializar la aplicación
+document.addEventListener("DOMContentLoaded", init);

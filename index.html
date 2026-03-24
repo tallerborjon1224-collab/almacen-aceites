@@ -24,7 +24,7 @@
       <nav class="nav-menu">
         <button class="nav-link active" data-section-target="dashboard">
           <span class="nav-pill">01</span>
-          <span>Resumen</span>
+          <span>Inicio</span>
         </button>
         <button class="nav-link" data-section-target="ordenes">
           <span class="nav-pill">02</span>
@@ -65,7 +65,7 @@
           <button class="menu-toggle" id="menuToggle" type="button">Menu</button>
           <div>
             <p class="eyebrow">Panel maestro</p>
-            <h2 id="sectionTitle">Resumen general</h2>
+            <h2 id="sectionTitle">Panel general</h2>
           </div>
         </div>
 
@@ -107,28 +107,6 @@
             </div>
           </article>
 
-          <div class="metric-grid">
-            <article class="stat-card panel">
-              <p>Ordenes abiertas</p>
-              <strong id="metricOpenOrders">0</strong>
-              <span>Seguimiento de vehiculos en proceso</span>
-            </article>
-            <article class="stat-card panel">
-              <p>Entregas de hoy</p>
-              <strong id="metricDeliveredToday">0</strong>
-              <span>Vehiculos listos o ya entregados</span>
-            </article>
-            <article class="stat-card panel">
-              <p>Stock bajo</p>
-              <strong id="metricLowStock">0</strong>
-              <span>Refacciones o insumos por surtir</span>
-            </article>
-            <article class="stat-card panel">
-              <p>Ingreso potencial</p>
-              <strong id="metricRevenue">$0</strong>
-              <span>Basado en ordenes registradas</span>
-            </article>
-          </div>
 
           <div class="content-grid dashboard-grid">
             <article class="panel">
@@ -181,234 +159,246 @@
                 </div>
               </div>
 
-              <div class="form-grid">
-                <label>
-                  <span>Fecha</span>
-                  <input type="date" id="orderDate" required>
-                </label>
-                <label>
-                  <span>Entrega estimada</span>
-                  <input type="date" id="orderDueDate" required>
-                </label>
-                <label>
-                  <span>Cliente</span>
-                  <input type="text" id="orderClient" placeholder="Nombre del cliente" required>
-                </label>
-                <label>
-                  <span>Telefono</span>
-                  <input type="tel" id="orderPhone" placeholder="664 000 0000" required>
-                </label>
-                <label>
-                  <span>Vehiculo</span>
-                  <input type="text" id="orderVehicle" placeholder="Marca, modelo y anio" required>
-                </label>
-                <label>
-                  <span>Placas</span>
-                  <input type="text" id="orderPlate" placeholder="ABC-123-A" required>
-                </label>
-                <label>
-                  <span>Servicio</span>
-                  <input type="text" id="orderService" placeholder="Cambio de frenos, afinacion, etc." required>
-                </label>
-                <label>
-                  <span>Tecnico asignado</span>
-                  <input type="text" id="orderMechanic" placeholder="Nombre del tecnico" required>
-                </label>
-                <label>
-                  <span>Prioridad</span>
-                  <select id="orderPriority" required>
-                    <option value="Alta">Alta</option>
-                    <option value="Media" selected>Media</option>
-                    <option value="Baja">Baja</option>
-                  </select>
-                </label>
-                <label>
-                  <span>Costo estimado</span>
-                  <input type="number" id="orderEstimate" min="0" step="100" placeholder="0" required>
-                </label>
+              <div class="form-header">
+                <div class="form-row">
+                  <label>
+                    <span>Fecha</span>
+                    <input type="date" id="orderDate" required>
+                  </label>
+                  <label>
+                    <span>Tecnico responsable</span>
+                    <input type="text" id="orderMechanic" placeholder="Nombre del tecnico" required>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h4 class="section-title">🚗 Información del Vehículo</h4>
+                <div class="form-grid">
+                  <label>
+                    <span>Marca</span>
+                    <input type="text" id="orderMake" placeholder="Nissan, Toyota, etc." required>
+                  </label>
+                  <label>
+                    <span>Modelo</span>
+                    <input type="text" id="orderModel" placeholder="Sentra, Corolla, etc." required>
+                  </label>
+                  <label>
+                    <span>Color</span>
+                    <input type="text" id="orderColor" placeholder="Rojo, Azul, etc." required>
+                  </label>
+                  <label>
+                    <span>Año</span>
+                    <input type="number" id="orderYear" placeholder="2020" min="1900" max="2025" required>
+                  </label>
+                  <label>
+                    <span>Placas</span>
+                    <input type="text" id="orderPlate" placeholder="ABC-123-A" required>
+                  </label>
+                  <label>
+                    <span>Prioridad</span>
+                    <select id="orderPriority" required>
+                      <option value="Alta">Alta</option>
+                      <option value="Media" selected>Media</option>
+                      <option value="Baja">Baja</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h4 class="section-title">👤 Información del Cliente</h4>
+                <div class="form-grid">
+                  <label>
+                    <span>Buscar cliente existente</span>
+                    <select id="orderClientSelect" onchange="handleClientSelect()">
+                      <option value="">Seleccionar cliente existente...</option>
+                      <option value="new">+ Crear nuevo cliente</option>
+                    </select>
+                  </label>
+                  <div id="newClientFields" style="display: none;">
+                    <label>
+                      <span>Nombre del cliente</span>
+                      <input type="text" id="orderClient" placeholder="Nombre completo" required>
+                    </label>
+                    <label>
+                      <span>Teléfono</span>
+                      <input type="tel" id="orderPhone" placeholder="664 000 0000" required>
+                    </label>
+                  </div>
+                  <div id="existingClientInfo" style="display: none; grid-column: 1 / -1;">
+                    <div class="client-info-display">
+                      <p><strong>Cliente:</strong> <span id="selectedClientName"></span></p>
+                      <p><strong>Teléfono:</strong> <span id="selectedClientPhone"></span></p>
+                      <p><strong>Vehículo:</strong> <span id="selectedClientVehicle"></span></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h4 class="section-title">🔧 Diagnóstico del Problema</h4>
                 <label class="full">
-                  <span>Diagnostico inicial</span>
-                  <textarea id="orderDiagnosis" rows="3" placeholder="Describe la falla reportada o el diagnostico inicial" required></textarea>
+                  <span>Diagnóstico inicial</span>
+                  <textarea id="orderDiagnosis" rows="4" placeholder="Describe la falla reportada o el diagnóstico inicial" required></textarea>
                 </label>
+              </div>
+
+              <div class="form-section">
+                <h4 class="section-title">📝 Observaciones del Vehículo</h4>
                 <label class="full">
-                  <span>Notas internas</span>
-                  <textarea id="orderNotes" rows="3" placeholder="Piezas necesarias, observaciones o detalles de seguimiento"></textarea>
+                  <span>Estado y detalles del vehículo</span>
+                  <textarea id="orderNotes" rows="3" placeholder="Rayones, abolladuras, detalles exteriores, estado interior, etc."></textarea>
                 </label>
               </div>
 
               <button class="accent-btn full-btn" type="submit">Guardar orden de trabajo</button>
             </form>
 
-            <article class="panel">
-              <div class="panel-head">
-                <div>
-                  <p class="eyebrow">Vista operativa</p>
-                  <h3>Estado del taller</h3>
-                </div>
-              </div>
-
-              <div class="status-strip" id="orderStatusStrip"></div>
-
-              <div class="spotlight-card" id="orderSpotlight"></div>
-            </article>
-          </div>
-
-          <article class="panel">
-            <div class="panel-head">
-              <div>
-                <p class="eyebrow">Seguimiento</p>
-                <h3>Listado general</h3>
-              </div>
+            <!-- Cards de órdenes recientes -->
+            <div class="orders-cards" id="ordersCards">
+              <!-- Las órdenes se mostrarán como cards aquí -->
             </div>
-
-            <div class="table-toolbar">
-              <input type="search" id="orderSearch" placeholder="Buscar por cliente, folio, vehiculo o servicio">
-              <select id="orderStatusFilter">
-                <option value="Todos">Todos los estados</option>
-                <option value="Recepcion">Recepcion</option>
-                <option value="Diagnostico">Diagnostico</option>
-                <option value="Reparacion">Reparacion</option>
-                <option value="Control final">Control final</option>
-                <option value="Listo">Listo</option>
-                <option value="Entregado">Entregado</option>
-              </select>
-              <select id="orderPriorityFilter">
-                <option value="Todas">Todas las prioridades</option>
-                <option value="Alta">Alta</option>
-                <option value="Media">Media</option>
-                <option value="Baja">Baja</option>
-              </select>
-            </div>
-
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Folio</th>
-                    <th>Cliente y vehiculo</th>
-                    <th>Servicio</th>
-                    <th>Prioridad</th>
-                    <th>Estado</th>
-                    <th>Entrega</th>
-                    <th>Costo</th>
-                    <th>Accion</th>
-                  </tr>
-                </thead>
-                <tbody id="ordersTableBody"></tbody>
-              </table>
-            </div>
-          </article>
         </section>
 
         <section class="page-section" id="inventario">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">Modulo clave</p>
-              <h3>Inventario</h3>
-              <p>Controla refacciones, aceites, consumibles y stock minimo del taller.</p>
+              <p class="eyebrow">Gestión de productos</p>
+              <h3>Catálogo de inventario</h3>
+              <p>Registra y controla todo el material del taller con clasificación profesional.</p>
             </div>
           </div>
 
-          <div class="content-grid form-layout">
-            <form class="panel form-panel" id="inventoryForm">
+          <div class="content-grid">
+            <div class="inventory-alerts" id="inventoryAlerts">
+              <!-- Alertas de stock bajo se mostrarán aquí -->
+            </div>
+
+            <!-- Botón para desplegar formulario -->
+            <button class="toggle-form-btn" id="toggleInventoryForm" onclick="toggleInventoryForm()">
+              <span class="btn-icon">➕</span>
+              <span class="btn-text">Agregar Nuevo Producto</span>
+            </button>
+
+            <!-- Formulario desplegable -->
+            <div class="panel form-panel collapsible" id="inventoryFormPanel" style="display: none;">
               <div class="panel-head">
                 <div>
-                  <p class="eyebrow">Nuevo producto</p>
-                  <h3>Registrar inventario</h3>
+                  <p class="eyebrow">Registro de producto</p>
+                  <h3>Nuevo item</h3>
                 </div>
+                <button class="close-form-btn" onclick="toggleInventoryForm()">✕</button>
               </div>
 
-              <div class="form-grid">
-                <label>
-                  <span>Producto</span>
-                  <input type="text" id="inventoryName" placeholder="Nombre del producto" required>
-                </label>
-                <label>
-                  <span>Categoria</span>
-                  <input type="text" id="inventoryCategory" placeholder="Filtros, lubricantes, frenos" required>
-                </label>
-                <label>
-                  <span>Proveedor</span>
-                  <input type="text" id="inventorySupplier" placeholder="Proveedor principal" required>
-                </label>
-                <label>
-                  <span>Ubicacion</span>
-                  <input type="text" id="inventoryLocation" placeholder="Rack A1, bodega, mostrador" required>
-                </label>
-                <label>
-                  <span>Existencia actual</span>
-                  <input type="number" id="inventoryStock" min="0" step="1" required>
-                </label>
-                <label>
-                  <span>Stock minimo</span>
-                  <input type="number" id="inventoryMinStock" min="0" step="1" required>
-                </label>
-                <label class="full">
-                  <span>Costo unitario</span>
-                  <input type="number" id="inventoryCost" min="0" step="1" required>
-                </label>
-              </div>
-
-              <button class="accent-btn full-btn" type="submit">Guardar producto</button>
-            </form>
-
-            <article class="panel">
-              <div class="panel-head">
-                <div>
-                  <p class="eyebrow">Control de almacen</p>
-                  <h3>Resumen rapido</h3>
+              <form id="inventoryForm">
+                <div class="form-section">
+                  <h4 class="section-title">🛢️ Información del Aceite</h4>
+                  <div class="form-grid">
+                    <label>
+                      <span>Nombre del Aceite</span>
+                      <input type="text" id="inventoryName" placeholder="Ej: Mobil Super 1000" required>
+                    </label>
+                    <label>
+                      <span>Marca</span>
+                      <input type="text" id="inventoryBrand" placeholder="Ej: Shell, Castrol, Quaker State" required>
+                    </label>
+                    <label>
+                      <span>SKU / Código Interno</span>
+                      <input type="text" id="inventorySku" placeholder="Ej: ACE-001" required>
+                    </label>
+                    <label>
+                      <span>Categoría</span>
+                      <select id="inventoryCategory" required>
+                        <option value="">Seleccionar categoría</option>
+                        <option value="Motor Gasolina">Motor Gasolina</option>
+                        <option value="Motor Diésel">Motor Diésel</option>
+                        <option value="Transmisión">Transmisión</option>
+                        <option value="Hidráulico">Hidráulico</option>
+                        <option value="Engranajes">Engranajes</option>
+                        <option value="Frenos">Frenos</option>
+                        <option value="Dirección">Dirección</option>
+                        <option value="Refrigeración">Refrigeración</option>
+                      </select>
+                    </label>
+                    <label>
+                      <span>Presentación</span>
+                      <select id="inventoryPresentation" required>
+                        <option value="">Seleccionar presentación</option>
+                        <option value="Botella 1L">Botella 1L</option>
+                        <option value="Botella 4L">Botella 4L</option>
+                        <option value="Galón 3.78L">Galón 3.78L</option>
+                        <option value="Garrafa 5L">Garrafa 5L</option>
+                        <option value="Garrafa 20L">Garrafa 20L</option>
+                        <option value="Tambor 200L">Tambor 200L</option>
+                        <option value="Cuñete 19L">Cuñete 19L</option>
+                        <option value="Lata 1L">Lata 1L</option>
+                      </select>
+                    </label>
+                    <label>
+                      <span>Proveedor</span>
+                      <input type="text" id="inventorySupplier" placeholder="Ej: AutoZone, Refacciones XYZ" required>
+                    </label>
+                  </div>
                 </div>
-              </div>
 
-              <div class="mini-metrics" id="inventoryMetrics"></div>
-
-              <div class="movement-feed">
-                <div class="feed-head">
-                  <h4>Movimientos recientes</h4>
-                  <span>Entradas y salidas</span>
+                <div class="form-section">
+                  <h4 class="section-title">💰 Precios y Margen de Ganancia</h4>
+                  <div class="form-grid">
+                    <label>
+                      <span>Costo de Compra (Neto)</span>
+                      <input type="number" id="inventoryCost" min="0" step="0.01" required>
+                      <small>Lo que tú pagas por cada unidad al proveedor</small>
+                    </label>
+                    <label>
+                      <span>Impuesto (IVA)</span>
+                      <select id="inventoryTax" required>
+                        <option value="">Seleccionar IVA</option>
+                        <option value="0">0% - Exento</option>
+                        <option value="8">8% - Reducido</option>
+                        <option value="16">16% - General</option>
+                      </select>
+                      <small>El porcentaje de impuesto aplicable</small>
+                    </label>
+                    <label>
+                      <span>Precio de Venta al Público</span>
+                      <input type="number" id="inventoryPrice" min="0" step="0.01" required>
+                      <small>El precio final que le das al cliente en el mostrador</small>
+                    </label>
+                    <label>
+                      <span>Margen de Ganancia</span>
+                      <div class="margin-display">
+                        <span class="margin-amount">$0.00</span>
+                        <span class="margin-percent">0%</span>
+                      </div>
+                      <small>Cuánto ganas por unidad (calculado automáticamente)</small>
+                    </label>
+                  </div>
                 </div>
-                <div class="list-stack" id="movementFeed"></div>
-              </div>
-            </article>
+
+                <div class="form-section">
+                  <h4 class="section-title">📊 Control de Stock</h4>
+                  <div class="form-grid">
+                    <label>
+                      <span>Existencia actual</span>
+                      <input type="number" id="inventoryStock" min="0" step="1" required>
+                    </label>
+                    <label>
+                      <span>Stock mínimo</span>
+                      <input type="number" id="inventoryMinStock" min="0" step="1" required>
+                    </label>
+                  </div>
+                </div>
+
+                <button class="accent-btn full-btn" type="submit">Guardar producto</button>
+              </form>
+            </div>
+
+            <!-- Lista de productos en cards -->
+            <div class="inventory-cards" id="inventoryCards">
+              <!-- Los productos se mostrarán como cards aquí -->
+            </div>
           </div>
-
-          <article class="panel">
-            <div class="panel-head">
-              <div>
-                <p class="eyebrow">Existencias</p>
-                <h3>Control general</h3>
-              </div>
-            </div>
-
-            <div class="table-toolbar">
-              <input type="search" id="inventorySearch" placeholder="Buscar producto, categoria o proveedor">
-              <select id="inventoryStatusFilter">
-                <option value="Todos">Todos los niveles</option>
-                <option value="Optimo">Optimo</option>
-                <option value="Bajo">Bajo</option>
-                <option value="Critico">Critico</option>
-              </select>
-            </div>
-
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Producto</th>
-                    <th>Categoria</th>
-                    <th>Proveedor</th>
-                    <th>Ubicacion</th>
-                    <th>Stock</th>
-                    <th>Minimo</th>
-                    <th>Nivel</th>
-                    <th>Costo</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody id="inventoryTableBody"></tbody>
-              </table>
-            </div>
-          </article>
         </section>
 
         <section class="page-section" id="clientes">
@@ -459,7 +449,7 @@
               <div class="panel-head">
                 <div>
                   <p class="eyebrow">Cartera activa</p>
-                  <h3>Resumen comercial</h3>
+                  <h3>Vista comercial</h3>
                 </div>
               </div>
 
@@ -573,7 +563,7 @@
               <div class="panel-head">
                 <div>
                   <p class="eyebrow">Estadisticas</p>
-                  <h3>Resumen de vehiculos</h3>
+                  <h3>Vista de vehículos</h3>
                 </div>
               </div>
 
@@ -624,7 +614,7 @@
               <div class="panel-head">
                 <div>
                   <p class="eyebrow">Estadisticas historicas</p>
-                  <h3>Resumen de operaciones</h3>
+                  <h3>Vista de operaciones</h3>
                 </div>
               </div>
 
@@ -738,12 +728,6 @@
           </div>
 
           <article class="panel">
-            <div class="panel-head">
-              <div>
-                <p class="eyebrow">Estado del sistema</p>
-                <h3>Resumen final</h3>
-              </div>
-            </div>
 
             <div class="summary-grid" id="systemSummary"></div>
           </article>

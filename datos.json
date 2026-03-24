@@ -1,11 +1,11 @@
 {
   "theme": "dark",
   "settings": {
-    "businessName": "Taller Black Orange",
-    "manager": "Jefe de operaciones",
-    "phone": "664 555 0101",
-    "email": "recepcion@tallerblackorange.mx",
-    "location": "Zona industrial"
+    "businessName": "Taller Borjon",
+    "manager": "Juan Borjon",
+    "phone": "6461906281",
+    "email": "juanborjon@gmail.com",
+    "location": "Calle 6ta"
   },
   "orders": [
     {
