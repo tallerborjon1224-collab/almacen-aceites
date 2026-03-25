@@ -1,6 +1,6 @@
 // Imports de Firebase (versión moderna)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, addDoc, collection, getDocs, doc, updateDoc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, addDoc, collection, getDocs, doc, updateDoc, deleteDoc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const STORAGE_KEY = "taller-pro-admin-v1";
 const API_BASE = "http://localhost:3000";
@@ -187,10 +187,10 @@ window.guardar = async function() {
       fechaRegistro: new Date().toISOString()
     };
     
-    // Guardar en Firebase usando la función existente
-    const resultado = await guardarCliente(cliente);
-    
-    if (resultado) {
+    // Guardar en Firebase directamente
+    try {
+      await addDoc(collection(firestoreDb, "clientes"), cliente);
+      
       // Limpiar los inputs
       document.getElementById("clientName").value = "";
       document.getElementById("clientPhone").value = "";
@@ -198,16 +198,17 @@ window.guardar = async function() {
       document.getElementById("clientVehicle").value = "";
       document.getElementById("clientNotes").value = "";
       
-      // Mostrar alerta de éxito
+      // Mostrar alerta
       alert("Cliente guardado correctamente");
       
       console.log("✅ Cliente guardado en Firebase:", cliente);
-    } else {
+    } catch (error) {
+      console.error("❌ Error guardando cliente:", error);
       alert("Error al guardar el cliente. Intenta de nuevo.");
     }
     
   } catch (error) {
-    console.error("❌ Error en la función guardar:", error);
+    console.error("❌ Error general:", error);
     alert("Ocurrió un error al guardar el cliente");
   }
 };
@@ -478,18 +479,119 @@ window.guardarProducto = async function() {
   }
 };
 
-// Funciones específicas para guardar datos en colecciones
-export async function guardarCliente(cliente) {
-  try {
-    await addDoc(collection(firestoreDb, "clientes"), {
-      ...cliente,
-      createdAt: new Date().toISOString()
+// Función para cargar clientes desde Firestore en tiempo real
+function loadClientsFromFirestore() {
+  const clientesRef = collection(firestoreDb, "clientes");
+  
+  // Usar onSnapshot para actualizaciones en tiempo real
+  onSnapshot(clientesRef, (snapshot) => {
+    const clientes = [];
+    snapshot.forEach((doc) => {
+      clientes.push({
+        id: doc.id,
+        ...doc.data()
+      });
     });
-    console.log('✅ Cliente guardado en Firebase');
-    return true;
+    
+    // Actualizar el estado local
+    state.clients = clientes;
+    
+    // Renderizar los clientes
+    renderClients();
+    
+    console.log('🔄 Clientes actualizados desde Firestore:', clientes.length);
+  }, (error) => {
+    console.error('❌ Error cargando clientes desde Firestore:', error);
+  });
+}
+
+// Función para eliminar cliente de Firestore
+window.deleteClient = async function(clientId) {
+  if (!confirm("¿Estás seguro de que quieres eliminar este cliente?")) {
+    return;
+  }
+  
+  try {
+    // Eliminar de Firestore
+    await deleteDoc(doc(firestoreDb, "clientes", clientId));
+    
+    // No necesitamos actualizar el estado local porque onSnapshot lo hará automáticamente
+    console.log('✅ Cliente eliminado de Firestore:', clientId);
+    
   } catch (error) {
-    console.error('❌ Error guardando cliente:', error);
-    return false;
+    console.error('❌ Error eliminando cliente:', error);
+    alert("Error al eliminar el cliente. Intenta de nuevo.");
+  }
+};
+
+// Función para editar cliente
+window.editClient = async function(clientId) {
+  const cliente = state.clients.find(c => c.id === clientId);
+  if (!cliente) return;
+  
+  // Llenar el formulario con los datos del cliente
+  document.getElementById("clientName").value = cliente.nombre || cliente.name || "";
+  document.getElementById("clientPhone").value = cliente.telefono || cliente.phone || "";
+  document.getElementById("clientEmail").value = cliente.email || "";
+  document.getElementById("clientVehicle").value = cliente.vehiculo || cliente.vehicle || "";
+  document.getElementById("clientNotes").value = cliente.notas || cliente.notes || "";
+  
+  // Cambiar el botón de guardar a "Actualizar"
+  const saveBtn = document.querySelector('#clientForm button[type="button"]');
+  if (saveBtn) {
+    saveBtn.textContent = "Actualizar cliente";
+    saveBtn.onclick = function() { updateClient(clientId); };
+  }
+  
+  // Scroll al formulario
+  document.getElementById("clientForm")?.scrollIntoView({ behavior: 'smooth' });
+};
+
+// Función para actualizar cliente en Firestore
+async function updateClient(clientId) {
+  try {
+    // Obtener valores del formulario
+    const nombre = document.getElementById("clientName")?.value.trim();
+    const telefono = document.getElementById("clientPhone")?.value.trim();
+    const email = document.getElementById("clientEmail")?.value.trim();
+    const vehiculo = document.getElementById("clientVehicle")?.value.trim();
+    const notas = document.getElementById("clientNotes")?.value.trim();
+    
+    // Validación básica
+    if (!nombre) {
+      alert("El nombre es requerido");
+      return;
+    }
+    
+    if (!telefono) {
+      alert("El teléfono es requerido");
+      return;
+    }
+    
+    // Actualizar en Firestore
+    await updateDoc(doc(firestoreDb, "clientes", clientId), {
+      nombre: nombre,
+      telefono: telefono,
+      email: email,
+      vehiculo: vehiculo,
+      notas: notas,
+      fechaActualizacion: new Date().toISOString()
+    });
+    
+    // Limpiar formulario y restaurar botón
+    document.getElementById("clientForm")?.reset();
+    const saveBtn = document.querySelector('#clientForm button[type="button"]');
+    if (saveBtn) {
+      saveBtn.textContent = "Guardar cliente";
+      saveBtn.onclick = window.guardar;
+    }
+    
+    alert("Cliente actualizado correctamente");
+    console.log('✅ Cliente actualizado en Firestore:', clientId);
+    
+  } catch (error) {
+    console.error('❌ Error actualizando cliente:', error);
+    alert("Error al actualizar el cliente. Intenta de nuevo.");
   }
 }
 
@@ -751,6 +853,9 @@ function init() {
   
   // Cargar datos asíncronos después de inicializar
   loadAsyncData();
+  
+  // Iniciar carga de clientes desde Firestore en tiempo real
+  loadClientsFromFirestore();
 }
 
 async function loadAsyncData() {
@@ -1662,7 +1767,7 @@ function renderClients() {
 
   const filtered = state.clients.filter((client) => {
     return !search ||
-      [client.name, client.phone, client.email, client.vehicle].some((value) =>
+      [client.nombre || client.name, client.telefono || client.phone, client.email, client.vehiculo || client.vehicle].some((value) =>
         String(value).toLowerCase().includes(search)
       );
   });
@@ -1670,18 +1775,18 @@ function renderClients() {
   refs.clientsTableBody.innerHTML = filtered.length
     ? filtered
         .slice()
-        .sort((left, right) => right.lastVisit.localeCompare(left.lastVisit))
+        .sort((left, right) => (right.fechaRegistro || right.createdAt || "").localeCompare(left.fechaRegistro || left.createdAt || ""))
         .map((client) => `
           <tr>
-            <td><strong>${safe(client.name)}</strong></td>
+            <td><strong>${safe(client.nombre || client.name)}</strong></td>
             <td>
               <div class="cell-title">
-                <strong>${safe(client.phone || "Sin telefono")}</strong>
+                <strong>${safe(client.telefono || client.phone || "Sin telefono")}</strong>
                 <small>${safe(client.email || "Sin correo")}</small>
               </div>
             </td>
-            <td>${safe(client.vehicle || "Sin vehiculo")}</td>
-            <td>${formatDate(client.lastVisit)}</td>
+            <td>${safe(client.vehiculo || client.vehicle || "Sin vehiculo")}</td>
+            <td>${formatDate(client.fechaRegistro || client.createdAt)}</td>
             <td>
               <div class="action-set">
                 <button class="mini-btn" type="button" onclick="editClient('${safe(client.id)}')">Editar</button>
