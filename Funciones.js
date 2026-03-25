@@ -613,8 +613,15 @@ function init() {
   applyTheme(state.theme || "dark");
   fillSettingsForm();
   updateBrand();
-  loadGitHubConfig(); // Cargar configuración de GitHub
-  loadFirebaseConfig(); // Cargar configuración de Firebase
+  
+  // Cargar configuraciones solo si existen las funciones
+  if (typeof loadGitHubConfig === 'function') {
+    loadGitHubConfig(); // Cargar configuración de GitHub
+  }
+  if (typeof loadFirebaseConfig === 'function') {
+    loadFirebaseConfig(); // Cargar configuración de Firebase
+  }
+  
   switchSection("dashboard");
   renderAll();
   
@@ -675,17 +682,32 @@ function bindEvents() {
     }
   });
   
-  refs.inventorySearch.addEventListener("input", renderInventory);
-  refs.themeToggle.addEventListener("click", toggleTheme);
-  refs.menuToggle.addEventListener("click", toggleMenu);
+  // Solo agregar event listeners si los elementos existen
+  if (refs.inventorySearch) {
+    refs.inventorySearch.addEventListener("input", renderInventory);
+  }
+  if (refs.themeToggle) {
+    refs.themeToggle.addEventListener("click", toggleTheme);
+  }
+  if (refs.menuToggle) {
+    refs.menuToggle.addEventListener("click", toggleMenu);
+  }
   
   // Event listener para el selector de clientes en formulario de vehículos
-  refs.vehicleClient.addEventListener("change", handleVehicleClientChange);
+  if (refs.vehicleClient) {
+    refs.vehicleClient.addEventListener("change", handleVehicleClientChange);
+  }
   
   // Event listeners para cálculo automático de margen
-  refs.inventoryCost.addEventListener("input", calculateMargin);
-  refs.inventoryTax.addEventListener("change", calculateMargin);
-  refs.inventoryPrice.addEventListener("input", calculateMargin);
+  if (refs.inventoryCost) {
+    refs.inventoryCost.addEventListener("input", calculateMargin);
+  }
+  if (refs.inventoryTax) {
+    refs.inventoryTax.addEventListener("change", calculateMargin);
+  }
+  if (refs.inventoryPrice) {
+    refs.inventoryPrice.addEventListener("input", calculateMargin);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", init);
@@ -1723,16 +1745,30 @@ function closeMenu() {
 }
 
 function seedFormDates() {
-  refs.orderDate.value = todayISO();
-  refs.appointmentDate.value = todayISO();
+  if (refs.orderDate) {
+    refs.orderDate.value = todayISO();
+  }
+  if (refs.appointmentDate) {
+    refs.appointmentDate.value = todayISO();
+  }
 }
 
 function fillSettingsForm() {
-  refs.settingsBusinessName.value = state.settings.businessName;
-  refs.settingsManager.value = state.settings.manager;
-  refs.settingsPhone.value = state.settings.phone;
-  refs.settingsEmail.value = state.settings.email;
-  refs.settingsLocation.value = state.settings.location;
+  if (refs.settingsBusinessName) {
+    refs.settingsBusinessName.value = state.settings.businessName;
+  }
+  if (refs.settingsManager) {
+    refs.settingsManager.value = state.settings.manager;
+  }
+  if (refs.settingsPhone) {
+    refs.settingsPhone.value = state.settings.phone;
+  }
+  if (refs.settingsEmail) {
+    refs.settingsEmail.value = state.settings.email;
+  }
+  if (refs.settingsLocation) {
+    refs.settingsLocation.value = state.settings.location;
+  }
 }
 
 function updateBrand() {
@@ -1894,9 +1930,16 @@ function getInventoryLevel(item) {
 }
 
 function sortOrders(orders) {
+  if (!Array.isArray(orders)) {
+    return [];
+  }
+  
   return orders
     .slice()
     .sort((left, right) => {
+      // Validar que las órdenes existan
+      if (!left || !right) return 0;
+      
       const leftDelivered = left.status === "Entregado" ? 1 : 0;
       const rightDelivered = right.status === "Entregado" ? 1 : 0;
       if (leftDelivered !== rightDelivered) {
@@ -1909,7 +1952,11 @@ function sortOrders(orders) {
         return leftPriority - rightPriority;
       }
 
-      return left.dueDate.localeCompare(right.dueDate);
+      // Validar dueDate antes de usar localeCompare
+      const leftDueDate = left.dueDate || left.createdAt || "";
+      const rightDueDate = right.dueDate || right.createdAt || "";
+      
+      return leftDueDate.localeCompare(rightDueDate);
     });
 }
 
