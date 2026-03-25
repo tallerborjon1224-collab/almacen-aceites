@@ -1,21 +1,27 @@
 {
-  "name": "Taller Borjón - Sistema Administrativo",
-  "short_name": "Taller Borjón",
-  "description": "Sistema profesional de administración para taller mecánico",
-  "start_url": ".",
+  "name": "Taller Borjón",
+  "short_name": "Taller",
+  "description": "Sistema administrativo para taller mecánico",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#1a1a1a",
-  "theme_color": "#ff8c1a",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "orientation": "portrait",
   "scope": ".",
   "icons": [
     {
-      "src": "icono.png",
+      "src": "icono-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icono-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
-  "categories": ["business", "productivity", "utilities"],
+  "categories": ["business"],
   "lang": "es-MX"
 }

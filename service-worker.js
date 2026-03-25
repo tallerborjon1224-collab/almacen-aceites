@@ -1,4 +1,3 @@
-// Service Worker para Taller Borjón PWA
 const CACHE_NAME = 'taller-borjon-v1';
 const urlsToCache = [
   '/',
@@ -6,6 +5,8 @@ const urlsToCache = [
   '/EstiloXd.css',
   '/Funciones.js',
   '/icono.png',
+  '/icono-192.png',
+  '/icono-512.png',
   '/manifest.json'
 ];
 
@@ -43,39 +44,11 @@ self.addEventListener('fetch', function(event) {
       .then(function(response) {
         // Si la petición está en cache, devolverla
         if (response) {
-          console.log('Service Worker: Sirviendo desde cache:', event.request.url);
           return response;
         }
 
         // Si no está en cache, hacer la petición a la red
-        return fetch(event.request).then(function(response) {
-          // Verificar si la respuesta es válida
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-
-          // Clonar la respuesta para guardarla en cache
-          var responseToCache = response.clone();
-
-          caches.open(CACHE_NAME)
-            .then(function(cache) {
-              cache.put(event.request, responseToCache);
-            });
-
-          return response;
-        });
+        return fetch(event.request);
       })
   );
-});
-
-// Notificación de instalación
-self.addEventListener('beforeinstallprompt', function(event) {
-  console.log('Service Worker: Evento de instalación detectado');
-  event.preventDefault();
-  
-  // Guardar el evento para mostrarlo más tarde
-  self.deferredPrompt = event;
-  
-  // Opcional: Mostrar tu propia UI de instalación
-  return false;
 });
