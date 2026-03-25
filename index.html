@@ -207,32 +207,16 @@
               </div>
 
               <div class="form-section">
-                <h4 class="section-title">👤 Información del Cliente</h4>
+                <h4 class="section-title">👤 Datos del Cliente</h4>
                 <div class="form-grid">
                   <label>
-                    <span>Buscar cliente existente</span>
-                    <select id="orderClientSelect" onchange="handleClientSelect()">
-                      <option value="">Seleccionar cliente existente...</option>
-                      <option value="new">+ Crear nuevo cliente</option>
-                    </select>
+                    <span>Nombre del cliente</span>
+                    <input type="text" id="orderClient" placeholder="Nombre completo" required>
                   </label>
-                  <div id="newClientFields" style="display: none;">
-                    <label>
-                      <span>Nombre del cliente</span>
-                      <input type="text" id="orderClient" placeholder="Nombre completo" required>
-                    </label>
-                    <label>
-                      <span>Teléfono</span>
-                      <input type="tel" id="orderPhone" placeholder="664 000 0000" required>
-                    </label>
-                  </div>
-                  <div id="existingClientInfo" style="display: none; grid-column: 1 / -1;">
-                    <div class="client-info-display">
-                      <p><strong>Cliente:</strong> <span id="selectedClientName"></span></p>
-                      <p><strong>Teléfono:</strong> <span id="selectedClientPhone"></span></p>
-                      <p><strong>Vehículo:</strong> <span id="selectedClientVehicle"></span></p>
-                    </div>
-                  </div>
+                  <label>
+                    <span>Teléfono</span>
+                    <input type="tel" id="orderPhone" placeholder="664 000 0000" required>
+                  </label>
                 </div>
               </div>
 

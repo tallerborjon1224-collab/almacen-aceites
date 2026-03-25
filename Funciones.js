@@ -328,11 +328,80 @@ function mostrarNuevaOrden(orden) {
       </div>
       
       <div class="order-actions">
-        <button class="mini-btn" type="button" onclick="editOrder('${safe(orden.id)}')">Editar</button>
-        <button class="mini-btn" type="button" onclick="updateOrderStatus('${safe(orden.id)}')">Actualizar</button>
+        <button class="mini-btn" type="button" onclick="editarOrden('${safe(orden.id)}')">Editar</button>
+        <button class="mini-btn" type="button" onclick="actualizarEstadoOrden('${safe(orden.id)}')">Actualizar estado</button>
+        <button class="mini-btn danger-btn" type="button" onclick="ordenTerminada('${safe(orden.id)}')">Orden terminada</button>
       </div>
     </div>
   `;
+}
+
+// Función para editar orden
+function editarOrden(orderId) {
+  const orden = state.orders.find(o => o.id === orderId);
+  if (!orden) return;
+  
+  // Llenar formulario con datos de la orden
+  document.getElementById("orderClient").value = orden.cliente || "";
+  document.getElementById("orderPhone").value = orden.telefono || "";
+  document.getElementById("orderMake").value = orden.make || "";
+  document.getElementById("orderModel").value = orden.model || "";
+  document.getElementById("orderColor").value = orden.color || "";
+  document.getElementById("orderYear").value = orden.year || "";
+  document.getElementById("orderPlate").value = orden.plate || "";
+  document.getElementById("orderMechanic").value = orden.mechanic || "";
+  document.getElementById("orderPriority").value = orden.priority || "";
+  document.getElementById("orderDiagnosis").value = orden.diagnosis || "";
+  document.getElementById("orderNotes").value = orden.notes || "";
+  document.getElementById("orderDate").value = orden.createdAt || "";
+  
+  alert("Orden cargada en el formulario. Edita los datos y guarda.");
+}
+
+// Función para actualizar estado de orden
+function actualizarEstadoOrden(orderId) {
+  const orden = state.orders.find(o => o.id === orderId);
+  if (!orden) return;
+  
+  const estados = ["Recepcion", "Diagnostico", "Reparacion", "Control final", "Listo", "Entregado"];
+  const estadoActual = orden.status || "Recepcion";
+  const indiceActual = estados.indexOf(estadoActual);
+  const nuevoEstado = estados[(indiceActual + 1) % estados.length];
+  
+  orden.status = nuevoEstado;
+  
+  // Actualizar en Firebase
+  updateDoc(doc(firestoreDb, "ordenes", orderId), { status: nuevoEstado })
+    .then(() => {
+      alert(`Estado actualizado a: ${nuevoEstado}`);
+      mostrarNuevaOrden(orden);
+    })
+    .catch(error => {
+      console.error("Error actualizando estado:", error);
+      alert("Error al actualizar el estado");
+    });
+}
+
+// Función para marcar orden como terminada
+function ordenTerminada(orderId) {
+  if (confirm("¿Estás seguro de que esta orden está terminada?")) {
+    const orden = state.orders.find(o => o.id === orderId);
+    if (!orden) return;
+    
+    orden.status = "Entregado";
+    
+    // Actualizar en Firebase
+    updateDoc(doc(firestoreDb, "ordenes", orderId), { status: "Entregado" })
+      .then(() => {
+        alert("¡Orden marcada como terminada y entregada!");
+        // Limpiar el área de órdenes
+        refs.ordersCards.innerHTML = '<div class="empty-state">Agrega una nueva orden para verla aquí.</div>';
+      })
+      .catch(error => {
+        console.error("Error marcando orden como terminada:", error);
+        alert("Error al marcar la orden como terminada");
+      });
+  }
 }
 
 // Función para guardar productos - Conectar formulario de inventario con Firebase  

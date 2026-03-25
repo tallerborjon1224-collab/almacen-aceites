@@ -1193,6 +1193,16 @@ textarea {
   transform: translateY(-2px);
 }
 
+.mini-btn.danger-btn {
+  background: var(--brand-danger, #dc3545);
+  color: white;
+  border: 1px solid var(--brand-danger, #dc3545);
+}
+
+.mini-btn.danger-btn:hover {
+  background: var(--brand-danger-dark, #c82333);
+}
+
 .menu-toggle {
   display: none;
 }
