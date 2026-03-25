@@ -5,8 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/png" href="icono.png">
   <link rel="shortcut icon" href="icono.png">
-  <title>Taller Pro Admin</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff8c1a">
+  <meta name="description" content="Sistema profesional de administración para taller mecánico">
+  <title>Taller Borjon</title>
   <link rel="stylesheet" href="EstiloXd.css">
+  <script>
+    // Registrar Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js')
+          .then(function(registration) {
+            console.log('Service Worker registrado con éxito:', registration.scope);
+          })
+          .catch(function(error) {
+            console.log('Error al registrar Service Worker:', error);
+          });
+      });
+    }
+
+    // Manejar instalación de PWA
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      // Mostrar botón de instalación personalizado (opcional)
+      console.log('PWA lista para instalar');
+      
+      // Puedes agregar aquí tu propia UI para instalar
+      // Por ejemplo: document.getElementById('installBtn').style.display = 'block';
+    });
+
+    // Función para instalar la PWA (llamarla desde un botón si quieres)
+    window.installPWA = function() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(choiceResult) {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('Usuario aceptó instalar la PWA');
+          } else {
+            console.log('Usuario rechazó instalar la PWA');
+          }
+          deferredPrompt = null;
+        });
+      }
+    };
+  </script>
 </head>
 <body>
   <div class="backdrop" id="backdrop"></div>
