@@ -512,10 +512,9 @@ window.deleteClient = async function(clientId) {
   }
   
   try {
-    // Eliminar de Firestore
+    // Eliminar directamente de Firestore usando el ID real
     await deleteDoc(doc(firestoreDb, "clientes", clientId));
     
-    // No necesitamos actualizar el estado local porque onSnapshot lo hará automáticamente
     console.log('✅ Cliente eliminado de Firestore:', clientId);
     
   } catch (error) {
@@ -568,7 +567,7 @@ async function updateClient(clientId) {
       return;
     }
     
-    // Actualizar en Firestore
+    // Actualizar directamente en Firestore usando el ID real
     await updateDoc(doc(firestoreDb, "clientes", clientId), {
       nombre: nombre,
       telefono: telefono,
@@ -832,6 +831,11 @@ function cacheDom() {
 function init() {
   // Inicializar state primero
   state = loadState();
+  
+  // Inicializar clientes como array vacío si no existe
+  if (!state.clients) {
+    state.clients = [];
+  }
   
   cacheDom();
   bindEvents();
@@ -1763,6 +1767,12 @@ function renderInventory() {
 }
 
 function renderClients() {
+  // Si no hay clientes en Firestore, mostrar mensaje vacío
+  if (!state.clients || state.clients.length === 0) {
+    refs.clientsTableBody.innerHTML = `<tr><td colspan="5"><div class="empty-state">No hay clientes registrados en Firestore.</div></td></tr>`;
+    return;
+  }
+
   const search = refs.clientSearch?.value?.trim().toLowerCase() || "";
 
   const filtered = state.clients.filter((client) => {
@@ -1796,7 +1806,7 @@ function renderClients() {
           </tr>
         `)
         .join("")
-    : `<tr><td colspan="5"><div class="empty-state">No hay clientes registrados.</div></td></tr>`;
+    : `<tr><td colspan="5"><div class="empty-state">No hay clientes que coincidan con la búsqueda.</div></td></tr>`;
 }
 
 function renderVehicles() {
