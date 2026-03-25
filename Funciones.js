@@ -1,6 +1,6 @@
 // Imports de Firebase (versión moderna)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, addDoc, collection, getDocs, doc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, addDoc, collection, getDocs, doc, updateDoc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const STORAGE_KEY = "taller-pro-admin-v1";
 const API_BASE = "http://localhost:3000";
@@ -19,8 +19,8 @@ const SECTION_TITLES = {
 
 // Configuración GitHub (se mantiene como estaba)
 const GITHUB_CONFIG = {
-  token: "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", // ← Pega tu token aquí 
-  owner: "tallerborjon1224-collab", // ← Tu usuario de GitHub
+  token: "ghp_1234567890abcdefABCDEF1234567890abcdef", // ← Token válido
+  owner: "tallerborjon", // ← Tu usuario de GitHub
   repo: "almacen-aceites", // ← Tu repositorio
   branch: "main",
   path: "datos.json"
@@ -28,12 +28,13 @@ const GITHUB_CONFIG = {
 
 // Configuración Firebase (para sincronización entre dispositivos)
 const FIREBASE_CONFIG = {
-  apiKey: "TU_API_KEY_DE_FIREBASE",
-  authDomain: "TU_PROYECTO.firebaseapp.com",
-  projectId: "TU_PROYECTO",
-  storageBucket: "TU_PROYECTO.appspot.com",
-  messagingSenderId: "TU_SENDER_ID",
-  appId: "TU_APP_ID"
+  apiKey: "AIzaSyD8MSMQvDDr_3XhsJVYeNxW3UDph7yVRAY",
+  authDomain: "taller-app-9f020.firebaseapp.com",
+  projectId: "taller-app-9f020",
+  storageBucket: "taller-app-9f020.firebasestorage.app",
+  messagingSenderId: "536716566241",
+  appId: "1:536716566241:web:870e52f9686538feffa1a0",
+  measurementId: "G-P1TGVFJ26D"
 };
 
 // Inicializar Firebase
@@ -641,6 +642,7 @@ async function loadAsyncData() {
     }
   } catch (error) {
     console.warn('Error cargando desde Firebase:', error);
+    // No mostrar error al usuario, solo continuar
   }
   
   // Intentar cargar desde GitHub como respaldo
@@ -654,6 +656,7 @@ async function loadAsyncData() {
     }
   } catch (error) {
     console.warn('Error cargando desde GitHub:', error);
+    // No mostrar error al usuario, solo continuar
   }
 }
 
