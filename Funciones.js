@@ -1,3 +1,7 @@
+// Imports de Firebase (versión moderna)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, addDoc, collection, getDocs, doc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
 const STORAGE_KEY = "taller-pro-admin-v1";
 const API_BASE = "http://localhost:3000";
 const ORDER_FLOW = ["Recepcion", "Diagnostico", "Reparacion", "Control final", "Listo", "Entregado"];
@@ -13,79 +17,36 @@ const SECTION_TITLES = {
   settings: "Configuracion"
 };
 
-// Función para guardar configuración de GitHub
-function saveGitHubConfig() {
-  const token = document.getElementById("githubToken")?.value.trim();
-  const owner = document.getElementById("githubOwner")?.value.trim();
-  const repo = document.getElementById("githubRepo")?.value.trim();
-  
-  if (!token || !owner || !repo) {
-    showToast("Todos los campos de GitHub son requeridos", "danger");
-    return;
-  }
-  
-  // Actualizar configuración
-  GITHUB_CONFIG.token = token;
-  GITHUB_CONFIG.owner = owner;
-  GITHUB_CONFIG.repo = repo;
-  
-  // Guardar en localStorage
-  localStorage.setItem("github_config", JSON.stringify(GITHUB_CONFIG));
-  
-  // Probar conexión
-  testGitHubConnection();
-}
+// Configuración GitHub (se mantiene como estaba)
+const GITHUB_CONFIG = {
+  token: "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", // ← Pega tu token aquí 
+  owner: "tallerborjon1224-collab", // ← Tu usuario de GitHub
+  repo: "almacen-aceites", // ← Tu repositorio
+  branch: "main",
+  path: "datos.json"
+};
 
-// Función para cargar configuración de GitHub
-function loadGitHubConfig() {
-  const saved = localStorage.getItem("github_config");
-  if (saved) {
-    try {
-      const config = JSON.parse(saved);
-      Object.assign(GITHUB_CONFIG, config);
-      
-      // Llenar formulario si existe
-      if (document.getElementById("githubToken")) {
-        document.getElementById("githubToken").value = GITHUB_CONFIG.token || "";
-        document.getElementById("githubOwner").value = GITHUB_CONFIG.owner || "";
-        document.getElementById("githubRepo").value = GITHUB_CONFIG.repo || "";
-      }
-    } catch (error) {
-      console.error("Error cargando configuración GitHub:", error);
-    }
-  }
-}
+// Configuración Firebase (para sincronización entre dispositivos)
+const FIREBASE_CONFIG = {
+  apiKey: "TU_API_KEY_DE_FIREBASE",
+  authDomain: "TU_PROYECTO.firebaseapp.com",
+  projectId: "TU_PROYECTO",
+  storageBucket: "TU_PROYECTO.appspot.com",
+  messagingSenderId: "TU_SENDER_ID",
+  appId: "TU_APP_ID"
+};
 
-// Función para verificar conexión con GitHub
-async function testGitHubConnection() {
-  try {
-    const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`, {
-      headers: {
-        'Authorization': `token ${GITHUB_CONFIG.token}`
-      }
-    });
-    
-    if (response.ok) {
-      const repoData = await response.json();
-      console.log('✅ Conexión exitosa con GitHub:', repoData.full_name);
-      showToast('Conexión con GitHub verificada', 'success');
-      return true;
-    } else {
-      console.error('❌ Error de autenticación:', response.status);
-      showToast('Error de autenticación con GitHub', 'danger');
-      return false;
-    }
-  } catch (error) {
-    console.error('❌ Error de conexión:', error);
-    showToast('Error de conexión con GitHub', 'danger');
-    return false;
-  }
-}
+// Inicializar Firebase
+const app = initializeApp(FIREBASE_CONFIG);
+const db = getFirestore(app);
+
+// Variable global para Firebase
+let firestoreDb = db;
 
 let state = loadState();
 const refs = {};
 
-// Funciones de sincronización con GitHub
+// Funciones de sincronización con GitHub (se mantienen)
 async function saveToGitHub(data) {
   try {
     const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
@@ -119,7 +80,7 @@ async function saveToGitHub(data) {
     });
     
     if (response.ok) {
-      showToast('Datos sincronizados con GitHub', 'success');
+      console.log('✅ Datos guardados en GitHub');
       return true;
     } else {
       console.error('Error guardando en GitHub:', await response.text());
@@ -127,7 +88,6 @@ async function saveToGitHub(data) {
     }
   } catch (error) {
     console.error('Error en saveToGitHub:', error);
-    showToast('Error al sincronizar con GitHub', 'danger');
     return false;
   }
 }
@@ -144,9 +104,8 @@ async function loadFromGitHub() {
     
     if (response.ok) {
       const fileData = await response.json();
-      const content = JSON.parse(atob(fileData.content));
-      showToast('Datos cargados desde GitHub', 'info');
-      return content;
+      const content = atob(fileData.content);
+      return JSON.parse(content);
     } else {
       console.log('No hay datos en GitHub, usando estado inicial');
       return null;
@@ -157,7 +116,145 @@ async function loadFromGitHub() {
   }
 }
 
-// Funciones de sincronización con backend (mantenemos como respaldo)
+// Funciones de sincronización con Firebase (versión moderna con Firestore)
+async function saveToFirebase(data) {
+  try {
+    // Guardar datos en Firestore
+    await setDoc(doc(firestoreDb, "taller-data", "main"), {
+      ...data,
+      updatedAt: new Date().toISOString()
+    });
+    
+    console.log('✅ Datos guardados en Firebase Firestore');
+    return true;
+  } catch (error) {
+    console.error('❌ Error guardando en Firebase:', error);
+    return false;
+  }
+}
+
+async function loadFromFirebase() {
+  try {
+    // Cargar datos desde Firestore
+    const docRef = doc(firestoreDb, "taller-data", "main");
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      console.log('✅ Datos cargados desde Firebase Firestore');
+      return data;
+    } else {
+      console.log('📝 No hay datos en Firebase Firestore');
+      return null;
+    }
+  } catch (error) {
+    console.error('❌ Error cargando desde Firebase:', error);
+    return null;
+  }
+}
+
+// Función global para conectar el formulario HTML con Firebase
+window.guardar = async function() {
+  try {
+    // Obtener los valores del formulario
+    const nombre = document.getElementById("clientName")?.value.trim();
+    const telefono = document.getElementById("clientPhone")?.value.trim();
+    const email = document.getElementById("clientEmail")?.value.trim();
+    const vehiculo = document.getElementById("clientVehicle")?.value.trim();
+    const notas = document.getElementById("clientNotes")?.value.trim();
+    
+    // Validación básica
+    if (!nombre) {
+      alert("El nombre es requerido");
+      document.getElementById("clientName")?.focus();
+      return;
+    }
+    
+    if (!telefono) {
+      alert("El teléfono es requerido");
+      document.getElementById("clientPhone")?.focus();
+      return;
+    }
+    
+    // Crear objeto cliente
+    const cliente = {
+      nombre: nombre,
+      telefono: telefono,
+      email: email,
+      vehiculo: vehiculo,
+      notas: notas,
+      fechaRegistro: new Date().toISOString()
+    };
+    
+    // Guardar en Firebase usando la función existente
+    const resultado = await guardarCliente(cliente);
+    
+    if (resultado) {
+      // Limpiar los inputs
+      document.getElementById("clientName").value = "";
+      document.getElementById("clientPhone").value = "";
+      document.getElementById("clientEmail").value = "";
+      document.getElementById("clientVehicle").value = "";
+      document.getElementById("clientNotes").value = "";
+      
+      // Mostrar alerta de éxito
+      alert("Cliente guardado correctamente");
+      
+      console.log("✅ Cliente guardado en Firebase:", cliente);
+    } else {
+      alert("Error al guardar el cliente. Intenta de nuevo.");
+    }
+    
+  } catch (error) {
+    console.error("❌ Error en la función guardar:", error);
+    alert("Ocurrió un error al guardar el cliente");
+  }
+};
+
+// Funciones específicas para guardar datos en colecciones
+export async function guardarCliente(cliente) {
+  try {
+    await addDoc(collection(firestoreDb, "clientes"), {
+      ...cliente,
+      createdAt: new Date().toISOString()
+    });
+    console.log('✅ Cliente guardado en Firebase');
+    return true;
+  } catch (error) {
+    console.error('❌ Error guardando cliente:', error);
+    return false;
+  }
+}
+
+export async function guardarOrden(orden) {
+  try {
+    await addDoc(collection(firestoreDb, "ordenes"), {
+      ...orden,
+      createdAt: new Date().toISOString()
+    });
+    console.log('✅ Orden guardada en Firebase');
+    return true;
+  } catch (error) {
+    console.error('❌ Error guardando orden:', error);
+    return false;
+  }
+}
+
+export async function guardarProducto(producto) {
+  try {
+    await addDoc(collection(firestoreDb, "productos"), {
+      ...producto,
+      createdAt: new Date().toISOString()
+    });
+    console.log('✅ Producto guardado en Firebase');
+    return true;
+  } catch (error) {
+    console.error('❌ Error guardando producto:', error);
+    return false;
+  }
+}
+
+// Funciones de sincronización con backend (mantenimos como respaldo)
 async function saveToBackend() {
   try {
     const response = await fetch(`${API_BASE}/guardar`, {
@@ -197,7 +294,7 @@ async function loadFromBackend() {
 
 // Funciones de estado principales
 function loadState() {
-  // Cargar desde localStorage directamente
+  // Cargar desde localStorage primero
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -209,6 +306,26 @@ function loadState() {
     console.error('Error cargando estado:', error);
     state = createInitialState();
   }
+  
+  // Intentar cargar desde Firebase para sincronización entre dispositivos
+  loadFromFirebase().then(firebaseData => {
+    if (firebaseData) {
+      state = { ...state, ...firebaseData };
+      persistState(); // Guardar en localStorage
+      renderAll(); // Actualizar UI
+      console.log('🔄 Datos sincronizados desde Firebase');
+    }
+  });
+  
+  // Intentar cargar desde GitHub como respaldo
+  loadFromGitHub().then(githubData => {
+    if (githubData && !localStorage.getItem(STORAGE_KEY)) {
+      state = { ...state, ...githubData };
+      persistState(); // Guardar en localStorage
+      renderAll(); // Actualizar UI
+      console.log('🔄 Datos cargados desde GitHub');
+    }
+  });
 }
 
 function persistState() {
@@ -218,11 +335,18 @@ function persistState() {
 async function saveState() {
   persistState();
   
-  // Intentar guardar en GitHub (sin bloquear)
+  // Guardar en GitHub (como respaldo)
   try {
     await saveToGitHub(state);
   } catch (error) {
     console.warn('No se pudo guardar en GitHub:', error);
+  }
+  
+  // Guardar en Firebase (sincronización entre dispositivos)
+  try {
+    await saveToFirebase(state);
+  } catch (error) {
+    console.warn('No se pudo guardar en Firebase:', error);
   }
   
   // Intentar guardar en backend como respaldo (sin bloquear)
@@ -362,6 +486,7 @@ function init() {
   fillSettingsForm();
   updateBrand();
   loadGitHubConfig(); // Cargar configuración de GitHub
+  loadFirebaseConfig(); // Cargar configuración de Firebase
   switchSection("dashboard");
   renderAll();
 }
