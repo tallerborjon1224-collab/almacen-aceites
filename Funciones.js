@@ -261,8 +261,8 @@ window.guardarOrden = async function() {
       if (!state.orders) state.orders = [];
       state.orders.unshift(orden);
       
-      // Renderizar las tarjetas
-      renderOrders();
+      // Mostrar solo la nueva orden agregada
+      mostrarNuevaOrden(orden);
       
       // Limpiar formulario
       document.getElementById("orderForm")?.reset();
@@ -280,6 +280,60 @@ window.guardarOrden = async function() {
     alert("Ocurrió un error al guardar la orden");
   }
 };
+
+// Función para mostrar solo la nueva orden agregada
+function mostrarNuevaOrden(orden) {
+  const priorityClass = orden.priority === "Alta" ? "badge--danger" : 
+                        orden.priority === "Media" ? "badge--warning" : "badge--info";
+  
+  refs.ordersCards.innerHTML = `
+    <div class="order-card" data-order-id="${safe(orden.id)}">
+      <div class="order-header">
+        <div class="order-title">
+          <strong>${safe(orden.plate)} - ${safe(orden.make)} ${safe(orden.model)}</strong>
+          <small>${safe(orden.createdAt)} · ${safe(orden.mechanic || "Sin asignar")}</small>
+        </div>
+        <div class="order-badges">
+          ${badgeHtml(orden.status || "Recepcion", "badge--info")}
+          ${badgeHtml(orden.priority, priorityClass)}
+        </div>
+      </div>
+      
+      <div class="order-body">
+        <div class="order-info">
+          <div class="order-info-item">
+            <span class="order-info-label">Cliente:</span>
+            <span class="order-info-value">${safe(orden.cliente)}</span>
+          </div>
+          <div class="order-info-item">
+            <span class="order-info-label">Teléfono:</span>
+            <span class="order-info-value">${safe(orden.telefono)}</span>
+          </div>
+          <div class="order-info-item">
+            <span class="order-info-label">Vehículo:</span>
+            <span class="order-info-value">${safe(orden.make)} ${safe(orden.model)} (${orden.year})</span>
+          </div>
+          <div class="order-info-item">
+            <span class="order-info-label">Color:</span>
+            <span class="order-info-value">${safe(orden.color)}</span>
+          </div>
+        </div>
+        
+        ${orden.diagnosis ? `
+        <div class="order-diagnosis">
+          <span class="order-diagnosis-label">Diagnóstico:</span>
+          <span class="order-diagnosis-text">${safe(orden.diagnosis)}</span>
+        </div>
+        ` : ''}
+      </div>
+      
+      <div class="order-actions">
+        <button class="mini-btn" type="button" onclick="editOrder('${safe(orden.id)}')">Editar</button>
+        <button class="mini-btn" type="button" onclick="updateOrderStatus('${safe(orden.id)}')">Actualizar</button>
+      </div>
+    </div>
+  `;
+}
 
 // Función para guardar productos - Conectar formulario de inventario con Firebase  
 window.guardarProducto = async function() {
@@ -1199,63 +1253,8 @@ function handleClientSelect() {
 }
 
 function renderOrders() {
-  const filtered = state.orders;
-
-  // Renderizar como cards en lugar de tabla
-  refs.ordersCards.innerHTML = filtered.length
-    ? filtered.map((order) => {
-        const priorityClass = order.priority === "Alta" ? "badge--danger" : 
-                              order.priority === "Media" ? "badge--warning" : "badge--info";
-        
-        return `
-          <div class="order-card" data-order-id="${safe(order.id)}">
-            <div class="order-header">
-              <div class="order-title">
-                <strong>${safe(order.plate)} - ${safe(order.make)} ${safe(order.model)}</strong>
-                <small>${safe(order.createdAt)} · ${safe(order.mechanic || "Sin asignar")}</small>
-              </div>
-              <div class="order-badges">
-                ${badgeHtml(order.status || "Recepcion", "badge--info")}
-                ${badgeHtml(order.priority, priorityClass)}
-              </div>
-            </div>
-            
-            <div class="order-body">
-              <div class="order-info">
-                <div class="order-info-item">
-                  <span class="order-info-label">Cliente:</span>
-                  <span class="order-info-value">${safe(order.client)}</span>
-                </div>
-                <div class="order-info-item">
-                  <span class="order-info-label">Teléfono:</span>
-                  <span class="order-info-value">${safe(order.phone)}</span>
-                </div>
-                <div class="order-info-item">
-                  <span class="order-info-label">Vehículo:</span>
-                  <span class="order-info-value">${safe(order.make)} ${safe(order.model)} (${order.year})</span>
-                </div>
-                <div class="order-info-item">
-                  <span class="order-info-label">Color:</span>
-                  <span class="order-info-value">${safe(order.color)}</span>
-                </div>
-              </div>
-              
-              ${order.diagnosis ? `
-              <div class="order-diagnosis">
-                <span class="order-diagnosis-label">Diagnóstico:</span>
-                <span class="order-diagnosis-text">${safe(order.diagnosis)}</span>
-              </div>
-              ` : ''}
-            </div>
-            
-            <div class="order-actions">
-              <button class="mini-btn" type="button" onclick="editOrder('${safe(order.id)}')">Editar</button>
-              <button class="mini-btn" type="button" onclick="updateOrderStatus('${safe(order.id)}')">Actualizar</button>
-            </div>
-          </div>
-        `;
-      }).join("")
-    : '<div class="empty-state">No hay ordenes registradas.</div>';
+  // No mostrar tarjetas existentes, solo cuando se agregue una nueva
+  refs.ordersCards.innerHTML = '<div class="empty-state">Agrega una nueva orden para verla aquí.</div>';
 }
 
 function editOrder(orderId) {
