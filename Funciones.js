@@ -43,7 +43,7 @@ const db = getFirestore(app);
 // Variable global para Firebase
 let firestoreDb = db;
 
-let state = loadState();
+let state;
 const refs = {};
 
 // Funciones de sincronización con GitHub (se mantienen)
@@ -441,34 +441,14 @@ function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      state = JSON.parse(saved);
+      return JSON.parse(saved);
     } else {
-      state = createInitialState();
+      return createInitialState();
     }
   } catch (error) {
     console.error('Error cargando estado:', error);
-    state = createInitialState();
+    return createInitialState();
   }
-  
-  // Intentar cargar desde Firebase para sincronización entre dispositivos
-  loadFromFirebase().then(firebaseData => {
-    if (firebaseData) {
-      state = { ...state, ...firebaseData };
-      persistState(); // Guardar en localStorage
-      renderAll(); // Actualizar UI
-      console.log('🔄 Datos sincronizados desde Firebase');
-    }
-  });
-  
-  // Intentar cargar desde GitHub como respaldo
-  loadFromGitHub().then(githubData => {
-    if (githubData && !localStorage.getItem(STORAGE_KEY)) {
-      state = { ...state, ...githubData };
-      persistState(); // Guardar en localStorage
-      renderAll(); // Actualizar UI
-      console.log('🔄 Datos cargados desde GitHub');
-    }
-  });
 }
 
 function persistState() {
@@ -624,6 +604,9 @@ function cacheDom() {
 }
 
 function init() {
+  // Inicializar state primero
+  state = loadState();
+  
   cacheDom();
   bindEvents();
   seedFormDates();
@@ -634,6 +617,37 @@ function init() {
   loadFirebaseConfig(); // Cargar configuración de Firebase
   switchSection("dashboard");
   renderAll();
+  
+  // Cargar datos asíncronos después de inicializar
+  loadAsyncData();
+}
+
+async function loadAsyncData() {
+  // Intentar cargar desde Firebase para sincronización entre dispositivos
+  try {
+    const firebaseData = await loadFromFirebase();
+    if (firebaseData) {
+      state = { ...state, ...firebaseData };
+      persistState(); // Guardar en localStorage
+      renderAll(); // Actualizar UI
+      console.log('🔄 Datos sincronizados desde Firebase');
+    }
+  } catch (error) {
+    console.warn('Error cargando desde Firebase:', error);
+  }
+  
+  // Intentar cargar desde GitHub como respaldo
+  try {
+    const githubData = await loadFromGitHub();
+    if (githubData && !localStorage.getItem(STORAGE_KEY)) {
+      state = { ...state, ...githubData };
+      persistState(); // Guardar en localStorage
+      renderAll(); // Actualizar UI
+      console.log('🔄 Datos cargados desde GitHub');
+    }
+  } catch (error) {
+    console.warn('Error cargando desde GitHub:', error);
+  }
 }
 
 function bindEvents() {
@@ -1917,30 +1931,31 @@ function upcomingAppointments() {
 //   persistState();
 // }
 
-function loadState() {
-  const fallback = createInitialState();
-  const stored = localStorage.getItem(STORAGE_KEY);
-
-  if (!stored) {
-    return fallback;
-  }
-
-  try {
-    const parsed = JSON.parse(stored);
-    return {
-      ...fallback,
-      ...parsed,
-      settings: { ...fallback.settings, ...(parsed.settings || {}) },
-      orders: Array.isArray(parsed.orders) ? parsed.orders : fallback.orders,
-      inventory: Array.isArray(parsed.inventory) ? parsed.inventory : fallback.inventory,
-      movements: Array.isArray(parsed.movements) ? parsed.movements : fallback.movements,
-      clients: Array.isArray(parsed.clients) ? parsed.clients : fallback.clients,
-      appointments: Array.isArray(parsed.appointments) ? parsed.appointments : fallback.appointments
-    };
-  } catch (error) {
-    return fallback;
-  }
-}
+// Eliminar función duplicada - ya está definida arriba
+// function loadState() {
+//   const fallback = createInitialState();
+//   const stored = localStorage.getItem(STORAGE_KEY);
+//
+//   if (!stored) {
+//     return fallback;
+//   }
+//
+//   try {
+//     const parsed = JSON.parse(stored);
+//     return {
+//       ...fallback,
+//       ...parsed,
+//       settings: { ...fallback.settings, ...(parsed.settings || {}) },
+//       orders: Array.isArray(parsed.orders) ? parsed.orders : fallback.orders,
+//       inventory: Array.isArray(parsed.inventory) ? parsed.inventory : fallback.inventory,
+//       movements: Array.isArray(parsed.movements) ? parsed.movements : fallback.movements,
+//       clients: Array.isArray(parsed.clients) ? parsed.clients : fallback.clients,
+//       appointments: Array.isArray(parsed.appointments) ? parsed.appointments : fallback.appointments
+//     };
+//   } catch (error) {
+//     return fallback;
+//   }
+// }
 
 function createInitialState() {
   return {
