@@ -1526,6 +1526,7 @@ body.menu-open .backdrop {
     width: min(88vw, 320px);
     transform: translateX(-104%);
     transition: transform 0.24s ease;
+    z-index: 1000;
   }
 
   body.menu-open .sidebar {
@@ -1534,6 +1535,7 @@ body.menu-open .backdrop {
 
   .menu-toggle {
     display: inline-flex;
+    z-index: 1001;
   }
 
   .topbar {

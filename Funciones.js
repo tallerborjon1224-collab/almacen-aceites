@@ -211,6 +211,149 @@ window.guardar = async function() {
   }
 };
 
+// Función para guardar órdenes - Conectar formulario de órdenes con Firebase
+window.guardarOrden = async function() {
+  try {
+    // Obtener valores del formulario de órdenes
+    const cliente = document.getElementById("orderClient")?.value.trim() || "Cliente sin nombre";
+    const telefono = document.getElementById("orderPhone")?.value.trim() || "Sin teléfono";
+    const marca = document.getElementById("orderMake")?.value.trim();
+    const modelo = document.getElementById("orderModel")?.value.trim();
+    const color = document.getElementById("orderColor")?.value.trim();
+    const año = document.getElementById("orderYear")?.value;
+    const placas = document.getElementById("orderPlate")?.value.trim().toUpperCase();
+    const mecanico = document.getElementById("orderMechanic")?.value.trim();
+    const prioridad = document.getElementById("orderPriority")?.value;
+    const diagnostico = document.getElementById("orderDiagnosis")?.value.trim();
+    const notas = document.getElementById("orderNotes")?.value.trim();
+    const fecha = document.getElementById("orderDate")?.value || new Date().toISOString().split('T')[0];
+    
+    // Validación básica
+    if (!marca || !modelo || !placas) {
+      alert("Marca, modelo y placas son requeridos");
+      return;
+    }
+    
+    // Crear objeto orden
+    const orden = {
+      id: `OT-${Date.now().toString().slice(-6)}`,
+      cliente: cliente,
+      telefono: telefono,
+      make: marca,
+      model: modelo,
+      color: color,
+      year: año,
+      plate: placas,
+      mechanic: mecanico,
+      priority: prioridad,
+      diagnosis: diagnostico,
+      notes: notas,
+      createdAt: fecha,
+      status: "Recepcion"
+    };
+    
+    // Guardar en Firebase
+    const resultado = await guardarOrden(orden);
+    
+    if (resultado) {
+      // Agregar al estado local para mostrar inmediatamente
+      if (!state.orders) state.orders = [];
+      state.orders.unshift(orden);
+      
+      // Renderizar las tarjetas
+      renderOrders();
+      
+      // Limpiar formulario
+      document.getElementById("orderForm")?.reset();
+      
+      // Mostrar alerta
+      alert("Orden guardada correctamente");
+      
+      console.log("✅ Orden guardada en Firebase:", orden);
+    } else {
+      alert("Error al guardar la orden. Intenta de nuevo.");
+    }
+    
+  } catch (error) {
+    console.error("❌ Error guardando orden:", error);
+    alert("Ocurrió un error al guardar la orden");
+  }
+};
+
+// Función para guardar productos - Conectar formulario de inventario con Firebase  
+window.guardarProducto = async function() {
+  try {
+    // Obtener valores del formulario de inventario
+    const nombre = document.getElementById("inventoryName")?.value.trim();
+    const marca = document.getElementById("inventoryBrand")?.value.trim();
+    const sku = document.getElementById("inventorySku")?.value.trim();
+    const categoria = document.getElementById("inventoryCategory")?.value;
+    const presentacion = document.getElementById("inventoryPresentation")?.value;
+    const proveedor = document.getElementById("inventorySupplier")?.value.trim();
+    const ubicacion = document.getElementById("inventoryLocation")?.value.trim() || "Almacén";
+    const stock = Number(document.getElementById("inventoryStock")?.value) || 0;
+    const stockMinimo = Number(document.getElementById("inventoryMinStock")?.value) || 5;
+    const costo = Number(document.getElementById("inventoryCost")?.value) || 0;
+    const impuesto = Number(document.getElementById("inventoryTax")?.value) || 0;
+    const precio = Number(document.getElementById("inventoryPrice")?.value) || 0;
+    const notas = document.getElementById("inventoryNotes")?.value.trim();
+    
+    // Validación básica
+    if (!nombre || !marca || !proveedor) {
+      alert("Nombre, marca y proveedor son requeridos");
+      return;
+    }
+    
+    // Crear objeto producto
+    const producto = {
+      id: `INV-${Date.now().toString().slice(-6)}`,
+      name: nombre,
+      brand: marca,
+      sku: sku,
+      category: categoria,
+      presentation: presentacion,
+      supplier: proveedor,
+      location: ubicacion,
+      stock: stock,
+      minStock: stockMinimo,
+      cost: costo,
+      tax: impuesto,
+      price: precio,
+      notes: notas,
+      createdAt: new Date().toISOString()
+    };
+    
+    // Guardar en Firebase
+    const resultado = await guardarProducto(producto);
+    
+    if (resultado) {
+      // Agregar al estado local para mostrar inmediatamente
+      if (!state.inventory) state.inventory = [];
+      state.inventory.unshift(producto);
+      
+      // Renderizar inventario
+      renderInventory();
+      
+      // Limpiar formulario
+      document.getElementById("inventoryForm")?.reset();
+      
+      // Cerrar formulario desplegable
+      toggleInventoryForm();
+      
+      // Mostrar alerta
+      alert("Producto guardado correctamente");
+      
+      console.log("✅ Producto guardado en Firebase:", producto);
+    } else {
+      alert("Error al guardar el producto. Intenta de nuevo.");
+    }
+    
+  } catch (error) {
+    console.error("❌ Error guardando producto:", error);
+    alert("Ocurrió un error al guardar el producto");
+  }
+};
+
 // Funciones específicas para guardar datos en colecciones
 export async function guardarCliente(cliente) {
   try {
@@ -330,6 +473,8 @@ function loadState() {
 
 function persistState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  // Auto-guardar en backend después de cambios locales
+  saveToBackend();
 }
 
 async function saveState() {
@@ -493,11 +638,29 @@ function init() {
 
 function bindEvents() {
   document.addEventListener("click", handleDocumentClick);
-  refs.orderForm.addEventListener("submit", handleOrderSubmit);
-  refs.inventoryForm.addEventListener("submit", handleInventorySubmit);
-  refs.clientForm.addEventListener("submit", handleClientSubmit);
-  refs.vehicleForm.addEventListener("submit", handleVehicleSubmit);
-  refs.settingsForm.addEventListener("submit", handleSettingsSubmit);
+  
+  // Event listeners para formularios - cambiar submit por click
+  refs.orderForm.addEventListener("click", function(e) {
+    if (e.target.type === "button" && e.target.onclick && e.target.onclick.toString().includes('guardarOrden')) {
+      e.preventDefault();
+      guardarOrden();
+    }
+  });
+  
+  refs.inventoryForm.addEventListener("click", function(e) {
+    if (e.target.type === "button" && e.target.onclick && e.target.onclick.toString().includes('guardarProducto')) {
+      e.preventDefault();
+      guardarProducto();
+    }
+  });
+  
+  refs.clientForm.addEventListener("click", function(e) {
+    if (e.target.type === "button" && e.target.onclick && e.target.onclick.toString().includes('guardar')) {
+      e.preventDefault();
+      guardar();
+    }
+  });
+  
   refs.inventorySearch.addEventListener("input", renderInventory);
   refs.themeToggle.addEventListener("click", toggleTheme);
   refs.menuToggle.addEventListener("click", toggleMenu);
@@ -516,6 +679,7 @@ document.addEventListener("DOMContentLoaded", init);
 function handleDocumentClick(event) {
   const sectionButton = event.target.closest("[data-section-target]");
   if (sectionButton) {
+    console.log("🎯 Click en botón de sección:", sectionButton.dataset.sectionTarget);
     switchSection(sectionButton.dataset.sectionTarget);
     return;
   }
@@ -1189,37 +1353,38 @@ function renderDashboard() {
   );
 }
 
-function renderOrders() {
-  // Mostrar solo historial de ordenes anteriores en lugar de listado general
-  const allOrders = sortOrders(state.orders);
-  const recentOrders = allOrders.slice(0, 10); // Últimas 10 ordenes como historial
-
-  // Renderizar historial en el panel de ordenes anteriores
-  const orderHistoryElement = document.getElementById("orderHistory");
-  if (orderHistoryElement) {
-    orderHistoryElement.innerHTML = recentOrders.length
-      ? recentOrders.map((order) => {
-        const vehicleInfo = `${order.make} ${order.model} ${order.year}`;
-        return `
-          <article class="row-card">
-            <div class="row-card-main">
-              <strong>${safe(order.id)} · ${safe(order.client)}</strong>
-              <small>${safe(vehicleInfo)} · ${safe(order.plate)}</small>
-              <div class="row-meta">
-                ${badgeHtml(order.priority, badgeClassForPriority(order.priority))}
-                ${badgeHtml(order.status, badgeClassForStatus(order.status))}
-              </div>
-            </div>
-            <div class="row-card-side">
-              <strong>${formatDate(order.createdAt)}</strong>
-              <small>${safe(order.mechanic || "Sin asignar")}</small>
-            </div>
-          </article>
-        `;
-      }).join("")
-      : '<div class="empty-state">No hay ordenes registradas.</div>';
-  }
-}
+// Eliminar esta función duplicada - ya existe renderOrders() arriba
+// function renderOrders() {
+//   // Mostrar solo historial de ordenes anteriores en lugar de listado general
+//   const allOrders = sortOrders(state.orders);
+//   const recentOrders = allOrders.slice(0, 10); // Últimas 10 ordenes como historial
+//
+//   // Renderizar historial en el panel de ordenes anteriores
+//   const orderHistoryElement = document.getElementById("orderHistory");
+//   if (orderHistoryElement) {
+//     orderHistoryElement.innerHTML = recentOrders.length
+//       ? recentOrders.map((order) => {
+//         const vehicleInfo = `${order.make} ${order.model} ${order.year}`;
+//         return `
+//           <article class="row-card">
+//             <div class="row-card-main">
+//               <strong>${safe(order.id)} · ${safe(order.client)}</strong>
+//               <small>${safe(vehicleInfo)} · ${safe(order.plate)}</small>
+//               <div class="row-meta">
+//                 ${badgeHtml(order.priority, badgeClassForPriority(order.priority))}
+//                 ${badgeHtml(order.status, badgeClassForStatus(order.status))}
+//               </div>
+//             </div>
+//             <div class="row-card-side">
+//               <strong>${formatDate(order.createdAt)}</strong>
+//               <small>${safe(order.mechanic || "Sin asignar")}</small>
+//             </div>
+//           </article>
+//         `;
+//       }).join("")
+//       : '<div class="empty-state">No hay ordenes registradas.</div>';
+//   }
+// }
 
 function renderInventoryAlerts() {
   const lowStockItems = state.inventory.filter(item => 
@@ -1504,6 +1669,8 @@ function renderSettings() {
 }
 
 function switchSection(sectionId) {
+  console.log("🎯 Cambiando a sección:", sectionId);
+  
   refs.sections.forEach((section) => {
     section.classList.toggle("active", section.id === sectionId);
   });
@@ -1514,6 +1681,8 @@ function switchSection(sectionId) {
 
   refs.sectionTitle.textContent = SECTION_TITLES[sectionId] || "Panel";
   closeMenu();
+  
+  console.log("✅ Sección cambiada a:", sectionId);
 }
 
 function toggleTheme() {
@@ -1529,10 +1698,13 @@ function applyTheme(theme) {
 }
 
 function toggleMenu() {
+  console.log("🔄 Toggle menu llamado");
   document.body.classList.toggle("menu-open");
+  console.log("📱 Clases del body:", document.body.classList.toString());
 }
 
 function closeMenu() {
+  console.log("❌ Cerrar menú llamado");
   document.body.classList.remove("menu-open");
 }
 
@@ -1733,15 +1905,17 @@ function upcomingAppointments() {
     .sort((left, right) => `${left.date}T${left.time}`.localeCompare(`${right.date}T${right.time}`));
 }
 
-function persistState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  // Auto-guardar en backend después de cambios locales
-  saveToBackend();
-}
+// Eliminar función duplicada - ya está definida arriba
+// function persistState() {
+//   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+//   // Auto-guardar en backend después de cambios locales
+//   saveToBackend();
+// }
 
-function saveState() {
-  persistState();
-}
+// Eliminar función duplicada - ya está definida arriba como async function
+// function saveState() {
+//   persistState();
+// }
 
 function loadState() {
   const fallback = createInitialState();
