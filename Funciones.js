@@ -1169,6 +1169,23 @@ async function loadAsyncData() {
 function bindEvents() {
   document.addEventListener("click", handleDocumentClick);
   
+  // Event listeners para botones específicos
+  const toggleBtn = document.getElementById("toggleInventoryForm");
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      toggleInventoryForm();
+    });
+  }
+  
+  const closeBtn = document.querySelector("#inventoryFormPanel .close-form-btn");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      toggleInventoryForm();
+    });
+  }
+  
   // Event listeners para formularios - cambiar submit por click
   refs.orderForm.addEventListener("click", function(e) {
     if (e.target.type === "button" && e.target.onclick && e.target.onclick.toString().includes('guardarOrden')) {
