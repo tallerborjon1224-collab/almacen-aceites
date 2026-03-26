@@ -1174,6 +1174,7 @@ function bindEvents() {
   if (toggleBtn) {
     toggleBtn.addEventListener("click", function(e) {
       e.preventDefault();
+      console.log("🎯 Click en toggleInventoryForm");
       toggleInventoryForm();
     });
   }
@@ -1182,7 +1183,56 @@ function bindEvents() {
   if (closeBtn) {
     closeBtn.addEventListener("click", function(e) {
       e.preventDefault();
+      console.log("🎯 Click en close-form-btn");
       toggleInventoryForm();
+    });
+  }
+  
+  // Event listener para botón de guardar producto
+  const saveProductBtn = document.querySelector("#inventoryForm .accent-btn.full-btn");
+  if (saveProductBtn) {
+    saveProductBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      console.log("🎯 Click en guardar producto");
+      guardarProducto();
+    });
+  }
+  
+  // Event listener para botón de guardar orden
+  const saveOrderBtn = document.querySelector("#orderForm .accent-btn.full-btn");
+  if (saveOrderBtn) {
+    saveOrderBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      console.log("🎯 Click en guardar orden");
+      guardarOrden();
+    });
+  }
+  
+  // Event listener para botón de guardar cliente
+  const saveClientBtn = document.querySelector("#clientForm .accent-btn.full-btn");
+  if (saveClientBtn) {
+    saveClientBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      console.log("🎯 Click en guardar cliente");
+      guardar();
+    });
+  }
+  
+  // Event listener para botón de menú
+  if (refs.menuToggle) {
+    refs.menuToggle.addEventListener("click", function(e) {
+      e.preventDefault();
+      console.log("🎯 Click en menu toggle");
+      toggleMenu();
+    });
+  }
+  
+  // Event listener para botón de tema
+  if (refs.themeToggle) {
+    refs.themeToggle.addEventListener("click", function(e) {
+      e.preventDefault();
+      console.log("🎯 Click en theme toggle");
+      toggleTheme();
     });
   }
   
@@ -1211,12 +1261,6 @@ function bindEvents() {
   // Solo agregar event listeners si los elementos existen
   if (refs.inventorySearch) {
     refs.inventorySearch.addEventListener("input", renderInventory);
-  }
-  if (refs.themeToggle) {
-    refs.themeToggle.addEventListener("click", toggleTheme);
-  }
-  if (refs.menuToggle) {
-    refs.menuToggle.addEventListener("click", toggleMenu);
   }
   
   // Event listener para el selector de clientes en formulario de vehículos
