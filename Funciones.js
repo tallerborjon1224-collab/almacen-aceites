@@ -255,7 +255,7 @@ window.guardarOrden = async function() {
     };
     
     // Guardar en Firebase
-    const resultado = await guardarOrden(orden);
+    const resultado = await guardarOrdenInterna(orden);
     
     if (resultado) {
       // Agregar al estado local para mostrar inmediatamente
@@ -733,7 +733,8 @@ window.toggleInventoryForm = function() {
   }
 };
 
-export async function guardarOrden(orden) {
+// Función auxiliar para guardar órdenes (usada internamente)
+async function guardarOrdenInterna(orden) {
   try {
     await addDoc(collection(firestoreDb, "ordenes"), {
       ...orden,
