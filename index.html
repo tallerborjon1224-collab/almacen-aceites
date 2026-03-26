@@ -270,10 +270,6 @@
           </div>
 
           <div class="content-grid">
-            <div class="inventory-alerts" id="inventoryAlerts">
-              <!-- Alertas de stock bajo se mostrarán aquí -->
-            </div>
-
             <!-- Botón para desplegar formulario -->
             <button class="toggle-form-btn" id="toggleInventoryForm" onclick="toggleInventoryForm()">
               <span class="btn-icon">➕</span>
@@ -292,10 +288,10 @@
 
               <form id="inventoryForm">
                 <div class="form-section">
-                  <h4 class="section-title">🛢️ Información del Aceite</h4>
+                  <h4 class="section-title">🛢️ Información del Producto</h4>
                   <div class="form-grid">
                     <label>
-                      <span>Nombre del Aceite</span>
+                      <span>Nombre del Producto</span>
                       <input type="text" id="inventoryName" placeholder="Ej: Mobil Super 1000" required>
                     </label>
                     <label>
@@ -303,7 +299,7 @@
                       <input type="text" id="inventoryBrand" placeholder="Ej: Shell, Castrol, Quaker State" required>
                     </label>
                     <label>
-                      <span>SKU / Código Interno</span>
+                      <span>SKU / Código</span>
                       <input type="text" id="inventorySku" placeholder="Ej: ACE-001" required>
                     </label>
                     <label>
@@ -342,27 +338,17 @@
                 </div>
 
                 <div class="form-section">
-                  <h4 class="section-title">💰 Precios y Margen de Ganancia</h4>
+                  <h4 class="section-title">💰 Precios y Margen</h4>
                   <div class="form-grid">
                     <label>
-                      <span>Costo de Compra (Neto)</span>
+                      <span>Costo de Compra</span>
                       <input type="number" id="inventoryCost" min="0" step="0.01" required>
-                      <small>Lo que tú pagas por cada unidad al proveedor</small>
+                      <small>Costo por unidad al proveedor</small>
                     </label>
                     <label>
-                      <span>Impuesto (IVA)</span>
-                      <select id="inventoryTax" required>
-                        <option value="">Seleccionar IVA</option>
-                        <option value="0">0% - Exento</option>
-                        <option value="8">8% - Reducido</option>
-                        <option value="16">16% - General</option>
-                      </select>
-                      <small>El porcentaje de impuesto aplicable</small>
-                    </label>
-                    <label>
-                      <span>Precio de Venta al Público</span>
+                      <span>Precio de Venta</span>
                       <input type="number" id="inventoryPrice" min="0" step="0.01" required>
-                      <small>El precio final que le das al cliente en el mostrador</small>
+                      <small>Precio final al cliente</small>
                     </label>
                     <label>
                       <span>Margen de Ganancia</span>
@@ -370,7 +356,7 @@
                         <span class="margin-amount">$0.00</span>
                         <span class="margin-percent">0%</span>
                       </div>
-                      <small>Cuánto ganas por unidad (calculado automáticamente)</small>
+                      <small>Calculado automáticamente</small>
                     </label>
                   </div>
                 </div>

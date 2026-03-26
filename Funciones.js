@@ -405,6 +405,263 @@ function ordenTerminada(orderId) {
   }
 }
 
+// Función para cargar productos desde Firestore en tiempo real
+function loadProductsFromFirestore() {
+  const productosRef = collection(firestoreDb, "productos");
+  
+  // Usar onSnapshot para actualizaciones en tiempo real
+  onSnapshot(productosRef, (snapshot) => {
+    const productos = [];
+    snapshot.forEach((doc) => {
+      productos.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    // Actualizar el estado local
+    state.inventory = productos;
+    
+    // Renderizar los productos
+    renderInventory();
+    
+    console.log('🔄 Productos actualizados desde Firestore:', productos.length);
+  }, (error) => {
+    console.error('❌ Error cargando productos desde Firestore:', error);
+  });
+}
+
+// Función para mostrar/ocultar formulario de inventario
+window.toggleInventoryForm = function() {
+  const panel = document.getElementById("inventoryFormPanel");
+  if (panel.style.display === "none") {
+    panel.style.display = "block";
+  } else {
+    panel.style.display = "none";
+  }
+};
+
+// Función para renderizar los productos
+function renderInventory() {
+  // Si no hay productos en Firestore, mostrar mensaje vacío
+  if (!state.inventory || state.inventory.length === 0) {
+    refs.inventoryCards.innerHTML = '<div class="empty-state">No hay productos registrados en Firestore.</div>';
+    return;
+  }
+
+  const search = refs.inventorySearch?.value?.trim().toLowerCase() || "";
+  const category = refs.inventoryCategory?.value || "";
+
+  const filtered = state.inventory.filter((item) => {
+    const matchesSearch = !search ||
+      [item.nombre, item.marca, item.sku, item.proveedor].some((value) =>
+        String(value).toLowerCase().includes(search)
+      );
+    const matchesCategory = !category || item.categoria === category;
+    return matchesSearch && matchesCategory;
+  });
+
+  refs.inventoryCards.innerHTML = filtered.length
+    ? filtered
+        .slice()
+        .sort((left, right) => left.nombre.localeCompare(right.nombre))
+        .map((item) => {
+          const stockClass = item.stock <= item.stockMinimo ? "stock-bajo" : "stock-normal";
+          const stockText = item.stock <= item.stockMinimo ? "STOCK BAJO" : "Stock OK";
+          
+          const margen = item.precio - item.costo;
+          const margenPorcentaje = ((margen / item.costo) * 100).toFixed(1);
+          
+          return `
+            <div class="inventory-card" data-product-id="${safe(item.id)}">
+              <div class="inventory-header">
+                <div class="inventory-title">
+                  <strong>${safe(item.nombre)}</strong>
+                  <small>${safe(item.marca)} · ${safe(item.presentacion)}</small>
+                </div>
+                <div class="inventory-badges">
+                  <span class="badge ${stockClass}">${stockText}</span>
+                </div>
+              </div>
+              
+              <div class="inventory-body">
+                <div class="inventory-info">
+                  <div class="inventory-info-item">
+                    <span class="inventory-info-label">SKU:</span>
+                    <span class="inventory-info-value">${safe(item.sku)}</span>
+                  </div>
+                  <div class="inventory-info-item">
+                    <span class="inventory-info-label">Categoría:</span>
+                    <span class="inventory-info-value">${safe(item.categoria)}</span>
+                  </div>
+                  <div class="inventory-info-item">
+                    <span class="inventory-info-label">Proveedor:</span>
+                    <span class="inventory-info-value">${safe(item.proveedor)}</span>
+                  </div>
+                </div>
+                
+                <div class="inventory-pricing">
+                  <div class="price-item">
+                    <span class="price-label">Costo:</span>
+                    <span class="price-value">$${safe(item.costo)}</span>
+                  </div>
+                  <div class="price-item">
+                    <span class="price-label">Venta:</span>
+                    <span class="price-value">$${safe(item.precio)}</span>
+                  </div>
+                  <div class="price-item">
+                    <span class="price-label">Margen:</span>
+                    <span class="price-value">$${margen.toFixed(2)} (${margenPorcentaje}%)</span>
+                  </div>
+                </div>
+                
+                <div class="inventory-stock">
+                  <div class="stock-display">
+                    <span class="stock-number">${item.stock}</span>
+                    <span class="stock-label">unidades</span>
+                  </div>
+                  <div class="stock-controls">
+                    <button class="mini-btn" type="button" onclick="adjustStock('${safe(item.id)}', -1)">-</button>
+                    <button class="mini-btn" type="button" onclick="adjustStock('${safe(item.id)}', 1)">+</button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="inventory-actions">
+                <button class="mini-btn" type="button" onclick="editProduct('${safe(item.id)}')">Editar</button>
+                <button class="mini-btn danger-btn" type="button" onclick="deleteProduct('${safe(item.id)}')">Eliminar</button>
+              </div>
+            </div>
+          `;
+        })
+        .join("")
+    : '<div class="empty-state">No hay productos que coincidan con los filtros.</div>';
+}
+
+// Función para eliminar producto de Firestore
+window.deleteProduct = async function(productId) {
+  if (!confirm("¿Estás seguro de que quieres eliminar este producto?")) {
+    return;
+  }
+  
+  try {
+    // Eliminar directamente de Firestore usando el ID real
+    await deleteDoc(doc(firestoreDb, "productos", productId));
+    
+    console.log('✅ Producto eliminado de Firestore:', productId);
+    
+  } catch (error) {
+    console.error('❌ Error eliminando producto:', error);
+    alert("Error al eliminar el producto. Intenta de nuevo.");
+  }
+};
+
+// Función para editar producto
+window.editProduct = async function(productId) {
+  const producto = state.inventory.find(p => p.id === productId);
+  if (!producto) return;
+  
+  // Llenar el formulario con los datos del producto
+  document.getElementById("inventoryName").value = producto.nombre || "";
+  document.getElementById("inventoryBrand").value = producto.marca || "";
+  document.getElementById("inventorySku").value = producto.sku || "";
+  document.getElementById("inventoryCategory").value = producto.categoria || "";
+  document.getElementById("inventoryPresentation").value = producto.presentacion || "";
+  document.getElementById("inventorySupplier").value = producto.proveedor || "";
+  document.getElementById("inventoryCost").value = producto.costo || 0;
+  document.getElementById("inventoryPrice").value = producto.precio || 0;
+  document.getElementById("inventoryStock").value = producto.stock || 0;
+  document.getElementById("inventoryMinStock").value = producto.stockMinimo || 5;
+  
+  // Cambiar el botón de guardar a "Actualizar"
+  const saveBtn = document.querySelector('#inventoryForm button[type="button"]');
+  if (saveBtn) {
+    saveBtn.textContent = "Actualizar producto";
+    saveBtn.onclick = function() { updateProduct(productId); };
+  }
+  
+  // Abrir el formulario
+  document.getElementById("inventoryFormPanel").style.display = "block";
+  
+  // Scroll al formulario
+  document.getElementById("inventoryForm")?.scrollIntoView({ behavior: 'smooth' });
+};
+
+// Función para actualizar producto en Firestore
+async function updateProduct(productId) {
+  try {
+    // Obtener valores del formulario
+    const nombre = document.getElementById("inventoryName")?.value.trim();
+    const marca = document.getElementById("inventoryBrand")?.value.trim();
+    const sku = document.getElementById("inventorySku")?.value.trim();
+    const categoria = document.getElementById("inventoryCategory")?.value;
+    const presentacion = document.getElementById("inventoryPresentation")?.value;
+    const proveedor = document.getElementById("inventorySupplier")?.value.trim();
+    const costo = Number(document.getElementById("inventoryCost")?.value) || 0;
+    const precio = Number(document.getElementById("inventoryPrice")?.value) || 0;
+    const stock = Number(document.getElementById("inventoryStock")?.value) || 0;
+    const stockMinimo = Number(document.getElementById("inventoryMinStock")?.value) || 5;
+    
+    // Validación básica
+    if (!nombre || !marca || !sku) {
+      alert("Nombre, marca y SKU son requeridos");
+      return;
+    }
+    
+    // Actualizar directamente en Firestore usando el ID real
+    await updateDoc(doc(firestoreDb, "productos", productId), {
+      nombre: nombre,
+      marca: marca,
+      sku: sku,
+      categoria: categoria,
+      presentacion: presentacion,
+      proveedor: proveedor,
+      costo: costo,
+      precio: precio,
+      stock: stock,
+      stockMinimo: stockMinimo,
+      fechaActualizacion: new Date().toISOString()
+    });
+    
+    // Limpiar formulario y restaurar botón
+    document.getElementById("inventoryForm")?.reset();
+    const saveBtn = document.querySelector('#inventoryForm button[type="button"]');
+    if (saveBtn) {
+      saveBtn.textContent = "Guardar producto";
+      saveBtn.onclick = window.guardarProducto;
+    }
+    
+    // Cerrar formulario
+    document.getElementById("inventoryFormPanel").style.display = "none";
+    
+    alert("Producto actualizado correctamente");
+    console.log('✅ Producto actualizado en Firestore:', productId);
+    
+  } catch (error) {
+    console.error('❌ Error actualizando producto:', error);
+    alert("Error al actualizar el producto. Intenta de nuevo.");
+  }
+}
+
+// Función para ajustar stock
+window.adjustStock = async function(productId, cantidad) {
+  const producto = state.inventory.find(p => p.id === productId);
+  if (!producto) return;
+  
+  const nuevoStock = Math.max(0, producto.stock + cantidad);
+  
+  try {
+    await updateDoc(doc(firestoreDb, "productos", productId), {
+      stock: nuevoStock,
+      fechaActualizacion: new Date().toISOString()
+    });
+    
+    console.log(`✅ Stock ajustado: ${producto.sku} ${cantidad > 0 ? '+' : ''}${cantidad} = ${nuevoStock}`);
+    
+  } catch (error) {
+    console.error('❌ Error ajustando stock:', error);
+    alert("Error al ajustar el stock. Intenta de nuevo.");
+  }
 // Función para guardar productos - Conectar formulario de inventario con Firebase  
 window.guardarProducto = async function() {
   try {
@@ -415,69 +672,80 @@ window.guardarProducto = async function() {
     const categoria = document.getElementById("inventoryCategory")?.value;
     const presentacion = document.getElementById("inventoryPresentation")?.value;
     const proveedor = document.getElementById("inventorySupplier")?.value.trim();
-    const ubicacion = document.getElementById("inventoryLocation")?.value.trim() || "Almacén";
+    const costo = Number(document.getElementById("inventoryCost")?.value) || 0;
+    const precio = Number(document.getElementById("inventoryPrice")?.value) || 0;
     const stock = Number(document.getElementById("inventoryStock")?.value) || 0;
     const stockMinimo = Number(document.getElementById("inventoryMinStock")?.value) || 5;
-    const costo = Number(document.getElementById("inventoryCost")?.value) || 0;
-    const impuesto = Number(document.getElementById("inventoryTax")?.value) || 0;
-    const precio = Number(document.getElementById("inventoryPrice")?.value) || 0;
-    const notas = document.getElementById("inventoryNotes")?.value.trim();
     
     // Validación básica
-    if (!nombre || !marca || !proveedor) {
-      alert("Nombre, marca y proveedor son requeridos");
+    if (!nombre || !marca || !sku) {
+      alert("Nombre, marca y SKU son requeridos");
       return;
     }
     
     // Crear objeto producto
     const producto = {
-      id: `INV-${Date.now().toString().slice(-6)}`,
-      name: nombre,
-      brand: marca,
+      nombre: nombre,
+      marca: marca,
       sku: sku,
-      category: categoria,
-      presentation: presentacion,
-      supplier: proveedor,
-      location: ubicacion,
+      categoria: categoria,
+      presentacion: presentacion,
+      proveedor: proveedor,
+      costo: costo,
+      precio: precio,
       stock: stock,
-      minStock: stockMinimo,
-      cost: costo,
-      tax: impuesto,
-      price: precio,
-      notes: notas,
-      createdAt: new Date().toISOString()
+      stockMinimo: stockMinimo,
+      fechaRegistro: new Date().toISOString()
     };
     
-    // Guardar en Firebase
-    const resultado = await guardarProducto(producto);
-    
-    if (resultado) {
-      // Agregar al estado local para mostrar inmediatamente
-      if (!state.inventory) state.inventory = [];
-      state.inventory.unshift(producto);
-      
-      // Renderizar inventario
-      renderInventory();
+    // Guardar en Firebase directamente
+    try {
+      await addDoc(collection(firestoreDb, "productos"), producto);
       
       // Limpiar formulario
       document.getElementById("inventoryForm")?.reset();
       
-      // Cerrar formulario desplegable
-      toggleInventoryForm();
+      // Cerrar formulario
+      document.getElementById("inventoryFormPanel").style.display = "none";
       
       // Mostrar alerta
       alert("Producto guardado correctamente");
       
       console.log("✅ Producto guardado en Firebase:", producto);
-    } else {
+    } catch (error) {
+      console.error("❌ Error guardando producto:", error);
       alert("Error al guardar el producto. Intenta de nuevo.");
     }
     
   } catch (error) {
-    console.error("❌ Error guardando producto:", error);
+    console.error("❌ Error general:", error);
     alert("Ocurrió un error al guardar el producto");
   }
 };
+
+// Función para mostrar/ocultar formulario de inventario
+window.toggleInventoryForm = function() {
+  const panel = document.getElementById("inventoryFormPanel");
+  if (panel.style.display === "none") {
+    panel.style.display = "block";
+  } else {
+    panel.style.display = "none";
+  }
+};
+
+export async function guardarOrden(orden) {
+  try {
+    await addDoc(collection(firestoreDb, "ordenes"), {
+      ...orden,
+      createdAt: new Date().toISOString()
+    });
+    console.log('✅ Orden guardada en Firebase');
+    return true;
+  } catch (error) {
+    console.error('❌ Error guardando orden:', error);
+    return false;
+  }
+}
 
 // Función para cargar clientes desde Firestore en tiempo real
 function loadClientsFromFirestore() {
@@ -832,9 +1100,9 @@ function init() {
   // Inicializar state primero
   state = loadState();
   
-  // Inicializar clientes como array vacío si no existe
-  if (!state.clients) {
-    state.clients = [];
+  // Inicializar productos como array vacío si no existe
+  if (!state.inventory) {
+    state.inventory = [];
   }
   
   cacheDom();
@@ -860,6 +1128,9 @@ function init() {
   
   // Iniciar carga de clientes desde Firestore en tiempo real
   loadClientsFromFirestore();
+  
+  // Iniciar carga de productos desde Firestore en tiempo real
+  loadProductsFromFirestore();
 }
 
 async function loadAsyncData() {
