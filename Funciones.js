@@ -662,6 +662,8 @@ window.adjustStock = async function(productId, cantidad) {
     console.error('❌ Error ajustando stock:', error);
     alert("Error al ajustar el stock. Intenta de nuevo.");
   }
+};
+
 // Función para guardar productos - Conectar formulario de inventario con Firebase  
 window.guardarProducto = async function() {
   try {
@@ -2691,4 +2693,4 @@ function safe(value) {
 }
 
 // Inicializar la aplicación
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", init); 
