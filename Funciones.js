@@ -2248,6 +2248,9 @@ function toggleTheme() {
   renderSettings();
 }
 
+// Hacer toggleTheme global
+window.toggleTheme = toggleTheme;
+
 function applyTheme(theme) {
   state.theme = theme;
   refs.root.setAttribute("data-theme", theme);
@@ -2259,6 +2262,9 @@ function toggleMenu() {
   document.body.classList.toggle("menu-open");
   console.log("📱 Clases del body:", document.body.classList.toString());
 }
+
+// Hacer toggleMenu global
+window.toggleMenu = toggleMenu;
 
 function closeMenu() {
   console.log("❌ Cerrar menú llamado");
@@ -2754,4 +2760,7 @@ function safe(value) {
 }
 
 // Inicializar la aplicación
-document.addEventListener("DOMContentLoaded", init); 
+document.addEventListener("DOMContentLoaded", function() {
+  console.log("🚀 DOM cargado, iniciando aplicación...");
+  init();
+}); 
