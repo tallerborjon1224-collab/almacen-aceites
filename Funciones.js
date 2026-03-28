@@ -443,7 +443,7 @@ window.toggleInventoryForm = function() {
 };
 
 // Función para renderizar los productos
-function renderInventory() {
+window.renderInventory = function() {
   // Si no hay productos en Firestore, mostrar mensaje vacío
   if (!state.inventory || state.inventory.length === 0) {
     refs.inventoryCards.innerHTML = '<div class="empty-state">No hay productos registrados en Firestore.</div>';
@@ -537,10 +537,7 @@ function renderInventory() {
         })
         .join("")
     : '<div class="empty-state">No hay productos que coincidan con los filtros.</div>';
-}
-
-// Hacer renderInventory global para que onclick funcione
-window.renderInventory = renderInventory;
+};
 
 // Función para eliminar producto de Firestore
 window.deleteProduct = async function(productId) {
