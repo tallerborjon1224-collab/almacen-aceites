@@ -1765,7 +1765,7 @@ function updateOrderStatus(orderId) {
 function renderAll() {
   renderDashboard();
   renderOrders();
-  renderInventoryAlerts();
+  // renderInventoryAlerts(); // Desactivado temporalmente para evitar errores
   renderInventory();
   renderClients();
   renderVehicles();
