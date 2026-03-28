@@ -443,7 +443,7 @@ window.toggleInventoryForm = function() {
 };
 
 // Función para renderizar los productos
-window.renderInventory = function() {
+function renderInventory() {
   // Si no hay productos en Firestore, mostrar mensaje vacío
   if (!state.inventory || state.inventory.length === 0) {
     refs.inventoryCards.innerHTML = '<div class="empty-state">No hay productos registrados en Firestore.</div>';
@@ -537,7 +537,10 @@ window.renderInventory = function() {
         })
         .join("")
     : '<div class="empty-state">No hay productos que coincidan con los filtros.</div>';
-};
+}
+
+// Exponer renderInventory globalmente
+window.renderInventory = renderInventory;
 
 // Función para eliminar producto de Firestore
 window.deleteProduct = async function(productId) {
@@ -1845,39 +1848,6 @@ function renderDashboard() {
     "No hay citas programadas."
   );
 }
-
-// Eliminar esta función duplicada - ya existe renderOrders() arriba
-// function renderOrders() {
-//   // Mostrar solo historial de ordenes anteriores en lugar de listado general
-//   const allOrders = sortOrders(state.orders);
-//   const recentOrders = allOrders.slice(0, 10); // Últimas 10 ordenes como historial
-//
-//   // Renderizar historial en el panel de ordenes anteriores
-//   const orderHistoryElement = document.getElementById("orderHistory");
-//   if (orderHistoryElement) {
-//     orderHistoryElement.innerHTML = recentOrders.length
-//       ? recentOrders.map((order) => {
-//         const vehicleInfo = `${order.make} ${order.model} ${order.year}`;
-//         return `
-//           <article class="row-card">
-//             <div class="row-card-main">
-//               <strong>${safe(order.id)} · ${safe(order.client)}</strong>
-//               <small>${safe(vehicleInfo)} · ${safe(order.plate)}</small>
-//               <div class="row-meta">
-//                 ${badgeHtml(order.priority, badgeClassForPriority(order.priority))}
-//                 ${badgeHtml(order.status, badgeClassForStatus(order.status))}
-//               </div>
-//             </div>
-//             <div class="row-card-side">
-//               <strong>${formatDate(order.createdAt)}</strong>
-//               <small>${safe(order.mechanic || "Sin asignar")}</small>
-//             </div>
-//           </article>
-//         `;
-//       }).join("")
-//       : '<div class="empty-state">No hay ordenes registradas.</div>';
-//   }
-// }
 
 function renderInventoryAlerts() {
   const lowStockItems = state.inventory.filter(item => 
