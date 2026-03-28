@@ -539,6 +539,9 @@ function renderInventory() {
     : '<div class="empty-state">No hay productos que coincidan con los filtros.</div>';
 }
 
+// Hacer renderInventory global para que onclick funcione
+window.renderInventory = renderInventory;
+
 // Función para eliminar producto de Firestore
 window.deleteProduct = async function(productId) {
   if (!confirm("¿Estás seguro de que quieres eliminar este producto?")) {
