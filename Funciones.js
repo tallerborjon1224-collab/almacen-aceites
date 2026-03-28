@@ -748,27 +748,49 @@ async function guardarOrdenInterna(orden) {
 
 // Función para cargar clientes desde Firestore en tiempo real
 function loadClientsFromFirestore() {
-  const clientesRef = collection(firestoreDb, "clientes");
-  
-  // Usar onSnapshot para actualizaciones en tiempo real
-  onSnapshot(clientesRef, (snapshot) => {
+  const ref = collection(firestoreDb, "Clientes");
+
+  onSnapshot(ref, (snapshot) => {
     const clientes = [];
+
     snapshot.forEach((doc) => {
       clientes.push({
         id: doc.id,
         ...doc.data()
       });
     });
+
+    state.clientes = clientes;
+
+    renderClients();
+
+    console.log("Clientes cargados:", clientes.length);
+  });
+}
+
+// Función para cargar órdenes desde Firestore en tiempo real
+function loadOrdersFromFirestore() {
+  const ordenesRef = collection(firestoreDb, "ordenes");
+  
+  // Usar onSnapshot para actualizaciones en tiempo real
+  onSnapshot(ordenesRef, (snapshot) => {
+    const ordenes = [];
+    snapshot.forEach((doc) => {
+      ordenes.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
     
     // Actualizar el estado local
-    state.clients = clientes;
+    state.orders = ordenes;
     
-    // Renderizar los clientes
-    renderClients();
+    // Renderizar las órdenes
+    renderOrders();
     
-    console.log('🔄 Clientes actualizados desde Firestore:', clientes.length);
+    console.log('🔄 Órdenes actualizadas desde Firestore:', ordenes.length);
   }, (error) => {
-    console.error('❌ Error cargando clientes desde Firestore:', error);
+    console.error('❌ Error cargando órdenes desde Firestore:', error);
   });
 }
 
@@ -1045,40 +1067,27 @@ function cacheDom() {
 }
 
 function init() {
-  // Inicializar state primero
-  state = loadState();
-  
-  // Inicializar productos como array vacío si no existe
-  if (!state.inventory) {
-    state.inventory = [];
-  }
+  // Inicializar state vacío - solo datos de Firebase
+  state = {
+    theme: "dark",
+    inventory: [],
+    clientes: [],
+    orders: [],
+    clients: []
+  };
   
   cacheDom();
   bindEvents();
   seedFormDates();
-  applyTheme(state.theme || "dark");
+  applyTheme(state.theme);
   fillSettingsForm();
   updateBrand();
-  
-  // Cargar configuraciones solo si existen las funciones
-  if (typeof loadGitHubConfig === 'function') {
-    loadGitHubConfig(); // Cargar configuración de GitHub
-  }
-  if (typeof loadFirebaseConfig === 'function') {
-    loadFirebaseConfig(); // Cargar configuración de Firebase
-  }
   
   switchSection("dashboard");
   renderAll();
   
-  // Cargar datos asíncronos después de inicializar
-  loadAsyncData();
-  
-  // Iniciar carga de clientes desde Firestore en tiempo real
+  // Cargar clientes desde Firestore
   loadClientsFromFirestore();
-  
-  // Iniciar carga de productos desde Firestore en tiempo real
-  loadProductsFromFirestore();
 }
 
 async function loadAsyncData() {
@@ -1850,14 +1859,14 @@ function renderDashboard() {
 
 function renderClients() {
   // Si no hay clientes en Firestore, mostrar mensaje vacío
-  if (!state.clients || state.clients.length === 0) {
+  if (!state.clientes || state.clientes.length === 0) {
     refs.clientsTableBody.innerHTML = `<tr><td colspan="5"><div class="empty-state">No hay clientes registrados en Firestore.</div></td></tr>`;
     return;
   }
 
   const search = refs.clientSearch?.value?.trim().toLowerCase() || "";
 
-  const filtered = state.clients.filter((client) => {
+  const filtered = state.clientes.filter((client) => {
     return !search ||
       [client.nombre || client.name, client.telefono || client.phone, client.email, client.vehiculo || client.vehicle].some((value) =>
         String(value).toLowerCase().includes(search)
