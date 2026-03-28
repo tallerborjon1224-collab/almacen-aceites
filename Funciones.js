@@ -726,15 +726,7 @@ window.guardarProducto = async function() {
   }
 };
 
-// Función para mostrar/ocultar formulario de inventario
-window.toggleInventoryForm = function() {
-  const panel = document.getElementById("inventoryFormPanel");
-  if (panel.style.display === "none") {
-    panel.style.display = "block";
-  } else {
-    panel.style.display = "none";
-  }
-};
+// FUNCIÓN DUPLICADA ELIMINADA - toggleInventoryForm ya existe arriba
 
 // Función auxiliar para guardar órdenes (usada internamente)
 async function guardarOrdenInterna(orden) {
@@ -866,33 +858,9 @@ async function updateClient(clientId) {
   }
 }
 
-export async function guardarOrden(orden) {
-  try {
-    await addDoc(collection(firestoreDb, "ordenes"), {
-      ...orden,
-      createdAt: new Date().toISOString()
-    });
-    console.log('✅ Orden guardada en Firebase');
-    return true;
-  } catch (error) {
-    console.error('❌ Error guardando orden:', error);
-    return false;
-  }
-}
+// FUNCIÓN DUPLICADA ELIMINADA - export guardarOrden ya no se necesita (usar window.guardarOrden)
 
-export async function guardarProducto(producto) {
-  try {
-    await addDoc(collection(firestoreDb, "productos"), {
-      ...producto,
-      createdAt: new Date().toISOString()
-    });
-    console.log('✅ Producto guardado en Firebase');
-    return true;
-  } catch (error) {
-    console.error('❌ Error guardando producto:', error);
-    return false;
-  }
-}
+// FUNCIÓN DUPLICADA ELIMINADA - export guardarProducto ya no se necesita (usar window.guardarProducto)
 
 // Funciones de sincronización con backend (mantenimos como respaldo)
 async function saveToBackend() {
@@ -979,34 +947,7 @@ async function saveState() {
   }
 }
 
-function toggleInventoryForm() {
-  const formPanel = document.getElementById("inventoryFormPanel");
-  const toggleBtn = document.getElementById("toggleInventoryForm");
-  const btnIcon = toggleBtn.querySelector(".btn-icon");
-  const btnText = toggleBtn.querySelector(".btn-text");
-  
-  if (formPanel.style.display === "none" || !formPanel.classList.contains("show")) {
-    // Mostrar formulario
-    formPanel.style.display = "block";
-    setTimeout(() => {
-      formPanel.classList.add("show");
-    }, 10);
-    
-    btnIcon.textContent = "➖";
-    btnText.textContent = "Cerrar Formulario";
-    toggleBtn.style.background = "linear-gradient(135deg, var(--danger), #ff6b6b)";
-  } else {
-    // Ocultar formulario
-    formPanel.classList.remove("show");
-    setTimeout(() => {
-      formPanel.style.display = "none";
-    }, 400);
-    
-    btnIcon.textContent = "➕";
-    btnText.textContent = "Agregar Nuevo Producto";
-    toggleBtn.style.background = "linear-gradient(135deg, var(--brand), var(--brand-strong))";
-  }
-}
+// FUNCIÓN DUPLICADA ELIMINADA - toggleInventoryForm ya existe como window.toggleInventoryForm
 
 function cacheDom() {
   refs.root = document.documentElement;
@@ -1999,108 +1940,7 @@ function renderInventoryAlerts() {
   refs.inventoryAlerts.innerHTML = alertsHTML;
 }
 
-function renderInventory() {
-  const search = refs.inventorySearch?.value?.trim().toLowerCase() || "";
-
-  const filtered = state.inventory.filter((item) => {
-    const matchesSearch =
-      !search ||
-      [item.name, item.brand, item.sku, item.category, item.supplier, item.location].some((value) =>
-        String(value).toLowerCase().includes(search)
-      );
-
-    return matchesSearch;
-  });
-
-  // Renderizar como cards en lugar de tabla
-  refs.inventoryCards.innerHTML = filtered.length
-    ? filtered.map((item) => {
-        const level = getInventoryLevel(item);
-        const levelClass = badgeClassForInventory(item);
-        
-        // Calcular margen para mostrar en el card
-        const totalCost = item.cost * (1 + (item.tax || 0) / 100);
-        const marginAmount = item.price - totalCost;
-        const marginPercent = totalCost > 0 ? (marginAmount / totalCost) * 100 : 0;
-        
-        return `
-          <div class="inventory-card" data-item-id="${safe(item.id)}">
-            <div class="card-header">
-              <div class="card-title">
-                <strong>${safe(item.name)}</strong>
-                <small>${safe(item.brand || "")} · SKU: ${safe(item.sku || "")}</small>
-              </div>
-              <div class="card-badges">
-                ${badgeHtml(item.category || "General", "badge--info")}
-                ${badgeHtml(level, levelClass)}
-              </div>
-            </div>
-            
-            <div class="card-body">
-              <div class="card-info">
-                <div class="info-item">
-                  <span class="info-label">Presentación:</span>
-                  <span class="info-value">${safe(item.presentation || "N/A")}</span>
-                </div>
-                <div class="info-item">
-                  <span class="info-label">Ubicación:</span>
-                  <span class="info-value">${safe(item.location)}</span>
-                </div>
-                <div class="info-item">
-                  <span class="info-label">Stock:</span>
-                  <span class="info-value stock-value ${level.toLowerCase()}">${item.stock} unidades</span>
-                </div>
-                <div class="info-item">
-                  <span class="info-label">Mínimo:</span>
-                  <span class="info-value">${item.minStock} unidades</span>
-                </div>
-              </div>
-              
-              <div class="card-pricing">
-                <div class="price-item">
-                  <span class="price-label">Costo:</span>
-                  <span class="price-value">${formatCurrency(item.cost)}</span>
-                </div>
-                <div class="price-item">
-                  <span class="price-label">Venta:</span>
-                  <span class="price-value">${formatCurrency(item.price)}</span>
-                </div>
-              </div>
-              
-              <div class="card-margin">
-                <div class="margin-item">
-                  <span class="margin-label">Margen:</span>
-                  <span class="margin-value ${marginAmount < 0 ? 'negative' : marginPercent < 10 ? 'low' : 'good'}">
-                    ${formatCurrency(marginAmount)} (${marginPercent.toFixed(1)}%)
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            <div class="card-info-row">
-              <div class="info-item">
-                <span class="info-label">Proveedor:</span>
-                <span class="info-value">${safe(item.supplier)}</span>
-              </div>
-            </div>
-            
-            ${item.notes ? `
-            <div class="card-notes">
-              <span class="notes-label">Notas:</span>
-              <span class="notes-value">${safe(item.notes)}</span>
-            </div>
-            ` : ''}
-            
-            <div class="card-actions">
-              <button class="mini-btn" type="button" onclick="editInventoryItem('${safe(item.id)}')">Editar</button>
-              <button class="mini-btn" type="button" onclick="adjustStock('${safe(item.id)}', 1)">+</button>
-              <button class="mini-btn" type="button" onclick="adjustStock('${safe(item.id)}', -1)">-</button>
-            </div>
-          </div>
-        `;
-      }).join("")
-    : '<div class="empty-state">No hay aceites registrados.</div>';
-}
+// FUNCIÓN DUPLICADA ELIMINADA - renderInventory ya existe arriba
 
 function renderClients() {
   // Si no hay clientes en Firestore, mostrar mensaje vacío
