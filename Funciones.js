@@ -1765,7 +1765,7 @@ function updateOrderStatus(orderId) {
 function renderAll() {
   renderDashboard();
   renderOrders();
-  // renderInventoryAlerts(); // Desactivado temporalmente para evitar errores
+  renderInventoryAlerts(); // Reactivado con validación de elemento
   renderInventory();
   renderClients();
   renderVehicles();
@@ -1850,6 +1850,12 @@ function renderDashboard() {
 }
 
 function renderInventoryAlerts() {
+  // Validar que el elemento exista antes de usarlo
+  if (!refs.inventoryAlerts) {
+    console.warn('⚠️ Elemento inventoryAlerts no encontrado, omitiendo renderInventoryAlerts');
+    return;
+  }
+
   const lowStockItems = state.inventory.filter(item => 
     item.stock <= item.minStock && item.stock > 0
   );
@@ -1890,15 +1896,15 @@ function renderInventoryAlerts() {
   if (lowStockItems.length > 0) {
     alertsHTML += `
       <div class="alert-card">
-        <div class="alert-icon">📉</div>
+        <div class="alert-icon">⚠️</div>
         <div class="alert-content">
-          <div class="alert-title">Stock Bajo</div>
+          <div class="alert-title">¡Stock Bajo!</div>
           <div class="alert-message">
-            Los siguientes productos están por debajo del nivel mínimo:
+            Los siguientes productos tienen stock bajo y necesitan reabastecimiento:
             ${lowStockItems.map(item => `
               <div class="alert-item">
                 <span class="alert-product">${safe(item.name)} (${safe(item.brand)})</span>
-                <span class="alert-stock">${item.stock} uds (mín: ${item.minStock})</span>
+                <span class="alert-stock">${item.stock} unidades</span>
               </div>
             `).join('')}
           </div>
