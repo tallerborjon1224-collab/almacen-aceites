@@ -1765,7 +1765,6 @@ function updateOrderStatus(orderId) {
 function renderAll() {
   renderDashboard();
   renderOrders();
-  renderInventoryAlerts(); // Reactivado con validación de elemento
   renderInventory();
   renderClients();
   renderVehicles();
@@ -1848,75 +1847,6 @@ function renderDashboard() {
     "No hay citas programadas."
   );
 }
-
-function renderInventoryAlerts() {
-  // Validar que el elemento exista antes de usarlo
-  if (!refs.inventoryAlerts) {
-    console.warn('⚠️ Elemento inventoryAlerts no encontrado, omitiendo renderInventoryAlerts');
-    return;
-  }
-
-  const lowStockItems = state.inventory.filter(item => 
-    item.stock <= item.minStock && item.stock > 0
-  );
-  
-  const criticalStockItems = state.inventory.filter(item => 
-    item.stock === 0
-  );
-
-  if (lowStockItems.length === 0 && criticalStockItems.length === 0) {
-    refs.inventoryAlerts.innerHTML = '';
-    return;
-  }
-
-  let alertsHTML = '';
-
-  // Alerta de stock crítico (sin existencia)
-  if (criticalStockItems.length > 0) {
-    alertsHTML += `
-      <div class="alert-card">
-        <div class="alert-icon">⚠️</div>
-        <div class="alert-content">
-          <div class="alert-title">¡Stock Crítico!</div>
-          <div class="alert-message">
-            Los siguientes productos están agotados y necesitan reabastecimiento urgente:
-            ${criticalStockItems.map(item => `
-              <div class="alert-item">
-                <span class="alert-product">${safe(item.name)} (${safe(item.brand)})</span>
-                <span class="alert-stock">AGOTADO</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  // Alerta de stock bajo
-  if (lowStockItems.length > 0) {
-    alertsHTML += `
-      <div class="alert-card">
-        <div class="alert-icon">⚠️</div>
-        <div class="alert-content">
-          <div class="alert-title">¡Stock Bajo!</div>
-          <div class="alert-message">
-            Los siguientes productos tienen stock bajo y necesitan reabastecimiento:
-            ${lowStockItems.map(item => `
-              <div class="alert-item">
-                <span class="alert-product">${safe(item.name)} (${safe(item.brand)})</span>
-                <span class="alert-stock">${item.stock} unidades</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  refs.inventoryAlerts.innerHTML = alertsHTML;
-}
-
-// FUNCIÓN DUPLICADA ELIMINADA - renderInventory ya existe arriba
 
 function renderClients() {
   // Si no hay clientes en Firestore, mostrar mensaje vacío
